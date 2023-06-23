@@ -1,0 +1,255 @@
+table.ddm_displaytag {
+
+    border: 1px solid #C7C8D8;
+    background-color: #ffffff;
+    max-width: 980px;
+
+    -moz-box-shadow: 3px 3px 3px #CAC2B3;
+    -moz-border-radius-bottomright: 0px;
+    -webkit-box-shadow: 3px 3px 3px #CAC2B3;
+    -webkit-border-bottom-right-radius: 0px;
+    box-shadow: 3px 3px 3px #CAC2B3;
+
+    /* For IE 8 */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#CAC2B3')";
+    /* For IE 5.5 - 7 */
+    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#CAC2B3');
+    margin: 5px 0 5px 0 !important;
+}
+
+table.ddm_displaytag  th {
+    padding: 3px 2px 3px 3px !important;
+    text-align: center;
+
+    vertical-align: middle;
+    font-family: Tahoma, Verdana;
+    font-size: 11px;
+    /*font-weight: bold;*/
+    color: #495F85;
+    text-decoration: none;
+
+}
+
+table.ddm_displaytag  td {
+    padding: 3px 2px 3px 3px !important;
+    text-align: left;
+    vertical-align: top;
+    font-family: Tahoma, Verdana;
+    font-size: 11px;
+    color: #515473;
+    text-decoration: none;
+}
+
+table.ddm_displaytag thead tr {
+    background-color: #A4B7CA;
+}
+
+table.ddm_displaytag  th.sorted {
+    background-color: #CFC4D9;
+}
+
+table.ddm_displaytag  th a, table.ddm_displaytag th a:visited {
+    color: #495F85;
+    text-decoration: none;
+}
+
+table.ddm_displaytag th a:hover {
+    text-decoration: underline;
+    color: black;
+}
+
+table.ddm_displaytag th.sorted a, table.ddm_displaytag th.sortable a {
+    background-position: right;
+    display: block;
+    /*width: 100%;*/
+}
+
+table.ddm_displaytag th.sortable a {
+    background-image: url(../images/arrow_off.png);
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+table.ddm_displaytag th.order1 a {
+    background-image: url(../images/arrow_up.png);
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+table.ddm_displaytag th.order2 a {
+    background-image: url(../images/arrow_down.png);
+    background-repeat: no-repeat;
+    background-position: right;
+}
+
+table.ddm_displaytag tr.odd {
+    background-color: #F5F7FA;
+}
+
+table.ddm_displaytag tr.tableRowEven {
+    background-color: #E7E9ED;
+}
+
+table.ddm_displaytag tr.even {
+    background-color: #E7E9ED;
+}
+
+table.ddm_displaytag tr.over {
+    background-color: #FFE8E8;
+}
+
+div.exportlinks {
+    background-color: #eee;
+    border: 1px dotted #999;
+    padding: 2px 4px 2px 4px;
+    margin: 10px 0 10px 0;
+    text-align: left;
+    vertical-align: middle;
+    
+
+    font-family: Tahoma, Verdana;
+    font-size: 11px;
+    font-weight: normal;
+    color: #75634D;
+    text-decoration: none;
+}
+
+div.exportlinks a {
+    font-family: Tahoma, Verdana;
+    font-size: 11px;
+    font-weight: normal;
+    color: #75634D;
+    text-decoration: underline;
+    
+}
+
+div.exportlinks a:visited {
+    font-family: Tahoma, Verdana;
+    font-size: 11px;
+    font-weight: normal;
+    color: #75634D;
+    text-decoration: underline;
+    
+}
+
+div.exportlinks a:hover {
+    font-family: Tahoma, Verdana;
+    font-size: 11px;
+    font-weight: normal;
+    color:#FF9105;
+    text-decoration: underline;
+    
+}
+
+span.export {
+    padding: 0 4px 1px 20px;
+    display: inline;
+    display: inline-block;
+    cursor: pointer;
+    height: 18px;
+    vertical-align: middle;
+}
+
+span.excel {
+    background-image: url(../images/ico_file_excel2.png);
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+span.csv {
+    background-image: url(../images/ico_file_csv.png);
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+span.xml {
+    background-image: url(../images/ico_file_xml.png);
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+span.pdf {
+    background-image: url(../images/ico_file_pdf2.png);
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+span.rtf {
+    background-image: url(../images/ico_file_rtf.png);
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+span.pagebanner {
+    background-color: #eee;
+    border: 1px dotted #999;
+    padding: 2px 4px 2px 4px;    
+    margin-top: 10px;
+    display: block;
+    border-bottom: none;
+}
+
+span.pagelinks {
+    background-color: #eee;
+    border: 1px dotted #999;
+    padding: 2px 4px 2px 4px;    
+    display: block;
+    border-top: none;
+    margin-bottom: -5px;
+}
+
+
+
+table.ddm_displaytag th.r {
+    text-align: center;
+}
+
+table.ddm_displaytag th.r2 {
+    text-align: left;
+}
+
+table.ddm_displaytag td.r {
+    text-align: right;    
+}
+
+table.ddm_displaytag tr.total td {
+    background-color: #D8D8D8;
+    font-weight: bold;
+}
+
+table.ddm_displaytag tr.subtotal td {
+    background-color: #D8D8D8;
+    font-weight: bold;
+}
+
+.group-1 {
+    font-weight:bold;
+    padding-bottom:10px;
+    border-top:1px solid black;
+}
+.group-2 {
+    font-style:italic;
+    border-top: 1px solid black;
+
+}
+.subtotal-sum, .grandtotal-sum {
+    font-weight:bold;
+    text-align:right;
+}
+.subtotal-header {
+    padding-bottom: 0px;
+    border-top: 1px solid white;
+}
+.subtotal-label, .grandtotal-label {
+    border-top: 1px solid white;
+    font-weight: bold;
+}
+.grouped-table tr.even {
+    background-color: #fff;
+}
+.grouped-table tr.odd {
+    background-color: #fff;
+}
+.grandtotal-row {
+    border-top: 2px solid black;
+}
