@@ -48,6 +48,7 @@ class MerchantUtil
                     mranm.setAcName(rs.getString("ACNOM_AccountName"));
                     mranm.setIsPrimary(rs.getString("ACNOM_IsPrimary"));
                     mranm.setStatus(rs.getString("ACNOM_Status"));
+                    mranm.setStatusModify(rs.getString("ACNOM_StatusModify"));
 
                     result2.add(mranm);
                 }
@@ -108,7 +109,7 @@ class MerchantUtil
                     {
                         merchant.setAuthorizedDate(DateFormatter.doFormat(rs.getTimestamp("AuthorizedDate").getTime(), DDM_Constants.simple_date_format_yyyy_MM_dd_HH_mm_ss));
                     }
-                    
+
                     merchant.setModificationRemarks(rs.getString("ModificationRemarks"));
                     merchant.setModifiedBy(rs.getString("ModifiedBy"));
 
@@ -135,14 +136,12 @@ class MerchantUtil
                     mranm.setAcName(rs.getString("ACNOM_AccountName"));
                     mranm.setIsPrimary(rs.getString("ACNOM_IsPrimary"));
                     mranm.setStatus(rs.getString("ACNOM_Status"));
+                    mranm.setStatusModify(rs.getString("ACNOM_StatusModify"));
 
                     result2.add(mranm);
                     merchant.setColAccNoMap(result2);
-
                 }
-
             }
-
         }
 
         return merchant;
@@ -177,6 +176,7 @@ class MerchantUtil
                 mranm.setAcName(rs.getString("ACNOM_AccountName"));
                 mranm.setIsPrimary(rs.getString("ACNOM_IsPrimary"));
                 mranm.setStatus(rs.getString("ACNOM_Status"));
+                mranm.setStatusModify(rs.getString("ACNOM_StatusModify"));
 
                 result2.add(mranm);
             }
@@ -264,6 +264,7 @@ class MerchantUtil
                 mranm.setAcName(rs.getString("ACNOM_AccountName"));
                 mranm.setIsPrimary(rs.getString("ACNOM_IsPrimary"));
                 mranm.setStatus(rs.getString("ACNOM_Status"));
+                mranm.setStatusModify(rs.getString("ACNOM_StatusModify"));
 
                 result2 = new java.util.ArrayList();
                 result2.add(mranm);

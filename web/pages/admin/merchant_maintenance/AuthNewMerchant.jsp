@@ -497,7 +497,7 @@
                                                                                                                                 <tr>
                                                                                                                                     <td align="center" valign="middle">
 
-                                                                                                                                       <table border="0" cellspacing="1" cellpadding="5" class="ddm_table_boder" bgcolor="#FFFFFF">
+                                                                                                                                       <table width="" border="0" cellspacing="0" cellpadding="0" class="ddm_table_boder"><tr><td><table border="0" cellspacing="1" cellpadding="5" bgcolor="#FFFFFF">
                                                                                                                                             <tr>
                                                                                                                                                 <td align="right" valign="middle" class="ddm_tbl_header_text">Merchant ID :</td>
                                                                                                                                                 <td class="ddm_tbl_common_text"><%=merchantDetails.getMerchantID() %></td>
@@ -654,7 +654,10 @@
 
                                                                                                                                                 </td>
                                                                                                                                             </tr>
-                                                                                                                                        </table>                                                                                                                                    </td>
+                                                                                                                                        </table></td></tr></table>
+                                                                                                                                       
+                                                                                                                                       
+                                                                                                                                                                                                                                                                           </td>
                                                                                                                                 </tr>
                                                                                                                             </table>
                                                                                                                         </div>                                                                                            </td>

@@ -135,7 +135,7 @@ public class MerchantDAOImpl implements MerchantDAO
 
             pstm = con.prepareStatement(sbQuery.toString());
 
-            System.out.println("sbQuery(getMerchant(String merchantID, String bank, String branch, String status)) ---> " + sbQuery.toString());
+            System.out.println("sbQuery(getMerchant) ---> " + sbQuery.toString());
 
             int i = 1;
 
@@ -229,7 +229,8 @@ public class MerchantDAOImpl implements MerchantDAO
                     + "mranm.bankcode as ACNOM_Bank, bkanm.FullName as ACNOM_BankName, bkanm.ShortName as ACNOM_ShortName, "
                     + "mranm.branchcode as ACNOM_Branch, branm.BranchName as ACNOM_BranchName, "
                     + "mranm.acno as ACNOM_AccountNo, mranm.acname as ACNOM_AccountName, "
-                    + "mranm.isprimary as ACNOM_IsPrimary, mranm.status as ACNOM_Status ");
+                    + "mranm.isprimary as ACNOM_IsPrimary, "
+                    + "mranm.status as ACNOM_Status, mranm.status_modify as ACNOM_StatusModify ");
             sbQuery.append("FROM ");
             sbQuery.append(DDM_Constants.tbl_merchant + " mr, ");
             sbQuery.append(DDM_Constants.tbl_merchant_accno_map + " mranm, ");
@@ -307,7 +308,8 @@ public class MerchantDAOImpl implements MerchantDAO
                     + "mranm.bankcode as ACNOM_Bank, bkanm.FullName as ACNOM_BankName, bkanm.ShortName as ACNOM_ShortName, "
                     + "mranm.branchcode as ACNOM_Branch, branm.BranchName as ACNOM_BranchName, "
                     + "mranm.acno as ACNOM_AccountNo, mranm.acname as ACNOM_AccountName, "
-                    + "mranm.isprimary as ACNOM_IsPrimary, mranm.status as ACNOM_Status ");
+                    + "mranm.isprimary as ACNOM_IsPrimary, "
+                    + "mranm.status as ACNOM_Status, mranm.status_modify as ACNOM_StatusModify ");
             sbQuery.append("FROM ");
             sbQuery.append(DDM_Constants.tbl_merchant + " mr, ");
             sbQuery.append(DDM_Constants.tbl_merchant_accno_map + " mranm, ");
@@ -550,7 +552,8 @@ public class MerchantDAOImpl implements MerchantDAO
                     + "mranm.bankcode as ACNOM_Bank, bkanm.FullName as ACNOM_BankName, bkanm.ShortName as ACNOM_ShortName, "
                     + "mranm.branchcode as ACNOM_Branch, branm.BranchName as ACNOM_BranchName, "
                     + "mranm.acno as ACNOM_AccountNo, mranm.acname as ACNOM_AccountName, "
-                    + "mranm.isprimary as ACNOM_IsPrimary, mranm.status as ACNOM_Status ");
+                    + "mranm.isprimary as ACNOM_IsPrimary, "
+                    + "mranm.status as ACNOM_Status, mranm.status_modify as ACNOM_StatusModify ");
             sbQuery.append("FROM ");
             sbQuery.append(DDM_Constants.tbl_merchant + " mr, ");
             sbQuery.append(DDM_Constants.tbl_merchant_accno_map + " mranm, ");
@@ -790,7 +793,8 @@ public class MerchantDAOImpl implements MerchantDAO
                     + "mranm.bankcode as ACNOM_Bank, bkanm.FullName as ACNOM_BankName, bkanm.ShortName as ACNOM_ShortName, "
                     + "mranm.branchcode as ACNOM_Branch, branm.BranchName as ACNOM_BranchName, "
                     + "mranm.acno as ACNOM_AccountNo, mranm.acname as ACNOM_AccountName, "
-                    + "mranm.isprimary as ACNOM_IsPrimary, mranm.status as ACNOM_Status ");
+                    + "mranm.isprimary as ACNOM_IsPrimary, "
+                    + "mranm.status as ACNOM_Status, mranm.status_modify as ACNOM_StatusModify ");
             sbQuery.append("FROM ");
             sbQuery.append(DDM_Constants.tbl_merchant + " mr, ");
             sbQuery.append(DDM_Constants.tbl_merchant_accno_map + " mranm, ");
@@ -873,7 +877,8 @@ public class MerchantDAOImpl implements MerchantDAO
                     + "mranm.bankcode as ACNOM_Bank, bkanm.FullName as ACNOM_BankName, bkanm.ShortName as ACNOM_ShortName, "
                     + "mranm.branchcode as ACNOM_Branch, branm.BranchName as ACNOM_BranchName, "
                     + "mranm.acno as ACNOM_AccountNo, mranm.acname as ACNOM_AccountName, "
-                    + "mranm.isprimary as ACNOM_IsPrimary, mranm.status as ACNOM_Status ");
+                    + "mranm.isprimary as ACNOM_IsPrimary, "
+                    + "mranm.status as ACNOM_Status, mranm.status_modify as ACNOM_StatusModify ");
             sbQuery.append("FROM ");
             sbQuery.append(DDM_Constants.tbl_merchant + " mr, ");
             sbQuery.append(DDM_Constants.tbl_merchant_accno_map + " mranm, ");
@@ -898,7 +903,8 @@ public class MerchantDAOImpl implements MerchantDAO
             sbQuery.append("AND mr.Status != ? ");
             sbQuery.append("ORDER BY MerchantID");
 
-            //System.out.println("getAuthPendingModifiedCorporateCustomer(sbQuery)=========>" + sbQuery);
+            System.out.println("getAuthPendingModifiedMerchant(sbQuery)=========>" + sbQuery);
+            
             pstm = con.prepareStatement(sbQuery.toString());
 
             pstm.setString(1, modifiedUser);

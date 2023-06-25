@@ -606,9 +606,9 @@
                                                                                                     <tr>
                                                                                                         <td align="center" valign="middle"><table width="" border="0" cellspacing="0" cellpadding="0" class="ddm_table_boder">
                                                                                                                 <tr>
-                                                                                                                    <td><table border="0" cellpadding="4" cellspacing="1" bgcolor="#FFFFFF" >
+                                                                                                                    <td><table border="0" cellpadding="5" cellspacing="1" bgcolor="#FFFFFF" >
 
-                                                                                                                            <tr>
+                                                                                                              <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">
                                                                                                                                     Merchant :</td>
 
@@ -647,7 +647,7 @@
                                                                                                                                             }
                                                                                                                                         %>
                                                                                                                                     </select>
-                                                                                                                                    <%
+                                                                                                                                  <%
                                                                                                                                     }
                                                                                                                                     else
                                                                                                                                     {
@@ -691,7 +691,7 @@
                                                                                                                                             }
                                                                                                                                         %>
                                                                                                                                     </select>
-                                                                                                                                    <%
+                                                                                                                                  <%
                                                                                                                                     }
                                                                                                                                     else
 

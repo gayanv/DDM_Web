@@ -516,8 +516,11 @@
                                                                                                                                     <td height="10"></td>
                                                                                                                                 </tr>
                                                                                                                                 <tr>
-                                                                                                                                    <td align="center" valign="middle"><table border="0" cellspacing="1" cellpadding="5" class="ddm_table_boder" bgcolor="#FFFFFF">
-                                                                                                                                            <tr>
+                                                                                                                                    <td align="center" valign="middle">
+                                                                                                                                    
+                                                                                                                                    <table border="0" cellspacing="0" cellpadding="0" class="ddm_table_boder"><tr><td>
+                                                                                                                                    <table border="0" cellspacing="1" cellpadding="5"  bgcolor="#FFFFFF">
+                                                                                                                              <tr>
                                                                                                                                                 <td align="center" valign="middle" class="ddm_tbl_header_text">&nbsp;</td>
                                                                                                                                                 <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Current Value</td>
                                                                                                                                                 <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal"> New Value</td>
@@ -535,14 +538,7 @@
                                                                                                                                                 <td align="left" valign="middle" class="ddm_tbl_header_text">Email :</td>
                                                                                                                                                 <td class="ddm_tbl_common_text"><%=merchantDetails.getEmail() != null ? merchantDetails.getEmail() : "N/A"%></td>
                                                                                                                                                 <td class="ddm_tbl_common_text"><%=merchantDetails.getEmailModify() != null ? merchantDetails.getEmailModify() : "N/A"%></td>
-                                                                                                                                            </tr>
-                                                                                                                                            Telephone :
-
-
-
-
-
-
+                                                                                                                                            </tr>                                                                                                                                            
                                                                                                                                             <tr>
                                                                                                                                                 <td align="left" valign="middle" class="ddm_tbl_header_text">Primary Telephone No. :</td>
                                                                                                                                                 <td class="ddm_tbl_common_text"><%=merchantDetails.getPrimaryTP() != null ? merchantDetails.getPrimaryTP() : "N/A"%></td>
@@ -725,7 +721,9 @@
                                                                                                                                                         </tr>
                                                                                                                                                     </table></td>
                                                                                                                                             </tr>
-                                                                                                                                  </table></td>
+                                                                                                                                  </table></td></tr></table>
+                                                                                                                                    
+                                                                                                                                    </td>
                                                                                                                                 </tr>
                                                                                                                             </table>
                                                                                                                         </div>                                                                                            </td>

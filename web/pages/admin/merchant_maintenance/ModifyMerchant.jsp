@@ -1071,7 +1071,7 @@
 
                                                                                                                                         <table width="" border="0" cellspacing="0" cellpadding="0" class="ddm_table_boder">
                                                                                                                                             <tr>
-                                                                                                                                                <td><table border="0" cellspacing="1" cellpadding="4" bgcolor="#FFFFFF">
+                                                                                                                                                <td><table border="0" cellspacing="1" cellpadding="5" bgcolor="#FFFFFF">
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="center" class="ddm_tbl_header_text_horizontal">&nbsp;</td>
                                                                                                                                                             <td align="center" class="ddm_tbl_header_text_horizontal">Current Value</td>

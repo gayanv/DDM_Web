@@ -198,7 +198,7 @@ public class DDM_Constants
     public static final String ddm_main_finction_path_auth_modified_branch = "/pages/admin/bankbranch_maintenance/branch/AuthModifiedBranch.jsp";
 
     public static final String ddm_main_finction_path_auth_new_merchant = "/pages/admin/merchant_maintenance/AuthNewMerchant.jsp";
-    public static final String ddm_main_finction_path_auth_modified_merchant = "/pages/admin/merchant_maintenance/AuthModifiedCustomer.jsp";
+    public static final String ddm_main_finction_path_auth_modified_merchant = "/pages/admin/merchant_maintenance/AuthModifiedMerchant.jsp";
 
     public static final String ddm_main_finction_path_auth_modified_params = "/pages/admin/parameter_maintenance/AuthModifiedParams.jsp";
     

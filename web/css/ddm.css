@@ -195,22 +195,21 @@
     text-shadow: 1px 2px #000;
 }
 
-
 .ddm_table_boder 
 {
-    border: 1px solid #7D87AC;
-    /* border-radius:10px; */
+    border: 1px solid #8894A6;
+    /*border-radius:10px;*/
 	
-	border-spacing: 0;
+	/* border-spacing: 0; */
 	border-collapse: separate;
     background-color:#FFFFFF;
-    background:white;  
-	overflow: hidden; 
-    
+    background:white; 
+	overflow: hidden;   
+   
     -moz-box-shadow: 4px 4px 4px #CFD0D6;
-    /* -moz-border-radius-bottomright: 10px; */
+    -moz-border-radius-bottomright: 0px;
     -webkit-box-shadow: 4px 4px 4px #CFD0D6;
-    /* -webkit-border-bottom-right-radius: 10px; */
+    -webkit-border-bottom-right-radius: 0px;
     box-shadow: 4px 4px 4px #CFD0D6;
 
     /* For IE 8 */
