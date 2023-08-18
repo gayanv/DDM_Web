@@ -21,7 +21,8 @@
 
 %>
 
-<%    String session_userName = null;
+<%    
+    String session_userName = null;
     String session_userType = null;
     String session_userTypeDesc = null;
     String session_pw = null;
@@ -213,7 +214,7 @@
                                                                                                             <tr>
                                                                                                                 <td class="ddm_menubar_text">Welcome :</td>
                                                                                                                 <td width="5"></td>
-                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuId : session_branchId%> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuName : session_branchName%></td>
+                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuId : session_bankCode %> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuName : session_bankName %></td>
                                                                                                                 <td width="15">&nbsp;</td>
                                                                                                                 <td valign="middle"><a href="<%=request.getContextPath()%>/pages/user/userProfile.jsp" title=" My Profile "><img src="<%=request.getContextPath()%>/images/user.png" width="18"
                                                                                                                                                                                                         height="22" border="0" align="middle" ></a></td>
@@ -401,9 +402,9 @@
                                                                                                                         {
                                                                                                                             colSLABreachIsuBK = DAOFactory.getDDMRequestDAO().getSLABreachByIssuingBankDDAReqSummary(DDM_Constants.status_all, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_all);
                                                                                                                         }
-                                                                                                                        else
+                                                                                                                        else if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
                                                                                                                         {
-                                                                                                                            colSLABreachIsuBK = DAOFactory.getDDMRequestDAO().getSLABreachByIssuingBankDDAReqSummary(session_cocuId, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_all);
+                                                                                                                            colSLABreachIsuBK = DAOFactory.getDDMRequestDAO().getSLABreachByIssuingBankDDAReqSummary(session_cocuId, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all);
                                                                                                                         }
 
                                                                                                                         if (colSLABreachIsuBK != null && colSLABreachIsuBK.size() > 0)
@@ -427,7 +428,7 @@
                                                                                                                                     rowNum++;                                                                                                                            
                                                                                                                             %>
                                                                                                                             <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>"   onMouseOver="cOn(this)" onMouseOut="cOut(this)">
-                                                                                                                                <td align="center" class="ddm_sub_link_large"><a href="<%=(request.getContextPath() + DDM_Constants.ddm_main_finction_path_inquiry_sla_breach_ddm_req_issuing_bank)%>" title="<%=ddmr.getIssuningBankName()%>" class="ddm_sub_link_large"><%=ddmr.getIssuningBankCode()%></a></td>
+                                                                                                                                <td align="center" class="ddm_sub_link_large"><a href="<%=(request.getContextPath() + DDM_Constants.ddm_main_finction_path_inquiry_sla_breach_ddm_req_issuing_bank)%>?hdnIsSearch=1&cmbIssuingBank=<%=ddmr.getIssuningBankCode()%>&cmbIssuingBranch=<%=DDM_Constants.status_all%>" title="<%=ddmr.getIssuningBankName()%>" class="ddm_sub_link_large"><%=ddmr.getIssuningBankCode()%></a></td>
                                                                                                                                 <td align="right" class="ddm_Display_Error_msg"><%=ddmr.getSLABreachedIsuBkReqCount()%></td>
                                                                                                                                 <td align="right" class="ddm_Display_Error_msg"><%=new DecimalFormat("###,##0.00").format(ddmr.getSLABreachedIsuBkReqAvgExceedDays())%></td>
                                                                                                                             </tr>  
@@ -449,7 +450,7 @@
 
                                                                                                                     <br/>
                                                                                                                     <span class="ddm_Display_Success_msg">No Records Available!</span>
-                                                                                                                    <%
+                                                                                                              <%
                                                                                                                         }
                                                                                                                     %>                                                                                                                </td>
                                                                                                       </tr>
@@ -502,7 +503,9 @@
                                                                                                                                     rowNum++;
                                                                                                                             %>
                                                                                                                             <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>"   onMouseOver="cOn(this)" onMouseOut="cOut(this)">
-                                                                                                                                <td align="center" class="ddm_sub_link_large"><a href="<%=(request.getContextPath() + DDM_Constants.ddm_main_finction_path_inquiry_sla_breach_ddm_req_acquiring_bank)%>" title="<%=ddmr.getAcquiringBankName()%>" class="ddm_sub_link_large"><%=ddmr.getAcquiringBankCode()%></a></td>
+                                                                                                                                <td align="center" class="ddm_sub_link_large">
+                                                                                                                                <a href="<%=(request.getContextPath() + DDM_Constants.ddm_main_finction_path_inquiry_sla_breach_ddm_req_acquiring_bank)%>?hdnIsSearch=1&cmbAcquiringBank=<%=ddmr.getAcquiringBankCode()%>&cmbAcquiringBranch=<%=DDM_Constants.status_all%>" title="<%=ddmr.getAcquiringBankName()%>" class="ddm_sub_link_large"><%=ddmr.getAcquiringBankCode()%></a>
+                                                                                                                                </td>
                                                                                                                                 <td align="right" class="ddm_Display_Error_msg"><%=ddmr.getSLABreachedAcqBkReqCount()%></td>
                                                                                                                                 <td align="right" class="ddm_Display_Error_msg"><%=new DecimalFormat("###,##0.00").format(ddmr.getSLABreachedAcqBkReqAvgExceedDays())%></td>
                                                                                                                             </tr>                                                                                                           
@@ -707,7 +710,7 @@
                                                                                                 if (colDDMReqIssuingBank != null && colDDMReqIssuingBank.size() > 0)
                                                                                                 {
                                                                                                     isOKToShowThingsToDo = true;
-                                                                                                    isOKToShowAuthPendingDDMReq_IssuingBank = true;
+                                                                                                    isOKToShowAuthPendingDDMReq_IssuingBank = true;                                                                                                    
 
                                                                                                     noOfPending_AuthPendingDDMReq_IssuingBank = colDDMReqIssuingBank.size();
                                                                                                 }
@@ -775,7 +778,7 @@
 
                                                                                                                 <%
                                                                                                                     }
-                                                                                                                    if (isOKToShowAuthPendingDDMReq_AcquiringBank)
+                                                                                                                    if (isOKToShowAuthPendingDDMReq_IssuingBank)
                                                                                                                     {
                                                                                                                         rowNum++;
                                                                                                                 %>

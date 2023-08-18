@@ -283,7 +283,7 @@
 
                     if (document.getElementById('txtNewPwd') != null)
                     {
-                        document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                        document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                         document.getElementById('txtNewPwd').title = 'Empty Password!';
                     }
 
@@ -309,7 +309,7 @@
 
                         if (document.getElementById('txtNewPwd') != null)
                         {
-                            document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                            document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                             document.getElementById('txtNewPwd').title = 'Spaces not allowed!';
                         }
 
@@ -335,7 +335,7 @@
 
                             if (document.getElementById('txtNewPwd') != null)
                             {
-                                document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                 document.getElementById('txtNewPwd').title = 'Password length less than ' + minPwdLength + ' characters!';
                             }
 
@@ -362,7 +362,7 @@
 
                                 if (document.getElementById('txtNewPwd') != null)
                                 {
-                                    document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                    document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                     document.getElementById('txtNewPwd').title = 'Password can not contain UserId!';
                                 }
 
@@ -431,7 +431,7 @@
 
                                             if (document.getElementById('txtNewPwd') != null)
                                             {
-                                                document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                                document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                                 document.getElementById('txtNewPwd').title = 'Password must contain minimum of ' + minLowChars + ' lower case characters!';
                                             }
 
@@ -456,7 +456,7 @@
 
                                         if (document.getElementById('txtNewPwd') != null)
                                         {
-                                            document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                            document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                             document.getElementById('txtNewPwd').title = 'Password must contain minimum of ' + minUpChars + ' upper case characters!';
                                         }
 
@@ -482,7 +482,7 @@
 
                                     if (document.getElementById('txtNewPwd') != null)
                                     {
-                                        document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                        document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                         document.getElementById('txtNewPwd').title = 'Password must be a combination of alpha-numeric characters and at least one special character!';
                                     }
 
@@ -539,7 +539,7 @@
                             document.getElementById("hdnIsPWDAvailableHis").value = "1";
                             if (document.getElementById('txtNewPwd') != null)
                             {
-                                document.getElementById('txtNewPwd').className = 'slips_loginbox_input_ok';
+                                document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_ok';
                                 document.getElementById('txtNewPwd').title = 'Correct password which match with password policy.';
                             }
 
@@ -570,7 +570,7 @@
 
                             if (document.getElementById('txtNewPwd') != null)
                             {
-                                document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                 document.getElementById('txtNewPwd').title = 'Password shuold not be equal to last ' + <%=iMinPwdHistory%> + ' passwords you used!';
                             }
 
@@ -596,7 +596,7 @@
 
                             if (document.getElementById('txtNewPwd') != null)
                             {
-                                document.getElementById('txtNewPwd').className = 'slips_loginbox_input_error';
+                                document.getElementById('txtNewPwd').className = 'ddm_loginbox_input_error';
                                 document.getElementById('txtNewPwd').title = 'Password shuold not be equal to last ' + <%=iMinPwdHistory%> + ' passwords you used!';
                             }
 
@@ -676,7 +676,7 @@
 
         </script>
     </head>
-    <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="slips_body" onLoad="setAnimLights()">
+    <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="ddm_body" onLoad="setAnimLights()">
 
 
     
@@ -702,52 +702,43 @@
 
         <form method="post" name="frmChangeInitPwd" onSubmit="return validate()">
 
-
-
-
-
-
-
-
-
-
-            <div class="slips_loginbox"> 
-                <img src="../../images/change_pwd.png" class="slips_login_avatar">        
+            <div class="ddm_loginbox"> 
+                <img src="../../images/change_pwd.png" class="ddm_login_avatar">        
 
                 <h1>LankaPay DDM - Change Password</h1>
-                <span class="slips_error_ipwd_change_large"><u>Please change your expired password.</u></span>
+                <span class="ddm_error_ipwd_change_large"><u>Please change your expired password.</u></span>
 
 
                 <table width="100%" border="0" cellspacing="0" cellpadding="1">
                     <tr>
-                        <td height="5" class="slips_error_ipwd_change"></td>
+                        <td height="5" class="ddm_error_ipwd_change"></td>
                     </tr>
                     <tr>
-                        <td height="15" valign="top" class="slips_error_ipwd_change">
+                        <td height="15" valign="top" class="ddm_error_ipwd_change">
                             Note : The new password should not be equal to last  <%=iMinPwdHistory%> password(s) you used, must be a combination of alpha numeric and at least one special character and minimum of 8 characters in length!
 
                             <input type="hidden" name="isChangeReq" id="isChangeReq"><input type="hidden" name="hdnIsPWDAvailableHis" id="hdnIsPWDAvailableHis">    											 </td>
                     </tr>
                     <tr>
-                        <td height="10" align="center" class="slips_loginbox_error"></td>
+                        <td height="10" align="center" class="ddm_loginbox_error"></td>
                     </tr>
                 </table>
 
 
                 <p>New Password</p>
-                <input type="password" name="txtNewPwd" id="txtNewPwd" class="slips_loginbox_input" maxlength="32" onKeyUp="validatePassword()" placeholder="Enter New Password">
+                <input type="password" name="txtNewPwd" id="txtNewPwd" class="ddm_loginbox_input" maxlength="32" onKeyUp="validatePassword()" placeholder="Enter New Password">
 
                 <p>Confirm Password</p>
-                <input type="password" name="txtConfirmPwd" id="txtConfirmPwd" class="slips_loginbox_input" maxlength="32" placeholder="Enter New Password">
+                <input type="password" name="txtConfirmPwd" id="txtConfirmPwd" class="ddm_loginbox_input" maxlength="32" placeholder="Enter New Password">
 
                 <br/>
 
                 <table border="0" cellspacing="0" cellpadding="0" width="100%">
                     <tr>
-                        <td width="48%"><input type="submit" id="btnChange" name="btnChange" value="Change" class="slips_loginbox_submit" onClick="actionChange()" disabled>    
+                        <td width="48%"><input type="submit" id="btnChange" name="btnChange" value="Change" class="ddm_loginbox_submit" onClick="actionChange()" disabled>    
                         </td>
                         <td width="4%"></td>
-                        <td width="48%"><input type="submit" id="btnCancel" name="btnCancel" value="Cancel" class="slips_loginbox_submit"  onClick="actionCancel()"></td>
+                        <td width="48%"><input type="submit" id="btnCancel" name="btnCancel" value="Cancel" class="ddm_loginbox_submit"  onClick="actionCancel()"></td>
                     </tr>
                 </table>
 

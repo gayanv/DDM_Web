@@ -56,15 +56,17 @@
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
 
-        if (session_userType.equals(DDM_Constants.user_type_ddm_administrator) || session_userType.equals(DDM_Constants.user_type_ddm_helpdesk_user))
+        boolean isAccessOK = DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, DDM_Constants.directory_previous + request.getServletPath());
+
+        if (!isAccessOK)
         {
-            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - DDM Request Inquiry' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
+            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - SLA Breached DDM Request Inquiry (As Acquiring Bank)' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
             {
                 response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp");
             }
             else
             {
-                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fpDDM_Requests_Inquiry");
+                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=SLA_Breached_DDM_Requests_Inquiry_As_Acquiring_Bank");
             }
         }
         else
@@ -112,62 +114,93 @@
     {
         initialRequest = true;
         isSearchReq = "0";
+
         issuingBankCode = DDM_Constants.status_all;
         issuingBranchCode = DDM_Constants.status_all;
 
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        acquiringBankCode = DDM_Constants.status_all;
+        acquiringBranchCode = DDM_Constants.status_all;
+
+        selMerchant = DDM_Constants.status_all;
+
+        selRequestStatus = DDM_Constants.ddm_request_status_04;
+        fromRequestDate = webBusinessDate;
+        toRequestDate = webBusinessDate;
+
+        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
         {
             acquiringBankCode = session_bankCode;
             acquiringBranchCode = DDM_Constants.status_all;
 
             colAcquiringBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(acquiringBankCode, DDM_Constants.status_pending);
         }
-        else
+        else if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        {
+            selMerchant = session_cocuId;
+        }
+    }
+    else
+    {
+        issuingBankCode = (String) request.getParameter("cmbIssuingBank");
+        issuingBranchCode = (String) request.getParameter("cmbIssuingBranch");
+
+        acquiringBankCode = (String) request.getParameter("cmbAcquiringBank");
+        acquiringBranchCode = (String) request.getParameter("cmbAcquiringBranch");
+
+        selMerchant = (String) request.getParameter("cmbMerchant");
+
+        //selRequestStatus = (String) request.getParameter("cmbReqStatus");
+        selRequestStatus = DDM_Constants.ddm_request_status_04;
+
+        fromRequestDate = (String) request.getParameter("txtFromRequestDate");
+        toRequestDate = (String) request.getParameter("txtToRequestDate");
+
+        if (selMerchant == null)
+        {
+            selMerchant = DDM_Constants.status_all;
+        }
+
+        if (issuingBankCode == null)
+        {
+            issuingBankCode = DDM_Constants.status_all;
+            issuingBranchCode = DDM_Constants.status_all;
+        }
+
+        if (acquiringBankCode == null)
         {
             acquiringBankCode = DDM_Constants.status_all;
             acquiringBranchCode = DDM_Constants.status_all;
         }
 
-        selMerchant = DDM_Constants.status_all;
-        selRequestStatus = DDM_Constants.status_all;
-        fromRequestDate = webBusinessDate;
-        toRequestDate = webBusinessDate;
+        if (fromRequestDate == null || fromRequestDate.isEmpty())
+        {
+            fromRequestDate = DDM_Constants.status_all;
+        }
 
-    }
-    else
-    {
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        if (toRequestDate == null || toRequestDate.isEmpty())
+        {
+            toRequestDate = DDM_Constants.status_all;
+        }
+
+        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
         {
             acquiringBankCode = session_bankCode;
-
-            colAcquiringBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(acquiringBankCode, DDM_Constants.status_pending);
+            //colAcquiringBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(acquiringBankCode, DDM_Constants.status_pending);
         }
-        else
+        else if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
         {
-            
-            
-            acquiringBankCode = (String) request.getParameter("cmbAcquiringBank");
-
-            if (!acquiringBankCode.equals(DDM_Constants.status_all))
-            {
-                colAcquiringBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(acquiringBankCode, DDM_Constants.status_pending);
-            }
+            selMerchant = session_cocuId;
         }
-
-        
-        issuingBankCode = (String) request.getParameter("cmbIssuingBank");
 
         if (!issuingBankCode.equals(DDM_Constants.status_all))
         {
             colIssuingBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(issuingBankCode, DDM_Constants.status_pending);
         }
 
-        issuingBranchCode = (String) request.getParameter("cmbIssuingBranch");
-        acquiringBranchCode = (String) request.getParameter("cmbAcquiringBranch");
-        selMerchant = (String) request.getParameter("cmbMerchant");
-        selRequestStatus = (String) request.getParameter("cmbReqStatus");
-        fromRequestDate = (String) request.getParameter("txtFromRequestDate");
-        toRequestDate = (String) request.getParameter("txtToRequestDate");
+        if (!acquiringBankCode.equals(DDM_Constants.status_all))
+        {
+            colAcquiringBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(acquiringBankCode, DDM_Constants.status_pending);
+        }
 
         if (isSearchReq.equals("0"))
         {
@@ -177,8 +210,9 @@
         {
             initialRequest = false;
 
-            colDDMRequestDetails = DAOFactory.getDDMRequestDAO().getDDARequestDetails(selMerchant, issuingBankCode, issuingBranchCode, acquiringBankCode, acquiringBranchCode, selRequestStatus, fromRequestDate, toRequestDate);
-
+            //colDDMRequestDetails = DAOFactory.getDDMRequestDAO().getDDARequestDetails(selMerchant, issuingBankCode, issuingBranchCode, acquiringBankCode, acquiringBranchCode, selRequestStatus, fromRequestDate, toRequestDate);
+            colDDMRequestDetails = DAOFactory.getDDMRequestDAO().getSLABreachByAcquiringBankDDAReqDetails(selMerchant, issuingBankCode, issuingBranchCode, acquiringBankCode, acquiringBranchCode, selRequestStatus, fromRequestDate, toRequestDate);
+            
             String strReqStatDes = "All";
 
             if (!selRequestStatus.equals(DDM_Constants.status_all))
@@ -191,7 +225,7 @@
                 }
             }
 
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_bank_user_ddm_request_inquiry_search_as_acquiring_bank, "| Search Criteria - (Issuing Bank : " + issuingBankCode + ", Issuing Branch : " + issuingBranchCode + ", Acquiring Bank : " + acquiringBankCode + ", Acquiring Branch : " + acquiringBranchCode + ", Merchant : " + selMerchant + ", Status : " + strReqStatDes + ", DDM Request Date : From - " + fromRequestDate + "  To - " + toRequestDate + ") | Result Count - " + (colDDMRequestDetails != null ? colDDMRequestDetails.size() : "0") + " | Searched By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_bank_user_slab_ddm_request_inquiry_search_as_acquiring_bank, "| Search Criteria - (Issuing Bank : " + issuingBankCode + ", Issuing Branch : " + issuingBranchCode + ", Acquiring Bank : " + acquiringBankCode + ", Acquiring Branch : " + acquiringBranchCode + ", Merchant : " + selMerchant + ", Status : " + strReqStatDes + ", DDM Request Date : From - " + fromRequestDate + "  To - " + toRequestDate + ") | Result Count - " + (colDDMRequestDetails != null ? colDDMRequestDetails.size() : "0") + " | Searched By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
     }
 
@@ -423,8 +457,8 @@
 
             function doSubmit()
             {
-                document.frmInquiryDDMR_AsAcquiringBank.action = "inqddmacb.jsp";
-                document.frmInquiryDDMR_AsAcquiringBank.submit();
+                document.frmSLBDDMR_AsAcquiringBank.action = "slbddmacb.jsp";
+                document.frmSLBDDMR_AsAcquiringBank.submit();
             }
 
 
@@ -526,7 +560,7 @@
                                                                                                     <td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
-                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                             <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                                 cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                             <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -600,7 +634,7 @@
                                                                                             String userTypeDescription = "Issuing Bank";
 
                                                                                         %>
-                                                                                        <td align="left" valign="top" class="ddm_header_text">DDM Request Inquiry - As Acquiring Bank</td>
+                                                                                        <td align="left" valign="top" class="ddm_header_text">SLA Breached DDM Request Inquiry - As Acquiring Bank</td>
                                                                                         <td width="10">&nbsp;</td>
                                                                                     </tr>
                                                                                     <tr>
@@ -610,7 +644,7 @@
                                                                                     </tr>
                                                                                     <tr>
                                                                                         <td></td>
-                                                                                        <td align="center" valign="top"><form name="frmInquiryDDMR_AsAcquiringBank" id="frmInquiryDDMR_AsAcquiringBank" method="post" >
+                                                                                        <td align="center" valign="top"><form name="frmSLBDDMR_AsAcquiringBank" id="frmSLBDDMR_AsAcquiringBank" method="post" >
                                                                                                 <table width="100%"  border="0" cellspacing="0" cellpadding="0">
                                                                                                     <tr>
                                                                                                         <td align="center" valign="top">
@@ -1045,7 +1079,7 @@
                                                                                                                                                 <td nowrap class="ddm_common_text" title="<%=ddmr.getAcquiringBranch()%> - <%=ddmr.getAcquiringBranchName()%>"><%=ddmr.getAcquiringBranch()%> - <%=ddmr.getAcquiringBranchName().length() > 10 ? (ddmr.getAcquiringBranchName().substring(0, 8) + "..") : ddmr.getAcquiringBranchName()%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getAcquiringAccountNumber()%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getAcquiringAccountName()%></td>
-                                                                                                                                                <td class="ddm_common_text" align="right" ><%=strMaxLimit%></td>
+                                                                                                                                                <td class="ddm_common_text" align="right" ><%=new DecimalFormat("###,##0.00").format(maxLimit)%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getStartDate()%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getEndDate()%></td>
                                                                                                                                                 <%

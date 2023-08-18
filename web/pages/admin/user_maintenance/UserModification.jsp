@@ -3,13 +3,12 @@
 <%@page import="lk.com.ttsl.pb.slips.dao.DAOFactory" errorPage="../../../error.jsp"  %>
 <%@page import="lk.com.ttsl.pb.slips.dao.bank.Bank" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.userLevel.UserLevel" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.corporatecustomer.CorporateCustomer" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.merchant.Merchant" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.parameter.Parameter" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.user.*" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate"  errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.window.*" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.Log" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.LogDAO" errorPage="../../../error.jsp"%>
 
@@ -79,10 +78,11 @@
 
 
 <%
-    Collection<Branch> colBranch = null;
-    Collection<CorporateCustomer> colCoCu = null;
-    Collection<User> col_user = null;
+    Collection<Bank> colBank = null;
+    Collection<Merchant> colMerchant = null;
     Collection<UserLevel> colUserLevel = null;
+    Collection<User> col_user = null;
+    
 
     User userDetails = null;
 
@@ -90,16 +90,16 @@
     String selectedUsername = null;
     String selectedUserLevel = null;
     String selectedUserStatus = null;
-    //String selectedUserBank = null;
-    //String selectedUserBranch = null;
+    String selectedUserBank = null;
+    String selectedUserMerchant = null;
 
     String userID = null;
     String newUserStatus = null;
     String newUserStatusDesc = null;
     String oldUserStatusDesc = null;
     String newUserBank = null;
-    String newUserBranch = null;
-    String newCoCuId = null;
+    //String newUserBranch = null;
+    String newMerchantId = null;
     String newUserLevel = null;
     String newUserLevelDesc = null;
     String newName = null;
@@ -107,7 +107,7 @@
     String newDesignation = null;
     String newEmail = null;
     String newContactNo = null;
-    String newUserRemarks = null;
+    String newRemarks = null;
     String newNIC = null;
     String rbNIC_Passport = null;
     //String newTokenSerial = null;
@@ -117,16 +117,8 @@
     boolean result = false;
 
     colUserLevel = DAOFactory.getUserLevelDAO().getUserLevelDetails();
-    colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(DDM_Constants.default_bank_code, DDM_Constants.status_pending);
-
-    if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
-    {
-        colCoCu = DAOFactory.getCorporateCustomerDAO().getCorporateCustomerBasicDetails(DDM_Constants.status_active, session_branchId);
-    }
-    else
-    {
-        colCoCu = DAOFactory.getCorporateCustomerDAO().getCorporateCustomerBasicDetails(DDM_Constants.status_active, DDM_Constants.status_all);
-    }
+    colBank = DAOFactory.getBankDAO().getBankNotInStatus(DDM_Constants.status_pending);
+    colMerchant = DAOFactory.getMerchantDAO().getMerchantNotInStatusBasicDetails(DDM_Constants.status_pending, DDM_Constants.status_all, DDM_Constants.status_all);
 
     defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
 
@@ -135,49 +127,59 @@
 
     if (reqType == null)
     {
+        reqType = "0";
+
         selectedUserLevel = DDM_Constants.status_all;
-        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all), "'" + DDM_Constants.status_pending + "'");
-
+        selectedUserBank = DDM_Constants.status_all;
+        selectedUserMerchant = DDM_Constants.status_all;
         selectedUserStatus = DDM_Constants.status_all;
-        //selectedUserBank = DDM_Constants.default_bank_code;
-        //selectedUserBranch = DDM_Constants.status_all;
-        selectedUsername = "-1";
+        selectedUsername = DDM_Constants.default_web_combo_select;
 
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_pending + "'");
     }
     else if (reqType.equals("0"))
     {
+        System.out.println("Inside 1111111111");
+
         selectedUserLevel = request.getParameter("search_cmbUserLevel");
-        selectedUsername = request.getParameter("search_cmbUserId");
-        selectedUserStatus = request.getParameter("search_cmbUserStatus");
-        //selectedUserBank = DDM_Constants.default_bank_code;
-        //selectedUserBranch = DDM_Constants.status_all;
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, DDM_Constants.default_bank_code, DDM_Constants.status_all, DDM_Constants.status_all), "'" + DDM_Constants.status_pending + "'");
+        System.out.println("selectedUserLevel ====> " + selectedUserLevel);
 
-        if (col_user != null && col_user.size() > 0)
+        if (selectedUserLevel != null && !selectedUserLevel.equals(DDM_Constants.status_all))
         {
-            boolean isuseravailable = false;
-
-            for (User u : col_user)
+            if (selectedUserLevel.equals(DDM_Constants.user_type_merchant_su) || selectedUserLevel.equals(DDM_Constants.user_type_merchant_op))
             {
-                if (selectedUsername != null && selectedUsername.equals(u.getUserId()))
-                {
-                    isuseravailable = true;
-                    break;
-                }
+                selectedUserBank = DDM_Constants.status_all;
+                selectedUserMerchant = (String) request.getParameter("search_cmbMerchant");
             }
-
-            if (!isuseravailable)
+            else if (selectedUserLevel.equals(DDM_Constants.user_type_bank_manager) || selectedUserLevel.equals(DDM_Constants.user_type_bank_user))
             {
-                selectedUsername = "-1";
+                selectedUserBank = (String) request.getParameter("search_cmbBank");
+                selectedUserMerchant = DDM_Constants.status_all;
+            }
+            else
+            {
+                selectedUserBank = DDM_Constants.lcpl_bank_code;
+                selectedUserMerchant = DDM_Constants.status_all;
             }
         }
         else
         {
-            selectedUsername = "-1";
+            selectedUserBank = DDM_Constants.status_all;
+            selectedUserMerchant = DDM_Constants.status_all;
         }
 
-        if (selectedUsername != null && !selectedUsername.equals("-1"))
+        selectedUserStatus = request.getParameter("search_cmbUserStatus");
+        selectedUsername = request.getParameter("search_cmbUserId");
+
+        System.out.println("selectedUserLevel ====> " + selectedUserLevel);
+        System.out.println("selectedUserBank ====> " + selectedUserBank);
+        System.out.println("selectedUserMerchant ====> " + selectedUserMerchant);
+        System.out.println("selectedUserStatus ====> " + selectedUserStatus);
+
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_pending + "'");
+
+        if (selectedUsername != null && !selectedUsername.equals(DDM_Constants.default_web_combo_select))
         {
             userDetails = DAOFactory.getUserDAO().getUserDetails(selectedUsername, DDM_Constants.status_all);
 
@@ -190,6 +192,20 @@
                     newUserLevel = userDetails.getUserLevelId();
                 }
 
+                newUserBank = request.getParameter("cmbBank");
+
+                if (newUserBank == null || newUserBank.equals(DDM_Constants.status_all))
+                {
+                    newUserBank = userDetails.getBankCode();
+                }
+
+                newMerchantId = request.getParameter("cmbMerchant");
+
+                if (newMerchantId == null || newMerchantId.equals(DDM_Constants.status_all))
+                {
+                    newMerchantId = userDetails.getCoCuId();
+                }
+
                 newUserStatus = request.getParameter("cmbUserStatus");
 
                 if (newUserStatus == null || newUserStatus.equals(DDM_Constants.status_all))
@@ -200,24 +216,6 @@
                 newUserStatusDesc = newUserStatus != null ? newUserStatus.equals(DDM_Constants.status_active) ? "Active" : newUserStatus.equals(DDM_Constants.status_deactive) ? "Deactive" : newUserStatus.equals(DDM_Constants.status_locked) ? "Locked" : newUserStatus.equals(DDM_Constants.status_expired) ? "Expired" : newUserStatus.equals(DDM_Constants.status_pending) ? "Pending" : "N/A" : "N/A";
                 oldUserStatusDesc = userDetails.getStatus() != null ? userDetails.getStatus().equals(DDM_Constants.status_active) ? "Active" : userDetails.getStatus().equals(DDM_Constants.status_deactive) ? "Deactive" : userDetails.getStatus().equals(DDM_Constants.status_locked) ? "Locked" : userDetails.getStatus().equals(DDM_Constants.status_expired) ? "Expired" : userDetails.getStatus().equals(DDM_Constants.status_pending) ? "Pending" : "N/A" : "N/A";
 
-                newUserBank = userDetails.getBankCode();
-                //newUserBranch = userDetails.getBranchCode();
-                //newCoCuId = userDetails.getCoCuId();
-
-                newUserBranch = request.getParameter("cmbBranch");
-
-                if (newUserBranch == null || newUserBranch.equals(DDM_Constants.status_all))
-                {
-                    newUserBranch = userDetails.getBranchCode();
-                }
-
-                newCoCuId = request.getParameter("cmbCoCuID");
-
-                if (newCoCuId == null || newCoCuId.equals(DDM_Constants.status_all))
-                {
-                    newCoCuId = userDetails.getCoCuId();
-                }
-
                 newName = userDetails.getName();
                 newEmpID = userDetails.getEmpId();
                 newDesignation = userDetails.getDesignation();
@@ -225,7 +223,7 @@
                 newContactNo = userDetails.getContactNo();
                 newNIC = userDetails.getNIC();
                 //newTokenSerial = userDetails.getTokenSerial();
-                newUserRemarks = userDetails.getRemarks();
+                newRemarks = userDetails.getRemarks();
 
                 if (userDetails.getNIC() != null)
                 {
@@ -251,24 +249,38 @@
     }
     else if (reqType.equals("1"))
     {
-        if (session_userType.equals(DDM_Constants.user_type_ddm_helpdesk_user))
+        selectedUserLevel = request.getParameter("search_cmbUserLevel");
+
+        if (selectedUserLevel != null && !selectedUserLevel.equals(DDM_Constants.status_all))
         {
-            //selectedUserLevel = DDM_Constants.user_type_bank;
-            selectedUserLevel = request.getParameter("search_cmbUserLevel");
-            col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all), "'" + DDM_Constants.status_pending + "'");
+            if (selectedUserLevel.equals(DDM_Constants.user_type_merchant_su) || selectedUserLevel.equals(DDM_Constants.user_type_merchant_op))
+            {
+                selectedUserBank = DDM_Constants.status_all;
+                selectedUserMerchant = (String) request.getParameter("search_cmbMerchant");
+            }
+            else if (selectedUserLevel.equals(DDM_Constants.user_type_bank_manager) || selectedUserLevel.equals(DDM_Constants.user_type_bank_user))
+            {
+                selectedUserBank = (String) request.getParameter("search_cmbBank");
+                selectedUserMerchant = DDM_Constants.status_all;
+            }
+            else
+            {
+                selectedUserBank = DDM_Constants.lcpl_bank_code;
+                selectedUserMerchant = DDM_Constants.status_all;
+            }
         }
         else
         {
-            selectedUserLevel = request.getParameter("search_cmbUserLevel");
-            col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all), "'" + DDM_Constants.status_pending + "'");
+            selectedUserBank = DDM_Constants.status_all;
+            selectedUserMerchant = DDM_Constants.status_all;
         }
 
         selectedUserStatus = request.getParameter("search_cmbUserStatus");
-        //selectedUserBank = DDM_Constants.default_bank_code;
-        //selectedUserBranch = DDM_Constants.status_all;
         selectedUsername = request.getParameter("search_cmbUserId");
 
-        if (selectedUsername != null && !selectedUsername.equals("-1"))
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_pending + "'");
+
+        if (selectedUsername != null && !selectedUsername.equals(DDM_Constants.default_web_combo_select))
         {
             userDetails = DAOFactory.getUserDAO().getUserDetails(selectedUsername, DDM_Constants.status_all);
         }
@@ -291,9 +303,8 @@
         newUserStatusDesc = newUserStatus != null ? newUserStatus.equals(DDM_Constants.status_active) ? "Active" : newUserStatus.equals(DDM_Constants.status_deactive) ? "Deactive" : newUserStatus.equals(DDM_Constants.status_locked) ? "Locked" : newUserStatus.equals(DDM_Constants.status_expired) ? "Expired" : newUserStatus.equals(DDM_Constants.status_pending) ? "Pending" : "N/A" : "N/A";
         oldUserStatusDesc = userDetails.getStatus() != null ? userDetails.getStatus().equals(DDM_Constants.status_active) ? "Active" : userDetails.getStatus().equals(DDM_Constants.status_deactive) ? "Deactive" : userDetails.getStatus().equals(DDM_Constants.status_locked) ? "Locked" : userDetails.getStatus().equals(DDM_Constants.status_expired) ? "Expired" : userDetails.getStatus().equals(DDM_Constants.status_pending) ? "Pending" : "N/A" : "N/A";
 
-        newUserBank = DDM_Constants.default_bank_code;
-        newUserBranch = request.getParameter("cmbBranch");
-        newCoCuId = request.getParameter("cmbCoCuID");
+        newUserBank = request.getParameter("cmbBank");
+        newMerchantId = request.getParameter("cmbMerchant");
 
         newName = request.getParameter("txtName");
         newEmpID = request.getParameter("txtEmpID");
@@ -302,17 +313,16 @@
         newContactNo = request.getParameter("txtContactNo");
         newNIC = request.getParameter("txtNIC");
         rbNIC_Passport = request.getParameter("rbNICPassport");
-        //newTokenSerial = request.getParameter("txtTokenSerial");
-        newUserRemarks = request.getParameter("txtaRemarks");
+        newRemarks = request.getParameter("txtaRemarks");
 
         User usr = new User();
 
         usr.setUserId(userID);
         usr.setUserLevelId(newUserLevel);
         usr.setStatus(newUserStatus);
-        usr.setBankCode(DDM_Constants.default_bank_code);
-        usr.setBranchCode(newUserBranch);
-        usr.setCoCuId(newCoCuId);
+        usr.setBankCode(newUserBank);
+        usr.setBranchCode(DDM_Constants.bank_default_branch_code);
+        usr.setCoCuId(newMerchantId);
         usr.setName(newName);
         usr.setEmpId(newEmpID);
         usr.setDesignation(newDesignation);
@@ -346,7 +356,7 @@
 
         usr.setNIC(newNIC);
         usr.setTokenSerial("");
-        usr.setRemarks(newUserRemarks);
+        usr.setRemarks(newRemarks);
         usr.setNeedDownloadToBIM(DDM_Constants.status_yes);
         usr.setModifiedBy(session_userName);
 
@@ -356,11 +366,11 @@
         if (!result)
         {
             msg = userDAO.getMsg();
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_modify_user_details, "| Username - " + userDetails.getUserId() + ", User Type - (New : " + (newUserLevel != null ? newUserLevel : "") + " , Old :" + (userDetails.getUserLevelDesc() != null ? userDetails.getUserLevelDesc() : "") + "), Bank - (New : " + (newUserBank != null ? newUserBank : "") + ", Old : " + userDetails.getBankCode() + "), Status - (New : " + newUserStatusDesc + ", Old : " + oldUserStatusDesc + "), Name - (New : " + (newName != null ? newName : "") + ", Old : " + (userDetails.getName() != null ? userDetails.getName() : "") + "), Designation - (New : " + (newDesignation != null ? newDesignation : "") + ", Old : " + (userDetails.getDesignation() != null ? userDetails.getDesignation() : "") + "), E-Mail - (New : " + (newEmail != null ? newEmail : "") + ", Old : " + (userDetails.getEmail() != null ? userDetails.getEmail() : "") + "), Contact No. - (New : " + (newContactNo != null ? newContactNo : "") + ", Old : " + (userDetails.getContactNo() != null ? userDetails.getContactNo() : "") + "), NIC - (New : " + (newNIC != null ? newNIC.replaceFirst("N:", "").replaceFirst("P:", "") : "") + ", Old : " + (userDetails.getNIC() != null ? userDetails.getNIC().replaceFirst("N:", "").replaceFirst("P:", "") : "") + "), Remarks - (New : " + (newUserRemarks != null ? newUserRemarks : "") + ", Old : " + (userDetails.getRemarks() != null ? userDetails.getRemarks() : "") + ") | Process Status - Unsuccess (" + msg + ") | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_modify_user_details, "| Username - " + userDetails.getUserId() + ", User Type - (New : " + (newUserLevel != null ? newUserLevel : "") + " , Old :" + (userDetails.getUserLevelDesc() != null ? userDetails.getUserLevelDesc() : "") + "), Bank - (New : " + (newUserBank != null ? newUserBank : "") + ", Old : " + userDetails.getBankCode() + "), Status - (New : " + newUserStatusDesc + ", Old : " + oldUserStatusDesc + "), Name - (New : " + (newName != null ? newName : "") + ", Old : " + (userDetails.getName() != null ? userDetails.getName() : "") + "), Designation - (New : " + (newDesignation != null ? newDesignation : "") + ", Old : " + (userDetails.getDesignation() != null ? userDetails.getDesignation() : "") + "), E-Mail - (New : " + (newEmail != null ? newEmail : "") + ", Old : " + (userDetails.getEmail() != null ? userDetails.getEmail() : "") + "), Contact No. - (New : " + (newContactNo != null ? newContactNo : "") + ", Old : " + (userDetails.getContactNo() != null ? userDetails.getContactNo() : "") + "), NIC - (New : " + (newNIC != null ? newNIC.replaceFirst("N:", "").replaceFirst("P:", "") : "") + ", Old : " + (userDetails.getNIC() != null ? userDetails.getNIC().replaceFirst("N:", "").replaceFirst("P:", "") : "") + "), Remarks - (New : " + (newRemarks != null ? newRemarks : "") + ", Old : " + (userDetails.getRemarks() != null ? userDetails.getRemarks() : "") + ") | Process Status - Unsuccess (" + msg + ") | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
         else
         {
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_modify_user_details, "| Username - " + userDetails.getUserId() + ", User Type - (New : " + (newUserLevel != null ? newUserLevel : "") + " , Old :" + (userDetails.getUserLevelDesc() != null ? userDetails.getUserLevelDesc() : "") + "), Bank - (New : " + (newUserBank != null ? newUserBank : "") + ", Old : " + userDetails.getBankCode() + "), Status - (New : " + newUserStatusDesc + ", Old : " + oldUserStatusDesc + "), Name - (New : " + (newName != null ? newName : "") + ", Old : " + (userDetails.getName() != null ? userDetails.getName() : "") + "), Designation - (New : " + (newDesignation != null ? newDesignation : "") + ", Old : " + (userDetails.getDesignation() != null ? userDetails.getDesignation() : "") + "), E-Mail - (New : " + (newEmail != null ? newEmail : "") + ", Old : " + (userDetails.getEmail() != null ? userDetails.getEmail() : "") + "), Contact No. - (New : " + (newContactNo != null ? newContactNo : "") + ", Old : " + (userDetails.getContactNo() != null ? userDetails.getContactNo() : "") + "), NIC - (New : " + (newNIC != null ? newNIC.replaceFirst("N:", "").replaceFirst("P:", "") : "") + ", Old : " + (userDetails.getNIC() != null ? userDetails.getNIC().replaceFirst("N:", "").replaceFirst("P:", "") : "") + "), Remarks - (New : " + (newUserRemarks != null ? newUserRemarks : "") + ", Old : " + (userDetails.getRemarks() != null ? userDetails.getRemarks() : "") + ") | Process Status - Success | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_modify_user_details, "| Username - " + userDetails.getUserId() + ", User Type - (New : " + (newUserLevel != null ? newUserLevel : "") + " , Old :" + (userDetails.getUserLevelDesc() != null ? userDetails.getUserLevelDesc() : "") + "), Bank - (New : " + (newUserBank != null ? newUserBank : "") + ", Old : " + userDetails.getBankCode() + "), Status - (New : " + newUserStatusDesc + ", Old : " + oldUserStatusDesc + "), Name - (New : " + (newName != null ? newName : "") + ", Old : " + (userDetails.getName() != null ? userDetails.getName() : "") + "), Designation - (New : " + (newDesignation != null ? newDesignation : "") + ", Old : " + (userDetails.getDesignation() != null ? userDetails.getDesignation() : "") + "), E-Mail - (New : " + (newEmail != null ? newEmail : "") + ", Old : " + (userDetails.getEmail() != null ? userDetails.getEmail() : "") + "), Contact No. - (New : " + (newContactNo != null ? newContactNo : "") + ", Old : " + (userDetails.getContactNo() != null ? userDetails.getContactNo() : "") + "), NIC - (New : " + (newNIC != null ? newNIC.replaceFirst("N:", "").replaceFirst("P:", "") : "") + ", Old : " + (userDetails.getNIC() != null ? userDetails.getNIC().replaceFirst("N:", "").replaceFirst("P:", "") : "") + "), Remarks - (New : " + (newRemarks != null ? newRemarks : "") + ", Old : " + (userDetails.getRemarks() != null ? userDetails.getRemarks() : "") + ") | Process Status - Success | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
     }
 %>
@@ -368,13 +378,13 @@
 
 <html>
     <head>
-    	<title>LankaPay Direct Debit Mandate Exchange System - Create Users</title>
+        <title>LankaPay Direct Debit Mandate Exchange System - Modify User Details</title>
         <link rel="shortcut icon" type="image/png" href="<%=request.getContextPath()%>/images/favicon.png">
         <link href="<%=request.getContextPath()%>/css/animbg4.css" rel="stylesheet" type="text/css" />
         <link href="<%=request.getContextPath()%>/css/ddm.css" rel="stylesheet" type="text/css" />
         <link href="<%=request.getContextPath()%>/css/tcal.css" rel="stylesheet" type="text/css" />
         <link href="../../../css/ddm.css" rel="stylesheet" type="text/css" />
-        
+
         <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/fade.js"></script>
         <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/digitalClock.js"></script>
         <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
@@ -385,36 +395,31 @@
 
         <script language="javascript" type="text/JavaScript">
 
-            function clearRecords_onPageLoad()
-            {
-            showClock(3);
-            }
-
             function resetRecords()
             {
-            document.getElementById('cmbUserStatus').selectedIndex = 0;
-            document.getElementById('txtName').value = "";
-            document.getElementById('txtDesignation').value = "";
-            document.getElementById('txtEmail').value = "";
-            document.getElementById('txtContactNo').value = "";				
-            document.getElementById('txtaRemarks').value = "";				
-            //document.getElementById('txtaRemarks').value = "";
+                document.getElementById('cmbUserStatus').selectedIndex = 0;
+                document.getElementById('txtName').value = '<%=newName!=null?newName:""%>';
+                document.getElementById('txtEmpID').value = '<%=newEmpID!=null?newEmpID:""%>';
+                document.getElementById('txtDesignation').value = "<%=newDesignation!=null?newDesignation:""%>";
+                document.getElementById('txtEmail').value = "<%=newEmail!=null?newEmail:""%>";
+                document.getElementById('txtContactNo').value = "<%=newContactNo!=null?newContactNo:""%>";	
+                document.getElementById('txtNIC').value = "<%=newNIC!=null?newNIC:""%>";				
+                document.getElementById('txtaRemarks').value = "<%=newRemarks!=null?newRemarks:""%>";
             }
 
             function password_Validation()
             {               
-            var password = document.getElementById('txtUserPassword').value;
-            var reType_password = document.getElementById('txtReTypePassword').value;
+                var password = document.getElementById('txtUserPassword').value;
+                var reType_password = document.getElementById('txtReTypePassword').value;
 
-            if(password != reType_password)
-            {
-
-            return false;
-            }
-            else
-            {
-            return true;
-            }
+                if(password != reType_password)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
 
 
@@ -440,9 +445,8 @@
             function fieldValidation()
             {
 
-
             var status = document.getElementById('cmbUserStatus').value;
-            var val_branch = document.getElementById('cmbBranch').value;
+            var val_bank = document.getElementById('cmbBank').value;
             var v_name = document.getElementById('txtName').value;
             var v_desig = document.getElementById('txtDesignation').value;  
             var v_email = document.getElementById('txtEmail').value;  
@@ -466,33 +470,36 @@
             }
             }
 
-            if (val_branch=="<%=DDM_Constants.status_all%>")
+            if(document.getElementById('cmbBank')!=null)
             {
-            alert("Please Select the appropriate 'Branch' for the user!");
-            document.getElementById('cmbBranch').focus();
-            return false;
-            } 
+                if (val_bank=="<%=DDM_Constants.status_all%>")
+                {
+                    alert("Please Select the appropriate 'Bank' for the user!");
+                    document.getElementById('cmbBank').focus();
+                    return false;
+                } 
+            }
 
 
-            if(document.getElementById('cmbCoCuID')!=null)
+            if(document.getElementById('cmbMerchant')!=null)
             {
-            var sel_cocuid = document.getElementById('cmbCoCuID').value; 
+                var sel_cocuid = document.getElementById('cmbMerchant').value; 
 
-            if (sel_cocuid=="<%=DDM_Constants.status_all%>")
-            {
-            alert("Please Select the appropriate 'Corporate Customer ID' for the user!");
-            document.getElementById('cmbCoCuID').focus();
-            return false;
-            } 
+                if (sel_cocuid=="<%=DDM_Constants.status_all%>")
+                {
+                    alert("Please Select the appropriate 'Merchant' for the user!");
+                    document.getElementById('cmbMerchant').focus();
+                    return false;
+                } 
 
             }
 
 
             if(status == "<%=DDM_Constants.status_all%>" || status == null)
             {
-            alert("Select Status of the user.");
-            document.getElementById('cmbUserStatus').focus();
-            return false;
+                alert("Select Status of the user.");
+                document.getElementById('cmbUserStatus').focus();
+                return false;
             }                
 
             else if(isempty(trim(v_name)))
@@ -624,32 +631,33 @@
 
             function doSearchUser(type)
             {
-            if(type==1)
-            {
-            if(document.getElementById('cmbUserLevel')!=null)
-            {        
-            document.getElementById('cmbUserLevel').selectedIndex = 0;
-            }
+                
+                if(type == 1)
+                {
+                    if(document.getElementById('cmbUserLevel')!=null)
+                    {        
+                        document.getElementById('cmbUserLevel').selectedIndex = 0;
+                    }
 
-            if(document.getElementById('cmbBranch')!=null)
-            {
-            document.getElementById('cmbBranch').selectedIndex = 0;
-            }
+                    if(document.getElementById('cmbBank')!=null)
+                    {
+                        document.getElementById('cmbBank').selectedIndex = 0;
+                    }
 
-            if(document.getElementById('cmbCoCuID')!=null)
-            {
-            document.getElementById('cmbCoCuID').selectedIndex = 0;
-            }
+                    if(document.getElementById('cmbMerchant')!=null)
+                    {
+                        document.getElementById('cmbMerchant').selectedIndex = 0;
+                    }
 
-            if(document.getElementById('cmbUserStatus')!=null)
-            {
-            document.getElementById('cmbUserStatus').selectedIndex = 0;
-            }
-            }
+                    if(document.getElementById('cmbUserStatus')!=null)
+                    {
+                        document.getElementById('cmbUserStatus').selectedIndex = 0;
+                    }
+                }
 
-            setRequestType(false);
-            document.frmModifyUser.action="UserModification.jsp";
-            document.frmModifyUser.submit();                    
+                setRequestType(false);
+                document.frmModifyUser.action="UserModification.jsp";
+                document.frmModifyUser.submit();                    
             }
 
 
@@ -667,6 +675,7 @@
 
             function isSearchRequest(status)
             {
+                
             if(status)
             {
             document.getElementById('hdnRequestType').value = "1";
@@ -681,6 +690,13 @@
             function updateUserDetails()
             {                                   
             fieldValidation();			
+            }
+            
+            function Done()
+            {
+                document.getElementById('search_cmbUserId').selectedIndex = 0;
+                setRequestType(false);
+                doSearchUser(1);
             }
 
             function isempty(Value)
@@ -722,7 +738,7 @@
         <div class="bg"></div>
         <div class="bg bg2"></div>
         <div class="bg bg3"></div>
-        
+
         <table width="100%" style="min-width:900;min-height:600" height="100%" align="center" border="0" cellpadding="0" cellspacing="0" >
             <tr>
                 <td align="center" valign="top" class="ddm_bgRepeat_center">
@@ -753,7 +769,7 @@
                                                                                                     <td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
-                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                             <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                                 cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                             <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -833,7 +849,7 @@
                                                                                     <tr>
                                                                                         <td></td>
                                                                                         <td align="center" valign="top">
-                                                                                            <form method="post" name="frmModifyUser" id="frmModifyUser">
+                                                                                            <form method="post" name="frmModifyUser" id="frmModifyUser" action="UserModification.jsp">
 
                                                                                                 <table border="0" cellspacing="0" cellpadding="0">
                                                                                                     <tr>
@@ -843,15 +859,12 @@
                                                                                                                     <td><table border="0" cellspacing="1" cellpadding="3"  bgcolor="#FFFFFF" >
                                                                                                                             <tr>
                                                                                                                                 <td align="left" valign="middle" bgcolor="#A4B7CA"  class="ddm_tbl_header_text">User Type :</td>
-                                                                                                                                <td valign="middle" bgcolor="#E1E3EC" class="ddm_tbl_common_text"><select name="search_cmbUserLevel" id="search_cmbUserLevel" class="ddm_field_border" onChange="setRequestType(false);
-                                                                                                                                                doSearchUser(1);" onFocus="hideMessage_onFocus()" >
-
+                                                                                                                                <td valign="middle" bgcolor="#E1E3EC" class="ddm_tbl_common_text">
+                                                                                                                                    <select name="search_cmbUserLevel" id="search_cmbUserLevel" class="ddm_field_border" onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" >
                                                                                                                                         <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserLevel != null && selectedUserLevel.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
-
                                                                                                                                         <%
                                                                                                                                             for (UserLevel usrlvl : colUserLevel)
                                                                                                                                             {
-
                                                                                                                                         %>
                                                                                                                                         <option value=<%=usrlvl.getUserLevelId()%> <%=(selectedUserLevel != null && usrlvl.getUserLevelId().equals(selectedUserLevel)) ? "selected" : ""%>><%=usrlvl.getUserLevelDesc()%></option>
                                                                                                                                         <%
@@ -862,52 +875,78 @@
                                                                                                                                     <input type="hidden" name="hdnRequestType" id="hdnRequestType" value="<%=reqType%>" />                                                                                                                                </td>
                                                                                                                             </tr>
                                                                                                                             <tr>
+                                                                                                                                <td align="left" valign="middle" class="ddm_tbl_header_text">Bank : </td>
+                                                                                                                                <td valign="middle"class="ddm_tbl_common_text">
+                                                                                                                                    <select name="search_cmbBank" id="search_cmbBank" class="ddm_field_border" onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_bank_manager) || selectedUserLevel.equals(DDM_Constants.user_type_bank_user)) ? "" : "disabled"%>>
+
+                                                                                                                                        <option value="<%=DDM_Constants.status_all%>" <%=(newUserBank != null && newUserBank.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+
+
+                                                                                                                                        <%
+
+                                                                                                                                            if (colBank != null && colBank.size() > 0)
+                                                                                                                                            {
+                                                                                                                                                for (Bank bk : colBank)
+                                                                                                                                                {
+                                                                                                                                        %>
+                                                                                                                                        <option value="<%=bk.getBankCode()%>" <%=(newUserBank != null && bk.getBankCode().equals(newUserBank)) ? "selected" : ""%> >
+                                                                                                                                            <%=bk.getBankCode() + " - " + bk.getBankFullName()%>
+                                                                                                                                        </option>
+                                                                                                                                        <%
+
+                                                                                                                                                }
+                                                                                                                                            }
+
+                                                                                                                                        %>
+                                                                                                                                    </select></td>
+                                                                                                                            </tr>
+                                                                                                                            <tr>
+                                                                                                                                <td align="left" valign="middle" class="ddm_tbl_header_text">Merchant :</td>
+                                                                                                                                <td valign="middle"class="ddm_tbl_common_text">
+                                                                                                                                    <select name="search_cmbMerchant" id="search_cmbMerchant" class="ddm_field_border"  onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_merchant_su) || selectedUserLevel.equals(DDM_Constants.user_type_merchant_op)) ? "" : "disabled"%> >
+                                                                                                                                        <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserMerchant != null && selectedUserMerchant.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+                                                                                                                                        <%
+                                                                                                                                            if (colMerchant != null && colMerchant.size() > 0)
+                                                                                                                                            {
+                                                                                                                                                for (Merchant merchant : colMerchant)
+                                                                                                                                                {
+                                                                                                                                        %>
+                                                                                                                                        <option value="<%=merchant.getMerchantID()%>" <%=(selectedUserMerchant != null && merchant.getMerchantID().equals(selectedUserMerchant)) ? "selected" : ""%> ><%=merchant.getMerchantID()%> - <%=merchant.getMerchantName()%></option>
+                                                                                                                                        <%
+                                                                                                                                                }
+                                                                                                                                            }
+                                                                                                                                        %>
+                                                                                                                                    </select>
+                                                                                                                                </td>
+                                                                                                                            </tr>
+                                                                                                                            <tr>
                                                                                                                                 <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Status :</td>
-                                                                                                                                <td valign="middle" bgcolor="#E1E3EC" class="ddm_tbl_common_text"><select name="search_cmbUserStatus" id="search_cmbUserStatus" class="ddm_field_border" onChange="setRequestType(false);
-                                                                                                                                        doSearchUser(1);" onFocus="hideMessage_onFocus()">
+                                                                                                                                <td valign="middle" bgcolor="#E1E3EC" class="ddm_tbl_common_text"><select name="search_cmbUserStatus" id="search_cmbUserStatus" class="ddm_field_border" onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()">
                                                                                                                                         <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
                                                                                                                                         <option value="<%=DDM_Constants.status_active%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_active)) ? "selected" : ""%>>Active</option>                                                                                                                                        
                                                                                                                                         <option value="<%=DDM_Constants.status_expired%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_expired)) ? "selected" : ""%>>Expired</option>
-
                                                                                                                                         <option value="<%=DDM_Constants.status_deactive%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_deactive)) ? "selected" : ""%>>Inactive</option>
-
                                                                                                                                         <option value="<%=DDM_Constants.status_locked%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_locked)) ? "selected" : ""%>>Locked</option>
-
                                                                                                                                         <option value="<%=DDM_Constants.status_pending%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_pending)) ? "selected" : ""%>>Pending</option>
-
                                                                                                                                     </select></td>
                                                                                                                             </tr>
-                                                                                                                            <!--tr>
-                                                                                                                                <td align="left" valign="middle" bgcolor="#A9D1B9" class="ddm_tbl_header_text">Branch :</td>
-                                                                                                                                <td valign="middle" bgcolor="#E1ECE4"class="ddm_tbl_header_text"></td>
-                                                                                                                            </tr-->
+
                                                                                                                             <tr>
                                                                                                                                 <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">User ID :</td>
-                                                                                                                                <td valign="middle" bgcolor="#E1E3EC"class="ddm_tbl_common_text"> <select name="search_cmbUserId" class="ddm_field_border" id="search_cmbUserId" onChange="setRequestType(false);
-                                                                                                                                        doSearchUser(1);" onFocus="hideMessage_onFocus()">
-                                                                                                                                        <option value="-1" <%=(selectedUsername != null && selectedUsername.equals("-1")) ? "selected" : ""%>>-- Select User --</option>
-                                                                                                                                        <% if (col_user != null && col_user.size() > 0)
+                                                                                                                                <td valign="middle" bgcolor="#E1E3EC"class="ddm_tbl_common_text"> 
+                                                                                                                                    <select name="search_cmbUserId" class="ddm_field_border" id="search_cmbUserId" onChange="setRequestType(false);doSearchUser(2);" onFocus="hideMessage_onFocus()">
+                                                                                                                                        <option value="<%=DDM_Constants.default_web_combo_select%>" <%=(selectedUsername != null && selectedUsername.equals(DDM_Constants.default_web_combo_select)) ? "selected" : ""%>>-- Select User --</option>
+
+                                                                                                                                        <%
+                                                                                                                                            if (col_user != null && col_user.size() > 0)
                                                                                                                                             {
                                                                                                                                                 for (User u : col_user)
                                                                                                                                                 {
                                                                                                                                                     if (u != null && !(u.getUserId().equals(session_userName)))
                                                                                                                                                     {
-                                                                                                                                                        if (!session_userType.equals(DDM_Constants.user_type_ddm_helpdesk_user))
-                                                                                                                                                        {
-                                                                                                                                        %>
+                                                                                                                                        %>                                                                                                                                        
                                                                                                                                         <option value="<%=u.getUserId()%>" <%=(selectedUsername != null && u.getUserId().equals(selectedUsername)) ? "selected" : ""%> > <%=u.getUserId()%> </option>
                                                                                                                                         <%
-                                                                                                                                        }
-                                                                                                                                        else
-                                                                                                                                        {
-                                                                                                                                            if (u.getUserLevelId().equals(DDM_Constants.user_type_bank_user) || u.getUserLevelId().equals(DDM_Constants.user_type_bank_manager) || u.getUserLevelId().equals(DDM_Constants.user_type_merchant_su) || u.getUserLevelId().equals(DDM_Constants.user_type_merchant_op))
-                                                                                                                                            {
-                                                                                                                                        %>
-                                                                                                                                        <option value="<%=u.getUserId()%>" <%=(selectedUsername != null && u.getUserId().equals(selectedUsername)) ? "selected" : ""%> > <%=u.getUserId()%> </option>
-                                                                                                                                        <%
-                                                                                                                                                            }
-
-                                                                                                                                                        }
                                                                                                                                                     }
                                                                                                                                                 }
                                                                                                                                             }
@@ -937,6 +976,8 @@
                                                                                                                 <%
                                                                                                                     if (userDetails == null)
                                                                                                                     {
+                                                                                                                        if(!selectedUsername.equals(DDM_Constants.default_web_combo_select))
+                                                                                                                        {
                                                                                                                 %>
 
                                                                                                                 <tr>
@@ -946,7 +987,7 @@
                                                                                                                     <td align="center"><div id="noresultbanner" class="ddm_header_small_text">No records Available !</div></td>
                                                                                                                 </tr>
 
-                                                                                                                <%                                                                                    }
+                                                                                                                <%                                                                                    							}}
                                                                                                                 else
                                                                                                                 {
                                                                                                                 %>
@@ -1012,9 +1053,6 @@
                                                                                                                                                             <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">User Type :</td>
                                                                                                                                                             <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><%=userDetails.getUserLevelDesc()%></td>
                                                                                                                                                             <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"> <input type="hidden" name="hdnUserType" id="hdnUserType" class="ddm_success" value="<%=userDetails.getUserLevelId()%>" />
-
-
-
                                                                                                                                                                 <select name="cmbUserLevel" id="cmbUserLevel" class="ddm_field_border" onChange="doSearchUser(2)" onFocus="hideMessage_onFocus()">
                                                                                                                                                                     <option value="<%=DDM_Constants.status_all%>" <%=(newUserLevel != null && newUserLevel.equals(DDM_Constants.status_all)) ? "selected" : ""%>>--Select User Type--</option>
                                                                                                                                                                     <%
@@ -1027,34 +1065,28 @@
 
                                                                                                                                                                         }
                                                                                                                                                                     %>
-                                                                                                                                                                </select>                                                                                                                                                            </td>
+                                                                                                                                                                </select></td>
                                                                                                                                                         </tr>
 
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Bank : </td>
-                                                                                                                                                            <td colspan="2" valign="middle" bgcolor="#E1E3EC"class="ddm_tbl_common_text"><%=userDetails.getBankCode()%> - <%=userDetails.getBankFullName()%></td>
-                                                                                                                                                        </tr>
-
-                                                                                                                                                        <tr>
-                                                                                                                                                            <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Branch : </td>
-                                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><%=userDetails.getBranchCode()%> - <%=userDetails.getBranchName()%></td>
-                                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><select name="cmbBranch" id="cmbBranch" class="ddm_field_border" onFocus="hideMessage_onFocus()" >
-                                                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(newUserBranch == null || newUserBranch.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- Select Branch --</option>
-
+                                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><%=userDetails.getBankCode()%> - <%=userDetails.getBankFullName()%></td>
+                                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text">
+                                                                                                                                                                <select name="cmbBank" id="cmbBank" class="ddm_field_border" onFocus="hideMessage_onFocus()" <%=(newUserLevel.equals(DDM_Constants.user_type_bank_manager) || newUserLevel.equals(DDM_Constants.user_type_bank_user)) ? "" : "disabled"%>>
+                                                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(newUserBank == null || newUserBank.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- Select Bank --</option>
                                                                                                                                                                     <%
-                                                                                                                                                                        if (colBranch != null && colBranch.size() > 0)
+                                                                                                                                                                        if (colBank != null && colBank.size() > 0)
                                                                                                                                                                         {
-                                                                                                                                                                            for (Branch b : colBranch)
+                                                                                                                                                                            for (Bank bk : colBank)
                                                                                                                                                                             {
                                                                                                                                                                     %>
-                                                                                                                                                                    <option value="<%=b.getBranchCode()%>" <%=(newUserBranch != null && b.getBranchCode().equals(newUserBranch)) ? "selected" : ""%>><%=b.getBranchCode() + " - " + b.getBranchName()%>                                                                                                                            </option>
-                                                                                                                                                                    <% }%> 
+                                                                                                                                                                    <option value="<%=bk.getBankCode()%>" <%=(newUserBank != null && bk.getBankCode().equals(newUserBank)) ? "selected" : ""%>><%=bk.getBankCode() + " - " + bk.getBankFullName()%> </option>
+                                                                                                                                                                    <%
+                                                                                                                                                                            }
+                                                                                                                                                                        }
+                                                                                                                                                                    %>
                                                                                                                                                                 </select>
-                                                                                                                                                                <% }
-                                                                                                                                                                else
-                                                                                                                                                                {%>
-                                                                                                                                                                <span class="ddm_error">No branch details available.</span>
-                                                                                                                                                                <%}%></td>
+                                                                                                                                                            </td>
                                                                                                                                                         </tr>
                                                                                                                                                         <%
                                                                                                                                                             if (newUserLevel != null && (newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_op)))
@@ -1063,44 +1095,37 @@
                                                                                                                                                         %>
 
                                                                                                                                                         <tr>
-                                                                                                                                                            <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Corporate Customer ID :</td>
+                                                                                                                                                            <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Merchant :</td>
                                                                                                                                                             <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><%=userDetails.getCoCuId()%> - <%=userDetails.getCoCuName()%></td>
                                                                                                                                                             <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><%                                                                                                                                          try
                                                                                                                                                                 {
                                                                                                                                                                 %>
-                                                                                                                                                                <select name="cmbCoCuID" id="cmbCoCuID" class="ddm_field_border" onChange="doSearchUser(2)" onFocus="hideMessage_onFocus()" >
+                                                                                                                                                                <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border" onChange="doSearchUser(2)" onFocus="hideMessage_onFocus()" >
                                                                                                                                                                     <%
-                                                                                                                                                                        if (newCoCuId == null || (newCoCuId != null && newCoCuId.equals(DDM_Constants.status_all)))
+                                                                                                                                                                        if (newMerchantId == null || (newMerchantId != null && newMerchantId.equals(DDM_Constants.status_all)))
                                                                                                                                                                         {
                                                                                                                                                                     %>
-                                                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" selected="selected">-- Select Corporate Customer ID --</option>
+                                                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" selected="selected">-- Select Merchant --</option>
                                                                                                                                                                     <%                                                                                                                        }
                                                                                                                                                                     else
                                                                                                                                                                     {
                                                                                                                                                                     %>
-                                                                                                                                                                    <option value="<%=DDM_Constants.status_all%>">-- Select Corporate Customer ID --</option>
+                                                                                                                                                                    <option value="<%=DDM_Constants.default_web_combo_select%>" <%=(newMerchantId != null && newMerchantId.equals(DDM_Constants.default_web_combo_select)) ? "selected" : ""%>>-- Select Merchant --</option>
                                                                                                                                                                     <%                                                                                                                                                            }
                                                                                                                                                                     %>
                                                                                                                                                                     <%
-                                                                                                                                                                        if (colCoCu != null && colCoCu.size() > 0)
+                                                                                                                                                                        if (colMerchant != null && colMerchant.size() > 0)
                                                                                                                                                                         {
-                                                                                                                                                                            for (CorporateCustomer cocu : colCoCu)
+                                                                                                                                                                            for (Merchant merchant : colMerchant)
                                                                                                                                                                             {
 
-                                                                                                                                                                                if (newCoCuId != null && cocu.getCoCuID().equals(newCoCuId))
-                                                                                                                                                                                {
-
 
                                                                                                                                                                     %>
-                                                                                                                                                                    <option value="<%=cocu.getCoCuID()%>" selected > <%=cocu.getCoCuID() + " - " + cocu.getCoCuName()%></option>
+                                                                                                                                                                    <option value="<%=merchant.getMerchantID()%>" <%=(newMerchantId != null && merchant.getMerchantID().equals(newMerchantId)) ? "selected" : ""%> ><%=merchant.getMerchantID()%> - <%=merchant.getMerchantName()%></option>
+
+
                                                                                                                                                                     <%
-                                                                                                                                                                    }
-                                                                                                                                                                    else
-                                                                                                                                                                    {
-                                                                                                                                                                    %>
-                                                                                                                                                                    <option value="<%=cocu.getCoCuID()%>" > <%=cocu.getCoCuID() + " - " + cocu.getCoCuName()%></option>
-                                                                                                                                                                    <%
-                                                                                                                                                                            }
+
                                                                                                                                                                         }
                                                                                                                                                                     %>
                                                                                                                                                                 </select>
@@ -1109,7 +1134,7 @@
                                                                                                                                                                 else
                                                                                                                                                                 {
                                                                                                                                                                 %>
-                                                                                                                                                                <span class="ddm_error">No corporate customer details available.</span>
+                                                                                                                                                                <span class="ddm_error">No Merchant details available.</span>
                                                                                                                                                                 <%}
                                                                                                                                                                     }
                                                                                                                                                                     catch (Exception e)
@@ -1190,14 +1215,14 @@
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Remarks :</td>
                                                                                                                                                             <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><%=userDetails.getRemarks() != null ? userDetails.getRemarks() : "N/A"%></td>
-                                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><textarea name="txtaRemarks" id="txtaRemarks" rows="3" cols="60" onFocus="hideMessage_onFocus()" class="ddm_field_border"><%=(newUserRemarks != null) ? newUserRemarks : ""%></textarea></td>
+                                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text"><textarea name="txtaRemarks" id="txtaRemarks" rows="3" cols="60" onFocus="hideMessage_onFocus()" class="ddm_field_border"><%=(newRemarks != null) ? newRemarks : ""%></textarea></td>
                                                                                                                                                         </tr>
                                                                                                                                                         <tr>
                                                                                                                                                             <td height="35" colspan="3" align="right" valign="middle" bgcolor="#CDCDCD" class="ddm_tbl_footer_text">                                                                                                                      <table border="0" cellpadding="0" cellspacing="0">
                                                                                                                                                                     <tr>
-                                                                                                                                                                        <td><input type="button" value="Update" name="btnUpdate" id="btnUpdate" class="ddm_custom_button" onClick="updateUserDetails()" <%=((reqType != null && reqType.equals("1")) && result) ? "disabled" : ""%>/>                             </td>
+                                                                                                                                                                        <td><input type="button" value="&nbsp;&nbsp; Update &nbsp;&nbsp;" name="btnUpdate" id="btnUpdate" class="ddm_custom_button" onClick="updateUserDetails()" <%=((reqType != null && reqType.equals("1")) && result) ? "disabled" : ""%>/></td>
                                                                                                                                                                         <td width="5"><input type="hidden" name="hdnReq" id="hdnReq" value="<%=reqType%>" /></td>
-                                                                                                                                                                        <td><input name="btnClear" id="btnClear" value="Reset" type="button" onClick="resetRecords()" class="ddm_custom_button" />                                                            </td></tr>
+                                                                                                                                                                        <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; <%=((reqType != null && reqType.equals("1")) && result) ? "Done" : "Reset"%>  &nbsp;&nbsp;" type="button" onClick="<%=((reqType != null && reqType.equals("1")) && result) ? "Done()" : "resetRecords()"%>" class="ddm_custom_button" />                                                            </td></tr>
                                                                                                                                                                 </table></td>
                                                                                                                                                         </tr>
                                                                                                                                                     </table>

@@ -87,6 +87,10 @@ public class UserUtil
             user.setBankFullName(rs.getString("BankFullName"));
             user.setBankShortName(rs.getString("BankShortName"));
 
+            user.setBankCodeModify(rs.getString("BankCode_Modify"));
+            user.setBankFullNameModify(rs.getString("BankFullName_Modify"));
+            user.setBankShortNameModify(rs.getString("BankShortName_Modify"));
+
             user.setBranchCode(rs.getString("BranchCode"));
             user.setBranchName(rs.getString("BranchName"));
 
@@ -213,6 +217,10 @@ public class UserUtil
             user.setBankCode(rs.getString("BankCode"));
             user.setBankFullName(rs.getString("BankFullName"));
             user.setBankShortName(rs.getString("BankShortName"));
+
+            user.setBankCodeModify(rs.getString("BankCode_Modify"));
+            user.setBankFullNameModify(rs.getString("BankFullName_Modify"));
+            user.setBankShortNameModify(rs.getString("BankShortName_Modify"));
 
             user.setBranchCode(rs.getString("BranchCode"));
             user.setBranchName(rs.getString("BranchName"));

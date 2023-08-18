@@ -8,7 +8,6 @@
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate"  errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.window.*" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.Log" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.LogDAO" errorPage="../../../error.jsp"%>
 
@@ -387,7 +386,7 @@
                                                                                                     <td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
-                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                             <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                                 cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                             <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -575,19 +574,21 @@
                                                                                                                                             <tr>
                                                                                                                                                 <td>
 
-                                                                                                                                                    <table border="0" cellspacing="1" cellpadding="3"  bgcolor="#FFFFFF">
+                                                                                                                                                    <table border="0" cellspacing="1" cellpadding="5"  bgcolor="#FFFFFF">
+                                                                                                                                                        <tr>
+                                                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">
+                                                                                                                                                                User ID :        </td>
+
+                                                                                                                                                            <td colspan="2" valign="middle"class="ddm_tbl_common_text_bold"><%=userDetails.getUserId()%><input type="hidden" name="hdnUsername" id="hdnUsername" value="<%=userDetails.getUserId()%>" /></td>
+                                                                                                                                                        </tr>
+                                                                                                                                                        
+                                                                                                                                                        
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text_horizontal">&nbsp;</td>
                                                                                                                                                             <td align="center" valign="middle"class="ddm_tbl_header_text_horizontal">Current Value</td>
                                                                                                                                                             <td align="center" valign="middle"class="ddm_tbl_header_text_horizontal">New Value</td>
                                                                                                                                                         </tr>
-                                                                                                                                                        <tr>
-                                                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">
-                                                                                                                                                                User ID :        </td>
-
-                                                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><%=userDetails.getUserId()%><input type="hidden" name="hdnUsername" id="hdnUsername" class="ddm_success" value="<%=userDetails.getUserId()%>" /></td>
-                                                                                                                                                            <td valign="middle"class="ddm_tbl_common_text">&nbsp;</td>
-                                                                                                                                                        </tr>
+                                                                                                                                                        
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text">User Type :</td>
                                                                                                                                                             <td valign="middle" class="ddm_tbl_common_text"><%=userDetails.getUserLevelDesc()%></td>
@@ -597,7 +598,8 @@
 
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text">Bank : </td>
-                                                                                                                                                            <td colspan="2" valign="middle" class="ddm_tbl_common_text"><%=userDetails.getBankCode()%> - <%=userDetails.getBankFullName()%></td>
+                                                                                                                                                            <td valign="middle" class="ddm_tbl_common_text"><%=userDetails.getBankCode()%> - <%=userDetails.getBankFullName()%></td>
+                                                                                                                                                            <td valign="middle" class="ddm_tbl_common_text"><%=userDetails.getBankCodeModify() %> - <%=userDetails.getBankFullNameModify() %></td>
                                                                                                                                                         </tr>
                                                                                                                                                         <tr>
                                                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text">Branch : </td>
@@ -664,7 +666,7 @@
                                                                                                                                                         <tr>
                                                                                                                                                             <td height="35" colspan="3" align="right" valign="middle" bgcolor="#CDCDCD" class="ddm_tbl_footer_text">                                                                                                                      <table border="0" cellpadding="0" cellspacing="0">
                                                                                                                                                                     <tr>
-                                                                                                                                                                        <td><input type="button" value="&nbsp;&nbsp; Authorize &nbsp;&nbsp;" name="btnUpdate" id="btnUpdate" class="ddm_custom_button" onClick="updateUserDetails()" <%=((reqType != null && reqType.equals("1")) && result) ? "disabled" : ""%>/>                             </td>
+                                                                                                                                                                      <td><input type="button" value="&nbsp;&nbsp; Authorize &nbsp;&nbsp;" name="btnUpdate" id="btnUpdate" class="ddm_custom_button" onClick="updateUserDetails()" <%=((reqType != null && reqType.equals("1")) && result) ? "disabled" : ""%>/></td>
                                                                                                                                                                         <td width="5"><input type="hidden" name="hdnReq" id="hdnReq" value="<%=reqType%>" /></td>
                                                                                                                                                                         <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; <%=((reqType != null && reqType.equals("1")) && result) ? "Done" : "Cancel"%> &nbsp;&nbsp;" type="button" onClick="<%=((reqType != null && reqType.equals("1")) && result) ? "Cancel()" : "Cancel()"%>" class="ddm_custom_button" />                                                            </td></tr>
                                                                                                                                                                 </table></td>

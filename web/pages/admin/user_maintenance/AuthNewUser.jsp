@@ -8,7 +8,6 @@
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate"  errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.window.*" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.Log" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.LogDAO" errorPage="../../../error.jsp"%>
 
@@ -389,7 +388,7 @@
                                                                                                     <td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
-                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                             <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                                 cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                             <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -649,9 +648,10 @@
                                                                                                                                                         <tr>
                                                                                                                                                             <td height="35" colspan="2" align="right" valign="middle" class="ddm_tbl_footer_text">                                                                                                                      <table border="0" cellpadding="0" cellspacing="0">
                                                                                                                                                                     <tr>
-                                                                                                                                                                        <td><input type="button" value="Authorize" name="btnUpdate" id="btnUpdate" class="ddm_custom_button" onClick="updateUserDetails()" <%=((reqType != null && reqType.equals("1")) && result) ? "disabled" : ""%>/>                             </td>
+                                                                                                                                                                      <td><input type="button" value="&nbsp;&nbsp; Authorize &nbsp;&nbsp;" name="btnUpdate" id="btnUpdate" class="ddm_custom_button" onClick="updateUserDetails()" <%=((reqType != null && reqType.equals("1")) && result) ? "disabled" : ""%>/></td>
                                                                                                                                                                         <td width="5"><input type="hidden" name="hdnReq" id="hdnReq" value="<%=reqType%>" /></td>
-                                                                                                                                                                        <td><input name="btnClear" id="btnClear" value="<%=((reqType != null && reqType.equals("1")) && result) ? "Done" : "Cancel"%>" type="button" onClick="<%=((reqType != null && reqType.equals("1")) && result) ? "Cancel()" : "Cancel()"%>" class="ddm_custom_button" />                                                            </td></tr>
+                                                                                                                                                                      <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; <%=((reqType != null && reqType.equals("1")) && result) ? "Done" : "Cancel"%> &nbsp;&nbsp;" type="button" onClick="<%=((reqType != null && reqType.equals("1")) && result) ? "Cancel()" : "Cancel()"%>" class="ddm_custom_button" /></td>
+                                                                                                                                                                    </tr>
                                                                                                                                                                 </table></td>
                                                                                                                                                         </tr>
                                                                                                                                                     </table>

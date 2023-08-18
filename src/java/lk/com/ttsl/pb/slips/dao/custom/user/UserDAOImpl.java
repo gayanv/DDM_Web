@@ -13,7 +13,6 @@ import java.util.Collection;
 import lk.com.ttsl.pb.slips.common.utils.DBUtil;
 import lk.com.ttsl.pb.slips.common.utils.DDM_Constants;
 import lk.com.ttsl.pb.slips.dao.DAOFactory;
-import lk.com.ttsl.pb.slips.services.email.SendHTMLEmail;
 import lk.com.ttsl.pb.slips.services.utils.RandomPasswordGenerator;
 
 /**
@@ -69,7 +68,6 @@ public class UserDAOImpl implements UserDAO
             {
                 if (DAOFactory.getUserDAO().isAuthorized(new User(usr.getUserId(), curPwd, DDM_Constants.status_all)))
                 {
-
                     con = DBUtil.getInstance().getConnection();
                     con.setAutoCommit(false);
 
@@ -863,12 +861,13 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("usrlvlm.UserLevelDesc as UserLevelDesc_Modify, ");
 
             sbQuery.append("usr.Bank as BankCode, ");
-            sbQuery.append("bank.ShortName as BankShortName, ");
-            sbQuery.append("bank.FullName as BankFullName, ");
+            sbQuery.append("bk.ShortName as BankShortName, ");
+            sbQuery.append("bk.FullName as BankFullName, ");
 
-//            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
-//            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
-//            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
+            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
+            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+
             sbQuery.append("usr.Branch as BranchCode, ");
             sbQuery.append("br.BranchName, ");
 
@@ -922,7 +921,10 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("(IF(usr.UserId=?, ?, ?) - DATEDIFF(now(), usr.LastPasswordResetDate)) as MinPwdValidDays FROM ");
 
             sbQuery.append(DDM_Constants.tbl_user + " usr, ");
-            sbQuery.append(DDM_Constants.tbl_bank + " bank, ");
+
+            sbQuery.append(DDM_Constants.tbl_bank + " bk, ");
+            sbQuery.append(DDM_Constants.tbl_bank + " bkm, ");
+
             sbQuery.append(DDM_Constants.tbl_branch + " br, ");
             sbQuery.append(DDM_Constants.tbl_branch + " brm, ");
 
@@ -931,13 +933,14 @@ public class UserDAOImpl implements UserDAO
 
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlevel, ");
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlvlm ");
-            sbQuery.append("WHERE usr.Bank = bank.BankCode ");
+            sbQuery.append("WHERE usr.Bank = bk.BankCode ");
+            sbQuery.append("AND usr.Bank_Modify = bkm.BankCode ");
 
             sbQuery.append("AND usr.Branch = br.BranchCode ");
             sbQuery.append("AND usr.Bank = br.BankCode ");
 
-            sbQuery.append("AND IFNULL(usr.Branch_Modify, usr.Branch) = brm.BranchCode ");
-            sbQuery.append("AND usr.Bank = brm.BankCode ");
+            sbQuery.append("AND usr.Branch_Modify = brm.BranchCode ");
+            sbQuery.append("AND usr.Bank_Modify = brm.BankCode ");
 
             sbQuery.append("AND IFNULL(usr.MerchantID, '" + DDM_Constants.default_coporate_customer_id + "') = cocu.MerchantID ");
             sbQuery.append("AND IFNULL(usr.MerchantID_Modify, '" + DDM_Constants.default_coporate_customer_id + "') = cocum.MerchantID ");
@@ -962,7 +965,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iSystemUserPwdExpireDuration = Integer.parseInt(strSystemUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iSystemUserPwdExpireDuration = DDM_Constants.system_pwd_expire_duration;
                 }
@@ -980,7 +983,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iUserPwdExpireDuration = Integer.parseInt(strUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iUserPwdExpireDuration = DDM_Constants.user_pwd_expire_duration;
                 }
@@ -1063,12 +1066,13 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("usrlvlm.UserLevelDesc as UserLevelDesc_Modify, ");
 
             sbQuery.append("usr.Bank as BankCode, ");
-            sbQuery.append("bank.ShortName as BankShortName, ");
-            sbQuery.append("bank.FullName as BankFullName, ");
+            sbQuery.append("bk.ShortName as BankShortName, ");
+            sbQuery.append("bk.FullName as BankFullName, ");
 
-//            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
-//            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
-//            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
+            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
+            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+
             sbQuery.append("usr.Branch as BranchCode, ");
             sbQuery.append("br.BranchName, ");
 
@@ -1122,7 +1126,10 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("(IF(usr.UserId=?, ?, ?) - DATEDIFF(now(), LastPasswordResetDate)) as MinPwdValidDays FROM ");
 
             sbQuery.append(DDM_Constants.tbl_user + " usr, ");
-            sbQuery.append(DDM_Constants.tbl_bank + " bank, ");
+
+            sbQuery.append(DDM_Constants.tbl_bank + " bk, ");
+            sbQuery.append(DDM_Constants.tbl_bank + " bkm, ");
+
             sbQuery.append(DDM_Constants.tbl_branch + " br, ");
             sbQuery.append(DDM_Constants.tbl_branch + " brm, ");
 
@@ -1131,13 +1138,14 @@ public class UserDAOImpl implements UserDAO
 
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlevel, ");
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlvlm ");
-            sbQuery.append("WHERE usr.Bank = bank.BankCode ");
+            sbQuery.append("WHERE usr.Bank = bk.BankCode ");
+            sbQuery.append("AND usr.Bank_Modify = bkm.BankCode ");
 
             sbQuery.append("AND usr.Branch = br.BranchCode ");
             sbQuery.append("AND usr.Bank = br.BankCode ");
 
-            sbQuery.append("AND IFNULL(usr.Branch_Modify, usr.Branch) = brm.BranchCode ");
-            sbQuery.append("AND usr.Bank = brm.BankCode ");
+            sbQuery.append("AND usr.Branch_Modify = brm.BranchCode ");
+            sbQuery.append("AND usr.Bank_Modify = brm.BankCode ");
 
             sbQuery.append("AND IFNULL(usr.MerchantID, '" + DDM_Constants.default_coporate_customer_id + "') = cocu.MerchantID ");
             sbQuery.append("AND IFNULL(usr.MerchantID_Modify, '" + DDM_Constants.default_coporate_customer_id + "') = cocum.MerchantID ");
@@ -1254,12 +1262,13 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("usrlvlm.UserLevelDesc as UserLevelDesc_Modify, ");
 
             sbQuery.append("usr.Bank as BankCode, ");
-            sbQuery.append("bank.ShortName as BankShortName, ");
-            sbQuery.append("bank.FullName as BankFullName, ");
+            sbQuery.append("bk.ShortName as BankShortName, ");
+            sbQuery.append("bk.FullName as BankFullName, ");
 
-//            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
-//            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
-//            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
+            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
+            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+
             sbQuery.append("usr.Branch as BranchCode, ");
             sbQuery.append("br.BranchName, ");
 
@@ -1313,7 +1322,10 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("(IF(usr.UserId=?, ?, ?) - DATEDIFF(now(), usr.LastPasswordResetDate)) as MinPwdValidDays FROM ");
 
             sbQuery.append(DDM_Constants.tbl_user + " usr, ");
-            sbQuery.append(DDM_Constants.tbl_bank + " bank, ");
+
+            sbQuery.append(DDM_Constants.tbl_bank + " bk, ");
+            sbQuery.append(DDM_Constants.tbl_bank + " bkm, ");
+
             sbQuery.append(DDM_Constants.tbl_branch + " br, ");
             sbQuery.append(DDM_Constants.tbl_branch + " brm, ");
 
@@ -1322,13 +1334,16 @@ public class UserDAOImpl implements UserDAO
 
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlevel, ");
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlvlm ");
-            sbQuery.append("WHERE usr.Bank = bank.BankCode ");
+            sbQuery.append("WHERE usr.Bank = bk.BankCode ");
+            sbQuery.append("AND usr.Bank_Modify = bkm.BankCode ");
+
+            sbQuery.append("AND usr.Branch = br.BranchCode ");
 
             sbQuery.append("AND usr.Branch = br.BranchCode ");
             sbQuery.append("AND usr.Bank = br.BankCode ");
 
-            sbQuery.append("AND IFNULL(usr.Branch_Modify, usr.Branch) = brm.BranchCode ");
-            sbQuery.append("AND usr.Bank = brm.BankCode ");
+            sbQuery.append("AND usr.Branch_Modify = brm.BranchCode ");
+            sbQuery.append("AND usr.Bank_Modify = brm.BankCode ");
 
             sbQuery.append("AND IFNULL(usr.MerchantID, '" + DDM_Constants.default_coporate_customer_id + "') = cocu.MerchantID ");
             sbQuery.append("AND IFNULL(usr.MerchantID_Modify, '" + DDM_Constants.default_coporate_customer_id + "') = cocum.MerchantID ");
@@ -1370,7 +1385,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iUserPwdExpireDuration = Integer.parseInt(strUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iUserPwdExpireDuration = DDM_Constants.user_pwd_expire_duration;
                 }
@@ -1451,12 +1466,13 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("usrlvlm.UserLevelDesc as UserLevelDesc_Modify, ");
 
             sbQuery.append("usr.Bank as BankCode, ");
-            sbQuery.append("bank.ShortName as BankShortName, ");
-            sbQuery.append("bank.FullName as BankFullName, ");
+            sbQuery.append("bk.ShortName as BankShortName, ");
+            sbQuery.append("bk.FullName as BankFullName, ");
 
-//            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
-//            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
-//            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
+            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
+            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+
             sbQuery.append("usr.Branch as BranchCode, ");
             sbQuery.append("br.BranchName, ");
 
@@ -1510,7 +1526,10 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("(IF(usr.UserId=?, ?, ?) - DATEDIFF(now(), usr.LastPasswordResetDate)) as MinPwdValidDays FROM ");
 
             sbQuery.append(DDM_Constants.tbl_user + " usr, ");
-            sbQuery.append(DDM_Constants.tbl_bank + " bank, ");
+
+            sbQuery.append(DDM_Constants.tbl_bank + " bk, ");
+            sbQuery.append(DDM_Constants.tbl_bank + " bkm, ");
+
             sbQuery.append(DDM_Constants.tbl_branch + " br, ");
             sbQuery.append(DDM_Constants.tbl_branch + " brm, ");
 
@@ -1519,13 +1538,15 @@ public class UserDAOImpl implements UserDAO
 
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlevel, ");
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlvlm ");
-            sbQuery.append("WHERE usr.Bank = bank.BankCode ");
+
+            sbQuery.append("WHERE usr.Bank = bk.BankCode ");
+            sbQuery.append("AND usr.Bank_Modify = bkm.BankCode ");
 
             sbQuery.append("AND usr.Branch = br.BranchCode ");
             sbQuery.append("AND usr.Bank = br.BankCode ");
 
-            sbQuery.append("AND IFNULL(usr.Branch_Modify, usr.Branch) = brm.BranchCode ");
-            sbQuery.append("AND usr.Bank = brm.BankCode ");
+            sbQuery.append("AND usr.Branch_Modify = brm.BranchCode ");
+            sbQuery.append("AND usr.Bank_Modify = brm.BankCode ");
 
             sbQuery.append("AND IFNULL(usr.MerchantID, '" + DDM_Constants.default_coporate_customer_id + "') = cocu.MerchantID ");
             sbQuery.append("AND IFNULL(usr.MerchantID_Modify, '" + DDM_Constants.default_coporate_customer_id + "') = cocum.MerchantID ");
@@ -1561,7 +1582,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iSystemUserPwdExpireDuration = Integer.parseInt(strSystemUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iSystemUserPwdExpireDuration = DDM_Constants.system_pwd_expire_duration;
                 }
@@ -1579,7 +1600,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iUserPwdExpireDuration = Integer.parseInt(strUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iUserPwdExpireDuration = DDM_Constants.user_pwd_expire_duration;
                 }
@@ -1855,6 +1876,12 @@ public class UserDAOImpl implements UserDAO
             return col;
         }
 
+        if (usr.getCoCuId() == null)
+        {
+            System.out.println("WARNING : Null usr.getCoCuId()  parameter.");
+            return col;
+        }
+
         if (statusNotIn == null)
         {
             System.out.println("WARNING : Null statusNotIn parameter.");
@@ -1871,7 +1898,7 @@ public class UserDAOImpl implements UserDAO
             int val_userStatus = 2;
             int val_userBank = 3;
             int val_userBranch = 4;
-            //int val_statusNotIn = 5;
+            int val_userMerchant = 5;
 
             StringBuilder sbQuery = new StringBuilder();
 
@@ -1900,6 +1927,11 @@ public class UserDAOImpl implements UserDAO
                 sbQuery.append("and usr.Branch = ? ");
                 vt.add(val_userBranch);
             }
+            if (!usr.getCoCuId().equals(DDM_Constants.status_all))
+            {
+                sbQuery.append("and usr.MerchantID = ? ");
+                vt.add(val_userMerchant);
+            }
 
             if (!statusNotIn.equals(DDM_Constants.status_all))
             {
@@ -1909,29 +1941,34 @@ public class UserDAOImpl implements UserDAO
 
             pstm = con.prepareStatement(sbQuery.toString());
 
-            //System.out.println("UserDAOImpl:getUsers(sbQuery)----> " + sbQuery.toString());
+            System.out.println("UserDAOImpl:getUsers(User usr, String statusNotIn)----> " + sbQuery.toString());
             pstm.setString(1, DDM_Constants.param_id_user_system);
 
             int i = 2;
 
             for (int val_item : vt)
             {
-                if (val_item == 1)
+                if (val_item == val_userLevel)
                 {
                     pstm.setString(i, usr.getUserLevelId());
                     i++;
                 }
-                if (val_item == 2)
+                if (val_item == val_userStatus)
                 {
                     pstm.setString(i, usr.getStatus());
                     i++;
                 }
-                if (val_item == 3)
+                if (val_item == val_userBank)
                 {
                     pstm.setString(i, usr.getBankCode());
                     i++;
                 }
-                if (val_item == 4)
+                if (val_item == val_userBranch)
+                {
+                    pstm.setString(i, usr.getBranchCode());
+                    i++;
+                }
+                if (val_item == val_userMerchant)
                 {
                     pstm.setString(i, usr.getBranchCode());
                     i++;
@@ -1949,12 +1986,7 @@ public class UserDAOImpl implements UserDAO
             }
 
         }
-        catch (SQLException e)
-        {
-            msg = e.getMessage();
-            System.out.println(e.getMessage());
-        }
-        catch (ClassNotFoundException e)
+        catch (SQLException | ClassNotFoundException e)
         {
             msg = e.getMessage();
             System.out.println(e.getMessage());
@@ -2005,7 +2037,7 @@ public class UserDAOImpl implements UserDAO
                 invalidPwdMaxWaitTime = 300;
             }
         }
-        catch (Exception e)
+        catch (NumberFormatException e)
         {
             invalidPwdMaxWaitTime = 300;
             System.out.println("Exception====>" + e.getMessage());
@@ -2697,16 +2729,11 @@ public class UserDAOImpl implements UserDAO
             {
                 con.commit();
                 query_status = true;
-                
+
                 //String finalURL = commonURL;
-
-                    //finalURL = "<a href=\"" + finalURL + "\" title=\"Login To LankaSign RA Automation System\">Login To LankaSign RA Automation System</a>";
-
-                    // Send email with new default userId and password to registration applied user 
-                    
-                        //new SendHTMLEmail().sendEmailForNewRegRequest(usr.getEmail(), "Alert - LankaSign RA Automation System Login!", "Dear " + usr.getName() + ", <br/><br/> You have successfuly added to the <b> LankaPay Direct Debit Mandate Exchange System </b>.<br/>In order to view the status of the new '" + categoryDisplayName + "' registration request, please click on the below link,", "<br/><br/>" + finalURL + "<br/><br/>Use below default username and password for login to the system.<br/><br/><b>Username - <b>" + defaultUserId + "<br/><b>Password - <b>" + defaultPassword + " <br/><br/>Thank You!");
-                    
-                    
+                //finalURL = "<a href=\"" + finalURL + "\" title=\"Login To LankaSign RA Automation System\">Login To LankaSign RA Automation System</a>";
+                // Send email with new default userId and password to registration applied user 
+                //new SendHTMLEmail().sendEmailForNewRegRequest(usr.getEmail(), "Alert - LankaSign RA Automation System Login!", "Dear " + usr.getName() + ", <br/><br/> You have successfuly added to the <b> LankaPay Direct Debit Mandate Exchange System </b>.<br/>In order to view the status of the new '" + categoryDisplayName + "' registration request, please click on the below link,", "<br/><br/>" + finalURL + "<br/><br/>Use below default username and password for login to the system.<br/><br/><b>Username - <b>" + defaultUserId + "<br/><b>Password - <b>" + defaultPassword + " <br/><br/>Thank You!");
             }
             else
             {
@@ -2770,12 +2797,13 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("usrlvlm.UserLevelDesc as UserLevelDesc_Modify, ");
 
             sbQuery.append("usr.Bank as BankCode, ");
-            sbQuery.append("bank.ShortName as BankShortName, ");
-            sbQuery.append("bank.FullName as BankFullName, ");
+            sbQuery.append("bk.ShortName as BankShortName, ");
+            sbQuery.append("bk.FullName as BankFullName, ");
 
-//            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
-//            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
-//            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
+            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
+            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+
             sbQuery.append("usr.Branch as BranchCode, ");
             sbQuery.append("br.BranchName, ");
 
@@ -2829,7 +2857,10 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("(IF(usr.UserId=?, ?, ?) - DATEDIFF(now(), usr.LastPasswordResetDate)) as MinPwdValidDays FROM ");
 
             sbQuery.append(DDM_Constants.tbl_user + " usr, ");
-            sbQuery.append(DDM_Constants.tbl_bank + " bank, ");
+
+            sbQuery.append(DDM_Constants.tbl_bank + " bk, ");
+            sbQuery.append(DDM_Constants.tbl_bank + " bkm, ");
+
             sbQuery.append(DDM_Constants.tbl_branch + " br, ");
             sbQuery.append(DDM_Constants.tbl_branch + " brm, ");
 
@@ -2838,13 +2869,15 @@ public class UserDAOImpl implements UserDAO
 
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlevel, ");
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlvlm ");
-            sbQuery.append("WHERE usr.Bank = bank.BankCode ");
+
+            sbQuery.append("WHERE usr.Bank = bk.BankCode ");
+            sbQuery.append("AND usr.Bank_Modify = bkm.BankCode ");
 
             sbQuery.append("AND usr.Branch = br.BranchCode ");
             sbQuery.append("AND usr.Bank = br.BankCode ");
 
-            sbQuery.append("AND IFNULL(usr.Branch_Modify, usr.Branch) = brm.BranchCode ");
-            sbQuery.append("AND usr.Bank = brm.BankCode ");
+            sbQuery.append("AND usr.Branch_Modify = brm.BranchCode ");
+            sbQuery.append("AND usr.Bank_Modify = brm.BankCode ");
 
             sbQuery.append("AND IFNULL(usr.MerchantID, '" + DDM_Constants.default_coporate_customer_id + "') = cocu.MerchantID ");
             sbQuery.append("AND IFNULL(usr.MerchantID_Modify, '" + DDM_Constants.default_coporate_customer_id + "') = cocum.MerchantID ");
@@ -2873,7 +2906,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iSystemUserPwdExpireDuration = Integer.parseInt(strSystemUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iSystemUserPwdExpireDuration = DDM_Constants.system_pwd_expire_duration;
                 }
@@ -2891,7 +2924,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iUserPwdExpireDuration = Integer.parseInt(strUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iUserPwdExpireDuration = DDM_Constants.user_pwd_expire_duration;
                 }
@@ -2922,12 +2955,7 @@ public class UserDAOImpl implements UserDAO
             }
 
         }
-        catch (SQLException e)
-        {
-            msg = e.getMessage();
-            System.out.println(e.getMessage());
-        }
-        catch (ClassNotFoundException e)
+        catch (SQLException | ClassNotFoundException e)
         {
             msg = e.getMessage();
             System.out.println(e.getMessage());
@@ -2997,12 +3025,7 @@ public class UserDAOImpl implements UserDAO
             }
 
         }
-        catch (SQLException ex)
-        {
-            msg = DDM_Constants.msg_error_while_processing;
-            System.out.println(ex.getMessage());
-        }
-        catch (ClassNotFoundException ex)
+        catch (SQLException | ClassNotFoundException ex)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(ex.getMessage());
@@ -3285,12 +3308,13 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("usrlvlm.UserLevelDesc as UserLevelDesc_Modify, ");
 
             sbQuery.append("usr.Bank as BankCode, ");
-            sbQuery.append("bank.ShortName as BankShortName, ");
-            sbQuery.append("bank.FullName as BankFullName, ");
+            sbQuery.append("bk.ShortName as BankShortName, ");
+            sbQuery.append("bk.FullName as BankFullName, ");
 
-//            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
-//            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
-//            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+            sbQuery.append("usr.Bank_Modify as BankCode_Modify, ");
+            sbQuery.append("bkm.ShortName as BankShortName_Modify, ");
+            sbQuery.append("bkm.FullName as BankFullName_Modify, ");
+
             sbQuery.append("usr.Branch as BranchCode, ");
             sbQuery.append("br.BranchName, ");
 
@@ -3344,7 +3368,10 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("(IF(usr.UserId=?, ?, ?) - DATEDIFF(now(), usr.LastPasswordResetDate)) as MinPwdValidDays FROM ");
 
             sbQuery.append(DDM_Constants.tbl_user + " usr, ");
-            sbQuery.append(DDM_Constants.tbl_bank + " bank, ");
+
+            sbQuery.append(DDM_Constants.tbl_bank + " bk, ");
+            sbQuery.append(DDM_Constants.tbl_bank + " bkm, ");
+
             sbQuery.append(DDM_Constants.tbl_branch + " br, ");
             sbQuery.append(DDM_Constants.tbl_branch + " brm, ");
 
@@ -3353,13 +3380,15 @@ public class UserDAOImpl implements UserDAO
 
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlevel, ");
             sbQuery.append(DDM_Constants.tbl_userlevel + " usrlvlm ");
-            sbQuery.append("WHERE usr.Bank = bank.BankCode ");
+
+            sbQuery.append("WHERE usr.Bank = bk.BankCode ");
+            sbQuery.append("AND usr.Bank_Modify = bkm.BankCode ");
 
             sbQuery.append("AND usr.Branch = br.BranchCode ");
             sbQuery.append("AND usr.Bank = br.BankCode ");
 
-            sbQuery.append("AND IFNULL(usr.Branch_Modify, usr.Branch) = brm.BranchCode ");
-            sbQuery.append("AND usr.Bank = brm.BankCode ");
+            sbQuery.append("AND usr.Branch_Modify = brm.BranchCode ");
+            sbQuery.append("AND usr.Bank_Modify = brm.BankCode ");
 
             sbQuery.append("AND IFNULL(usr.MerchantID, '" + DDM_Constants.default_coporate_customer_id + "') = cocu.MerchantID ");
             sbQuery.append("AND IFNULL(usr.MerchantID_Modify, '" + DDM_Constants.default_coporate_customer_id + "') = cocum.MerchantID ");
@@ -3405,7 +3434,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iSystemUserPwdExpireDuration = Integer.parseInt(strSystemUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iSystemUserPwdExpireDuration = DDM_Constants.system_pwd_expire_duration;
                 }
@@ -3423,7 +3452,7 @@ public class UserDAOImpl implements UserDAO
                 {
                     iUserPwdExpireDuration = Integer.parseInt(strUserPwdExpireDuration);
                 }
-                catch (Exception e)
+                catch (NumberFormatException e)
                 {
                     iUserPwdExpireDuration = DDM_Constants.user_pwd_expire_duration;
                 }

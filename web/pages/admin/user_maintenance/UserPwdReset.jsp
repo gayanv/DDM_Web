@@ -1,17 +1,17 @@
 <%@page import="java.util.*,java.sql.*" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.branch.Branch" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.DAOFactory" errorPage="../../../error.jsp"  %>
-<%@page import="lk.com.ttsl.pb.slips.dao.bank.Bank" errorPage="../../../error.jsp" %>
-<%@page import="lk.com.ttsl.pb.slips.dao.userLevel.UserLevel" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.parameter.Parameter" errorPage="../../../error.jsp" %>
-<%@page import="lk.com.ttsl.pb.slips.dao.custom.user.*" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.services.email.*" errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.services.utils.RandomPasswordGenerator" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate"  errorPage="../../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.bank.Bank" errorPage="../../../error.jsp" %>
+<%@page import="lk.com.ttsl.pb.slips.dao.custom.user.*" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.DAOFactory" errorPage="../../../error.jsp"  %>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.Log" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.LogDAO" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.merchant.Merchant" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.parameter.Parameter" errorPage="../../../error.jsp" %>
+<%@page import="lk.com.ttsl.pb.slips.dao.userLevel.UserLevel" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.services.email.*" errorPage="../../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.services.utils.RandomPasswordGenerator" errorPage="../../../error.jsp"%>
 
 <%
     response.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
@@ -69,8 +69,7 @@
 
 %>
 
-<%    
-    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
+<%    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
     String currentDate = DAOFactory.getCustomDAO().getCurrentDate();
     long serverTime = DAOFactory.getCustomDAO().getServerTime();
     CustomDate customDate = DAOFactory.getCustomDAO().getServerTimeDetails();
@@ -79,18 +78,19 @@
 
 <%
     Collection<UserLevel> colUserLevel = null;
-    //Collection<Bank> colBank = null;
-    Collection<Branch> colBranch = null;
+    Collection<Bank> colBank = null;
+    Collection<Merchant> colMerchant = null;
     Collection<User> col_user = null;
 
     String isReq = null;
+
+    String newUserLevel = null;
+    String newUserBank = null;
+    String newUserMerchant = null;
+    String newUserStatus = null;
     String selectedUserId = null;
     String newUserPassword = null;
-    String newUserReTypePassword = null;
-    String newUserLevel = null;
-    String newUserStatus = null;
-    String newUserBank = null;
-    String newUserBranch = null;
+
     String newUserEmail = null;
     String msg = null;
     String defaultPwd = null;
@@ -98,7 +98,8 @@
     boolean result = false;
 
     colUserLevel = DAOFactory.getUserLevelDAO().getUserLevelDetails();
-    colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(DDM_Constants.default_bank_code, DDM_Constants.status_pending);
+    colBank = DAOFactory.getBankDAO().getBankNotInStatus(DDM_Constants.status_pending);
+    colMerchant = DAOFactory.getMerchantDAO().getMerchantNotInStatusBasicDetails(DDM_Constants.status_pending, DDM_Constants.status_all, DDM_Constants.status_all);
 
     defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
 
@@ -109,82 +110,81 @@
     {
         isReq = "0";
 
-        if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
-        {
-            newUserLevel = DDM_Constants.status_all;
-            newUserStatus = DDM_Constants.status_all;
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = session_branchId;
-        }
-        else if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
-        {
-            newUserLevel = DDM_Constants.status_all;
-            newUserStatus = DDM_Constants.status_all;
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = session_branchId;
-        }
-        else
-        {
-            newUserLevel = DDM_Constants.status_all;
-            newUserStatus = DDM_Constants.status_all;
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = DDM_Constants.status_all;
-        }
+        newUserLevel = DDM_Constants.status_all;
+        newUserStatus = DDM_Constants.status_all;
+        newUserBank = DDM_Constants.status_all;
+        newUserMerchant = DDM_Constants.status_all;
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, newUserBranch, newUserStatus), "'" + DDM_Constants.status_pending + "'");
+        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, DDM_Constants.status_all, newUserMerchant, newUserStatus), "'" + DDM_Constants.status_pending + "'");
     }
     else if (isReq.equals("0"))
     {
-        selectedUserId = (String) request.getParameter("cmbUserId");
         newUserLevel = (String) request.getParameter("cmbUserLevel");
-        newUserStatus = (String) request.getParameter("cmbStatus");
 
-        if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        if (newUserLevel != null && !newUserLevel.equals(DDM_Constants.status_all))
         {
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = session_branchId;
-        }
-        else if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
-        {
+            if (newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_op))
+            {
+                newUserBank = DDM_Constants.status_all;
+                newUserMerchant = (String) request.getParameter("cmbMerchant");
+            }
+            else if (newUserLevel.equals(DDM_Constants.user_type_bank_manager) || newUserLevel.equals(DDM_Constants.user_type_bank_user))
+            {
+                newUserBank = (String) request.getParameter("cmbBank");
+                newUserMerchant = DDM_Constants.status_all;
+            }
+            else
+            {
+                newUserBank = DDM_Constants.lcpl_bank_code;
+                newUserMerchant = DDM_Constants.status_all;
+            }
 
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = session_branchId;
         }
         else
         {
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = (String) request.getParameter("cmbBranch");
+            newUserBank = DDM_Constants.status_all;
+            newUserMerchant = DDM_Constants.status_all;
         }
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, newUserBranch, newUserStatus), "'" + DDM_Constants.status_pending + "'");
+        newUserStatus = (String) request.getParameter("cmbStatus");
+        selectedUserId = (String) request.getParameter("cmbUserId");
+
+        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, DDM_Constants.status_all, newUserMerchant, newUserStatus), "'" + DDM_Constants.status_pending + "'");
 
     }
     else if (isReq.equals("1"))
     {
-        selectedUserId = (String) request.getParameter("cmbUserId");
-        newUserPassword = (String) request.getParameter("txtUserPassword");
-        newUserReTypePassword = (String) request.getParameter("txtReTypePassword");
         newUserLevel = (String) request.getParameter("cmbUserLevel");
-        newUserStatus = (String) request.getParameter("cmbStatus");
 
-        if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        if (newUserLevel != null && !newUserLevel.equals(DDM_Constants.status_all))
         {
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = session_branchId;
-        }
-        else if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
-        {
+            if (newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_su))
+            {
+                newUserBank = DDM_Constants.status_all;
+                newUserMerchant = (String) request.getParameter("cmbMerchant");
+            }
+            else if (newUserLevel.equals(DDM_Constants.user_type_bank_manager) || newUserLevel.equals(DDM_Constants.user_type_bank_manager))
+            {
+                newUserBank = (String) request.getParameter("cmbBank");
+                newUserMerchant = DDM_Constants.status_all;
+            }
+            else
+            {
+                newUserBank = DDM_Constants.lcpl_bank_code;
+                newUserMerchant = DDM_Constants.status_all;
+            }
 
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = session_branchId;
         }
         else
         {
-            newUserBank = DDM_Constants.default_bank_code;
-            newUserBranch = (String) request.getParameter("cmbBranch");
+            newUserBank = DDM_Constants.status_all;
+            newUserMerchant = DDM_Constants.status_all;
         }
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, newUserBranch, newUserStatus), "'" + DDM_Constants.status_pending + "'");
+        newUserStatus = (String) request.getParameter("cmbStatus");
+        selectedUserId = (String) request.getParameter("cmbUserId");
+
+        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, DDM_Constants.status_all, newUserMerchant, newUserStatus), "'" + DDM_Constants.status_pending + "'");
 
         String currentUserStat = null;
         String userStat = null;
@@ -244,13 +244,13 @@
 
         UserDAO userDAO = DAOFactory.getUserDAO();
 
-        if (newUserEmail != null && newUserEmail.length() > 5)
+        if (newUserEmail != null)
         {
             result = userDAO.resetUserPassword(new User(selectedUserId, newUserPassword, userStat), true);
         }
         else
         {
-            userDAO.setMsg("Null or empty user email address");
+            userDAO.setMsg("Null email address");
         }
 
         if (!result)
@@ -268,25 +268,25 @@
 
             try
             {
-                String webURL = "";
+                String webURL = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_ddm_web_url);
+                
+                String webLink = "<a href=\"" + webURL + "\" title=\"LankaPay Direct Debit Mandate Exchange System - Login\">Login To LankaPay Direct Debit Mandate Exchange System</a>";
 
-                if (objUser.getUserLevelId().equals(DDM_Constants.user_type_merchant_op) || objUser.getUserLevelId().equals(DDM_Constants.user_type_merchant_su))
-                {
-                    webURL = "<a href=\"https://www.salpay.peoplesbank.lk\" title=\"LankaPay Direct Debit Mandate Exchange System System - Login\">Login To LankaPay Direct Debit Mandate Exchange System System</a>";
-                }
-                else
-                {
-                    webURL = "<a href=\"https://pbccd/slipsweb/\" title=\"LankaPay Direct Debit Mandate Exchange System System - Login\">Login To LankaPay Direct Debit Mandate Exchange System System</a>";
-                }
+                new SendHTMLEmail().sendEmailForPasswordReset(newUserEmail, "Alert - LankaPay Direct Debit Mandate Exchange System Password Reset!", "Dear " + (objUser.getName() != null ? objUser.getName() : "User") + ", <br/><br/> The password of <b>LankaPay Direct Debit Mandate Exchange System </b> has been reset to - <b>" + newUserPassword + "</b>", "<br/><br/>Please login to the system using above password first and then you will be prompted to change the new system generated password as you prefered. <br/><br/> Please don't share your new password to anyone else and make sure to change the password as required before it expired! <br/>You can reset your password via <b>'My Profile'</b> page of LankaPay Direct Debit Mandate Exchange System.<br/><br/>In order to reset your password please click on the below link to login to the LankaPay Direct Debit Mandate Exchange System,<br/><br/>" + webLink);
 
-                new SendHTMLEmail().sendEmailForPasswordReset(newUserEmail, "Alert - LankaPay Direct Debit Mandate Exchange System System Password Reset!", "Dear " + (objUser.getName() != null ? objUser.getName() : "LankaPay Direct Debit Mandate Exchange System User") + ", <br/><br/> The password of <b>LankaPay Direct Debit Mandate Exchange System System</b> has been successfully reset to - <b>" + newUserPassword + "</b>", "<br/><br/>Please login to the system using above password and you will be prompted to change the new system generated password as you prefered. <br/><br/> Please don't share your new password to anyone else and make sure to change the password as required before it expired! <br/>You can reset your password via <b>'My Profile'</b> page of LankaPay DDM System.<br/><br/>In order to reset your password please click on the below link to login to the LankaPay Direct Debit Mandate Exchange System System,<br/><br/>" + webURL);
+                DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_reset_user_password, "| User Name - " + selectedUserId + ", Status - (New : " + userStat + ", Old : " + currentUserStat + ") | Process Status - Success | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
             }
             catch (Exception e)
             {
+                result = false;
+
                 System.out.println("Exception occured while sending email (user password reset) =====> " + e.getMessage());
+
+                msg = "Exception occured while sending password reset email (" + e.getMessage() + ")";
+
+                DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_reset_user_password, "| User Name - " + selectedUserId + ", Status - (New : " + userStat + ", Old : " + currentUserStat + ") | Process Status - Unsuccess (" + msg + ") | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
             }
 
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_user_maintenance_reset_user_password, "| User Name - " + selectedUserId + ", Status - (New : " + userStat + ", Old : " + currentUserStat + ") | Process Status - Success | Modified By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
     }
 %>
@@ -300,7 +300,7 @@
     <link href="<%=request.getContextPath()%>/css/ddm.css" rel="stylesheet" type="text/css" />
     <link href="<%=request.getContextPath()%>/css/tcal.css" rel="stylesheet" type="text/css" />
     <link href="../../../css/ddm.css" rel="stylesheet" type="text/css" />
-    
+
     <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/fade.js"></script>
     <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/digitalClock.js"></script>
     <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/ajax.js"></script>
@@ -310,24 +310,24 @@
 
     <script language="javascript" type="text/JavaScript">
 
-    function validate()
-    { 
+        function validate()
+        { 
         var selUser = document.getElementById('cmbUserId').value;
 
         if(selUser == "-1")
         {
-            alert("You must select valid user name for reset password!");
-            document.getElementById('cmbUserId').focus();
-            return false;
+        alert("You must select valid user name for reset password!");
+        document.getElementById('cmbUserId').focus();
+        return false;
         }
         else
         { 
-                document.frmResetPwd.submit();
+        document.frmResetPwd.submit();
         }
-    }
+        }
 
-    function showClock(type)
-    {
+        function showClock(type)
+        {
         if (type == 1)
         {
         clock(document.getElementById('showText'), type, null);
@@ -338,14 +338,14 @@
         clock(document.getElementById('showText'), type, val);
         }
         else if (type == 3)
-                {
-                    var val = new Array(<%=customDate.getYear()%>, <%=customDate.getMonth()%>, <%=customDate.getDay()%>, <%=customDate.getHour()%>, <%=customDate.getMinitue()%>, <%=customDate.getSecond()%>, <%=customDate.getMilisecond()%>);
-                    clock(document.getElementById('showText'), type, val);
-                }
-    }
+        {
+        var val = new Array(<%=customDate.getYear()%>, <%=customDate.getMonth()%>, <%=customDate.getDay()%>, <%=customDate.getHour()%>, <%=customDate.getMinitue()%>, <%=customDate.getSecond()%>, <%=customDate.getMilisecond()%>);
+        clock(document.getElementById('showText'), type, val);
+        }
+        }
 
-    function isRequest(status)
-    {
+        function isRequest(status)
+        {
         if(status)
         {
         document.getElementById('hdnReq').value = "1";
@@ -354,11 +354,11 @@
         {                    
         document.getElementById('hdnReq').value = "0";
         }
-    }
+        }
 
 
-    function validatePassword()
-    {
+        function validatePassword()
+        {
         var newPassword = document.getElementById('txtUserPassword').value;
 
         if(isempty(newPassword))
@@ -551,11 +551,11 @@
 </head>
 <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onLoad="showClock(3)">
 
-        <div class="bg"></div>
-        <div class="bg bg2"></div>
-        <div class="bg bg3"></div>
-        
-        <table width="100%" style="min-width:900;min-height:600" height="100%" align="center" border="0" cellpadding="0" cellspacing="0" >
+    <div class="bg"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
+
+    <table width="100%" style="min-width:900;min-height:600" height="100%" align="center" border="0" cellpadding="0" cellspacing="0" >
         <tr>
             <td align="center" valign="top" class="ddm_bgRepeat_center">
                 <table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" class="ddm_bgRepeat_left">
@@ -585,7 +585,7 @@
                                                                                                 <td>
 
                                                                                                     <div style="padding:1;height:100%;width:100%;">
-                                                                                                        <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                        <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                         <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                             cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                         <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -637,7 +637,7 @@
                                                                                     <td valign="top" class="ddm_menubar_text_dark"><div id="showText" class="ddm_menubar_text_dark"></div></td>
                                                                                     <td width="5" valign="top" nowrap class="ddm_menubar_text_dark">&nbsp;]</td>
                                                                                 </tr>
-                                                                      </table></td>
+                                                                            </table></td>
                                                                         <td width="15"></td>
                                                                     </tr>
                                                                 </table></td>
@@ -701,8 +701,7 @@
                                                                                                                 <td><table border="0" cellspacing="1" cellpadding="3"  bgcolor="#FFFFFF" >
                                                                                                                         <tr>
                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text">User Type :</td>
-                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><select name="cmbUserLevel" id="cmbUserLevel" class="ddm_field_border" onChange="isRequest(false);
-                                                                                                                                            frmResetPwd.submit()" onFocus="hideMessage_onFocus()">
+                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><select name="cmbUserLevel" id="cmbUserLevel" class="ddm_field_border" onChange="isRequest(false);frmResetPwd.submit()" onFocus="hideMessage_onFocus()">
                                                                                                                                     <option value="<%=DDM_Constants.status_all%>" <%=(newUserLevel != null && newUserLevel.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
                                                                                                                                     <%
                                                                                                                                         for (UserLevel usrlvl : colUserLevel)
@@ -733,7 +732,55 @@
                                                                                                                                             }
                                                                                                                                         }
                                                                                                                                     %>
+                                                                                                                                </select>
+                                                                                                                                
+                                                                                                                                <input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />
+                                                                                                                                </td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">Bank : </td>
+                                                                                                                            <td valign="middle"class="ddm_tbl_common_text">
+                                                                                                                                <select name="cmbBank" id="cmbBank" class="ddm_field_border" onChange="isRequest(false);frmResetPwd.submit()" onFocus="hideMessage_onFocus()" <%=(newUserLevel.equals(DDM_Constants.user_type_bank_manager) || newUserLevel.equals(DDM_Constants.user_type_bank_user)) ? "" : "disabled"%>>
+
+                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(newUserBank != null && newUserBank.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+
+
+                                                                                                                                    <%
+
+                                                                                                                                        if (colBank != null && colBank.size() > 0)
+                                                                                                                                        {
+                                                                                                                                            for (Bank bk : colBank)
+                                                                                                                                            {
+                                                                                                                                    %>
+                                                                                                                                    <option value="<%=bk.getBankCode()%>" <%=(newUserBank != null && bk.getBankCode().equals(newUserBank)) ? "selected" : ""%> >
+                                                                                                                                        <%=bk.getBankCode() + " - " + bk.getBankFullName()%>
+                                                                                                                                    </option>
+                                                                                                                                    <%
+
+                                                                                                                                            }
+                                                                                                                                        }
+
+                                                                                                                                    %>
                                                                                                                                 </select></td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">Merchant :</td>
+                                                                                                                            <td valign="middle"class="ddm_tbl_common_text">
+                                                                                                                                <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="isRequest(false);frmResetPwd.submit()" onFocus="hideMessage_onFocus()" <%=(newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_op)) ? "" : "disabled"%> >
+                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(newUserMerchant != null && newUserMerchant.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+                                                                                                                                    <%
+                                                                                                                                        if (colMerchant != null && colMerchant.size() > 0)
+                                                                                                                                        {
+                                                                                                                                            for (Merchant merchant : colMerchant)
+                                                                                                                                            {
+                                                                                                                                    %>
+                                                                                                                                    <option value="<%=merchant.getMerchantID()%>" <%=(newUserMerchant != null && merchant.getMerchantID().equals(newUserMerchant)) ? "selected" : ""%> ><%=merchant.getMerchantID()%> - <%=merchant.getMerchantName()%></option>
+                                                                                                                                    <%
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                    %>
+                                                                                                                                </select>
+                                                                                                                            </td>
                                                                                                                         </tr>
                                                                                                                         <tr>
                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text">Status :</td>
@@ -745,37 +792,6 @@
                                                                                                                                     <option value="<%=DDM_Constants.status_expired%>" <%=(newUserStatus != null && newUserStatus.equals(DDM_Constants.status_expired)) ? "selected" : ""%>>Expired</option>
                                                                                                                                     <option value="<%=DDM_Constants.status_locked%>" <%=(newUserStatus != null && newUserStatus.equals(DDM_Constants.status_locked)) ? "selected" : ""%>>Locked</option>
                                                                                                                                 </select></td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">Branch :</td>
-                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><select name="cmbBranch" id="cmbBranch" class="ddm_field_border" onChange="isRequest(false);
-                                                                                                                                    frmResetPwd.submit()" onFocus="hideMessage_onFocus()" <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op) || session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user)) ? "disabled" : ""%>>
-                                                                                                                                    <%
-                                                                                                                                        if (newUserBranch == null || newUserBranch.equals(DDM_Constants.status_all))
-                                                                                                                                        {
-                                                                                                                                    %>
-                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" selected="selected">-- All --</option>
-                                                                                                                                    <% }
-                                                                                                                                    else
-                                                                                                                                    {
-                                                                                                                                    %>
-                                                                                                                                    <option value="<%=DDM_Constants.status_all%>">-- All --</option>
-                                                                                                                                    <%
-                                                                                                                                        }
-                                                                                                                                        if (colBranch != null && colBranch.size() > 0)
-                                                                                                                                        {
-                                                                                                                                            for (Branch br : colBranch)
-                                                                                                                                            {
-                                                                                                                                    %>
-                                                                                                                                    <option value="<%=br.getBranchCode()%>" <%=(newUserBranch != null && br.getBranchCode().equals(newUserBranch)) ? "selected" : ""%> >
-                                                                                                                                        <%=br.getBranchCode() + " - " + br.getBranchName()%></option>
-                                                                                                                                        <%
-
-                                                                                                                                                }
-                                                                                                                                            }
-
-                                                                                                                                        %>
-                                                                                                                                </select>                                                                                                                            </td>
                                                                                                                         </tr>
 
                                                                                                                         <tr>
@@ -826,12 +842,12 @@
                                                                                                                                         }%>
                                                                                                                                 </select>  </td></tr>
                                                                                                                         <tr>
-                                                                                                                            <td height="35" colspan="2" align="right" valign="middle" class="ddm_tbl_footer_text"><input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />                                                                                                                            <table border="0" cellpadding="0" cellspacing="0">
+                                                                                                                            <td height="35" colspan="2" align="right" valign="middle" class="ddm_tbl_footer_text">                                                                                                                            <table border="0" cellpadding="0" cellspacing="0">
                                                                                                                                     <tr>
-                                                                                                                                        <td><input type="button" value="Reset Password" name="btnChange" id="btnChange" class="ddm_custom_button" onClick="isRequest(true);
-                                                                                                                                                validate();"/>                             </td>
+                                                                                                                                        <td><input type="button" value="&nbsp;&nbsp; Reset Password &nbsp;&nbsp;" name="btnChange" id="btnChange" class="ddm_custom_button" onClick="isRequest(true);
+                                                                                                                                                validate();"/></td>
                                                                                                                                         <td width="5"></td>
-                                                                                                                                        <td><input name="btnClear" id="btnClear" value="Reset" type="button" onClick="resetRecords()" class="ddm_custom_button" />                                                </td></tr>
+                                                                                                                                        <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; Reset &nbsp;&nbsp;" type="button" onClick="resetRecords()" class="ddm_custom_button" />                                                </td></tr>
                                                                                                                                 </table></td>
                                                                                                                         </tr>
 

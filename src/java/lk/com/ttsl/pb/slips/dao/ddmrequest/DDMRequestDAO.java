@@ -138,11 +138,15 @@ public interface DDMRequestDAO
      *
      * @param merchantId
      * @param issuingBankCode
+     * @param issuingBranchCode
+     * @param acquiringBankCode
+     * @param acquiringBranchCode
      * @param fromRequestDate
      * @param toRequestDate
+     * @param status
      * @return
      */
-    public Collection<DDMRequest> getSLABreachByIssuingBankDDAReqDetails(String merchantId, String issuingBankCode, String fromRequestDate, String toRequestDate);
+    public Collection<DDMRequest> getSLABreachByIssuingBankDDAReqDetails(String merchantId, String issuingBankCode, String issuingBranchCode, String acquiringBankCode, String acquiringBranchCode, String status, String fromRequestDate, String toRequestDate);
 
     /**
      *
@@ -157,12 +161,16 @@ public interface DDMRequestDAO
     /**
      *
      * @param merchantId
-     * @param acquiringBank
+     * @param issuingBankCode
+     * @param issuingBranchCode
+     * @param acquiringBankCode
+     * @param acquiringBranchCode
      * @param fromRequestDate
      * @param toRequestDate
+     * @param status
      * @return
      */
-    public Collection<DDMRequest> getSLABreachByAcquiringBankDDAReqDetails(String merchantId, String acquiringBank, String fromRequestDate, String toRequestDate);
+    public Collection<DDMRequest> getSLABreachByAcquiringBankDDAReqDetails(String merchantId, String issuingBankCode, String issuingBranchCode, String acquiringBankCode, String acquiringBranchCode, String status, String fromRequestDate, String toRequestDate);
 
     /**
      *

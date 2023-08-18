@@ -56,15 +56,17 @@
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
 
-        if (session_userType.equals(DDM_Constants.user_type_ddm_administrator) || session_userType.equals(DDM_Constants.user_type_ddm_helpdesk_user))
+        boolean isAccessOK = DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, DDM_Constants.directory_previous + request.getServletPath());
+
+        if (!isAccessOK)
         {
-            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - DDM Request Inquiry' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
+            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - DDM Request Inquiry (As Acquiring Bank)' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
             {
                 response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp");
             }
             else
             {
-                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fpDDM_Requests_Inquiry");
+                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=DDM_Requests_Inquiry_As_Acquiring_Bank");
             }
         }
         else
@@ -526,7 +528,7 @@
                                                                                                     <td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
-                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                             <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                                 cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                             <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>

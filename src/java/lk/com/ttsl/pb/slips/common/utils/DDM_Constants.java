@@ -33,7 +33,10 @@ public class DDM_Constants
     public static final String param_id_cits_cutoff_time = "CITS";
     public static final String param_id_default_pwd = "DefaultPwd";
     public static final String param_id_db_enc_pw_1 = "DBEncPW_1";
-    public static final String param_id_db_enc_pw_2 = "DBEncPW_2";
+    public static final String param_id_db_enc_pw_2 = "DBEncPW_2";    
+    
+    public static final String param_id_ddm_web_url = "DDM_WebUrl"; 
+            
     public static final String param_id_no_of_sessions = "NoOfSessions";
 
     public static final String param_id_session = "Session";
@@ -110,8 +113,9 @@ public class DDM_Constants
     public static final String email_notification_type_session_summary = "04";
     public static final String email_notification_type_cbsl_mlns = "05";
 
-    public static final String default_bank_code = "9991";
-    public static final String default_branch_code = "001";
+    public static final String lcpl_bank_code = "9991";    
+    public static final String default_bank_code = "9999";
+    public static final String default_branch_code = "999";
     public static final String bank_default_branch_code = "001";
     public static final String default_branch_code_card_centre = "600";
     public static final String default_branch_code_head_office_990 = "990";
@@ -848,6 +852,8 @@ public class DDM_Constants
     public static final String log_type_lankapay_user_ddm_request_inquiry_search = "0410";
     public static final String log_type_bank_user_ddm_request_inquiry_search_as_issuing_bank = "0411";
     public static final String log_type_bank_user_ddm_request_inquiry_search_as_acquiring_bank = "0412";
+    public static final String log_type_bank_user_slab_ddm_request_inquiry_search_as_issuing_bank = "0413";
+    public static final String log_type_bank_user_slab_ddm_request_inquiry_search_as_acquiring_bank = "0414";
 
 //    public static final String log_type_user_upload_ddm_file_confirmation = "0201";    
 //    public static final String log_type_user_upload_ddm_file_confirmation_download_vs_file = "0202";

@@ -78,7 +78,10 @@ public class DBUtil
             {
                 try
                 {
-                    fis.close();
+                    if (fis != null)
+                    {
+                        fis.close();
+                    }
                 }
                 catch (IOException e)
                 {

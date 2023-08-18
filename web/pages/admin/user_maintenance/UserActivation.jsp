@@ -2,6 +2,7 @@
 <%@page import="lk.com.ttsl.pb.slips.dao.branch.Branch" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.DAOFactory" errorPage="../../../error.jsp"  %>
 <%@page import="lk.com.ttsl.pb.slips.dao.bank.Bank" errorPage="../../../error.jsp" %>
+<%@page import="lk.com.ttsl.pb.slips.dao.merchant.Merchant" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.userLevel.UserLevel" errorPage="../../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.parameter.Parameter" errorPage="../../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.user.*" errorPage="../../../error.jsp"%>
@@ -75,70 +76,77 @@
 %>
 
 <%
+    Collection<Bank> colBank = null;
+    Collection<Merchant> colMerchant = null;
     Collection<UserLevel> colUserLevel = null;
-    //Collection<Bank> colBank = null;
-    Collection<Branch> colBranch = null;
     Collection<User> col_user = null;
+    
 
     String isReq = null;
+    
+    String selectedUserLevel = null;
+    String selectedUserStatus = null;
+    String selectedUserBank = null;
+    String selectedUserMerchant = null;
+    
     String selectedUserId = null;
-    String newUserLevel = null;
-    String newUserStatus = null;
-    String newUserBank = null;
-    String newUserBranch = null;
+    
     String msg = null;
 
     boolean result = false;
 
     colUserLevel = DAOFactory.getUserLevelDAO().getUserLevelDetails();
-    //colBank = DAOFactory.getBankDAO().getBank(DDM_Constants.status_active);
-    colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(DDM_Constants.default_bank_code, DDM_Constants.status_pending);
+    colBank = DAOFactory.getBankDAO().getBankNotInStatus(DDM_Constants.status_pending);
+    colMerchant = DAOFactory.getMerchantDAO().getMerchantNotInStatusBasicDetails(DDM_Constants.status_pending, DDM_Constants.status_all, DDM_Constants.status_all);
 
+    
     isReq = (String) request.getParameter("hdnReq");
 
     if (isReq == null)
     {
         isReq = "0";
 
-        newUserLevel = DDM_Constants.status_all;
-        newUserStatus = DDM_Constants.status_all;
-        newUserBank = DDM_Constants.default_bank_code;
-        newUserBranch = DDM_Constants.status_all;
+        selectedUserLevel = DDM_Constants.status_all;
+        selectedUserStatus = DDM_Constants.status_all;
+        selectedUserBank = DDM_Constants.status_all;
+        selectedUserMerchant = DDM_Constants.status_all;
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, newUserBranch, newUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
     }
     else if (isReq.equals("0"))
-    {
+    {        
+        selectedUserLevel = request.getParameter("cmbUserLevel");
+        selectedUserBank = request.getParameter("cmbBank");
+        selectedUserMerchant = request.getParameter("cmbMerchant");
+        selectedUserStatus = request.getParameter("cmbStatus");
+        
         selectedUserId = request.getParameter("cmbUserId");
-        newUserLevel = request.getParameter("cmbUserLevel");
-        newUserStatus = request.getParameter("cmbStatus");
-        newUserBank = DDM_Constants.default_bank_code;
-        newUserBranch = request.getParameter("cmbBranch");
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, newUserBranch, newUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
     }
     else if (isReq.equals("1"))
-    {
+    {        
+        selectedUserLevel = request.getParameter("cmbUserLevel");
+        selectedUserBank = request.getParameter("cmbBank");
+        selectedUserMerchant = request.getParameter("cmbMerchant");
+        selectedUserStatus = request.getParameter("cmbStatus");        
+        
         selectedUserId = request.getParameter("cmbUserId");
-        newUserLevel = request.getParameter("cmbUserLevel");
-        newUserStatus = request.getParameter("cmbStatus");
-        newUserBank = DDM_Constants.default_bank_code;
-        newUserBranch = request.getParameter("cmbBranch");
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(newUserLevel, newUserBank, newUserBranch, newUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
 
         String currentUserStat = null;
 
-        if (newUserStatus != null && newUserStatus.equals(DDM_Constants.status_all))
+        if (selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_all))
         {
             User objUser = DAOFactory.getUserDAO().getUserDetails(selectedUserId, DDM_Constants.status_all);
 
             currentUserStat = objUser.getStatus();
 
         }
-        else if (newUserStatus != null && (newUserStatus.equals(DDM_Constants.status_expired) || newUserStatus.equals(DDM_Constants.status_locked)))
+        else if (selectedUserStatus != null && (selectedUserStatus.equals(DDM_Constants.status_expired) || selectedUserStatus.equals(DDM_Constants.status_locked)))
         {
-            currentUserStat = newUserStatus;
+            currentUserStat = selectedUserStatus;
         }
 
         UserDAO userDAO = DAOFactory.getUserDAO();
@@ -460,7 +468,7 @@
                                                                                                 <td>
 
                                                                                                     <div style="padding:1;height:100%;width:100%;">
-                                                                                                        <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                        <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                         <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                             cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                         <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -578,51 +586,70 @@
                                                                                                                         <tr>
                                                                                                                             <td align="left" valign="middle" class="ddm_tbl_header_text">User Type :</td>
                                                                                                                             <td valign="middle"class="ddm_tbl_common_text"><select name="cmbUserLevel" id="cmbUserLevel" class="ddm_field_border" onChange="isSearchRequest(false);frmActivateUser.submit()" onFocus="hideMessage_onFocus()">
-                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(newUserLevel != null && newUserLevel.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserLevel != null && selectedUserLevel.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
                                                                                                                                     <%
                                                                                                                                         for (UserLevel usrlvl : colUserLevel)
                                                                                                                                         {
 
                                                                                                                                     %>
-                                                                                                                                    <option value=<%=usrlvl.getUserLevelId()%> <%=(newUserLevel != null && usrlvl.getUserLevelId().equals(newUserLevel)) ? "selected" : ""%>><%=usrlvl.getUserLevelDesc()%></option>
+                                                                                                                                    <option value=<%=usrlvl.getUserLevelId()%> <%=(selectedUserLevel != null && usrlvl.getUserLevelId().equals(selectedUserLevel)) ? "selected" : ""%>><%=usrlvl.getUserLevelDesc()%></option>
                                                                                                                                     <%
                                                                                                                                         }
-                                                                                                                                    %></select></td>
+                                                                                                                                    %></select>
+                                                                                                                                    
+                                                                                                                                    <input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />
+                                                                                                                                    </td>
                                                                                                                         </tr>
                                                                                                                         <tr>
-                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">Status :</td>
-                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><select name="cmbStatus" id="cmbStatus" class="ddm_field_border" onChange="isRequest(false);frmActivateUser.submit()" onFocus="hideMessage_onFocus()">
-                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(newUserStatus != null && newUserStatus.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
-                                                                                                                                    <option value="<%=DDM_Constants.status_deactive%>" <%=(newUserStatus != null && newUserStatus.equals(DDM_Constants.status_deactive)) ? "selected" : ""%>>Inactive</option>
-                                                                                                                                    <option value="<%=DDM_Constants.status_expired%>" <%=(newUserStatus != null && newUserStatus.equals(DDM_Constants.status_expired)) ? "selected" : ""%>>Expired</option>
-                                                                                                                                    <option value="<%=DDM_Constants.status_locked%>" <%=(newUserStatus != null && newUserStatus.equals(DDM_Constants.status_locked)) ? "selected" : ""%>>Locked</option>
-                                                                                                                                </select></td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">Branch :</td>
-                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><select name="cmbBranch" id="cmbBranch" class="ddm_field_border" onChange="isRequest(false);frmActivateUser.submit()" onFocus="hideMessage_onFocus()">
-                                                                                                                                    <%
-                                                                                                                                        if (newUserBranch == null || newUserBranch.equals(DDM_Constants.status_all))
-                                                                                                                                        {
-                                                                                                                                    %>
-                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" selected="selected">-- All --</option>
-                                                                                                                                    <% }
-                                                                                                                                    else
-                                                                                                                                    {
-                                                                                                                                    %>
-                                                                                                                                    <option value="<%=DDM_Constants.status_all%>">-- All --</option>
-                                                                                                                                    <%
-                                                                                                                                        }
-                                                                                                                                        if (colBranch != null && colBranch.size() > 0)
-                                                                                                                                        {
-                                                                                                                                            for (Branch br : colBranch)
-                                                                                                                                            {%>
-                                                                                                                                    <option value="<%=br.getBranchCode()%>" <%=(newUserBranch != null && br.getBranchCode().equals(newUserBranch)) ? "selected" : ""%> >
-                                                                                                                                        <%=br.getBranchCode() + " - " + br.getBranchName()%></option>
-                                                                                                                                        <%}
+                                                                                                                                <td align="left" valign="middle" class="ddm_tbl_header_text">Bank : </td>
+                                                                                                                                <td valign="middle"class="ddm_tbl_common_text">
+                                                                                                                                    <select name="cmbBank" id="cmbBank" class="ddm_field_border" onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_bank_manager) || selectedUserLevel.equals(DDM_Constants.user_type_bank_user)) ? "" : "disabled"%>>
+
+                                                                                                                                        <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserBank != null && selectedUserBank.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+
+
+                                                                                                                                        <%
+
+                                                                                                                                            if (colBank != null && colBank.size() > 0)
+                                                                                                                                            {
+                                                                                                                                                for (Bank bk : colBank)
+                                                                                                                                                {
+                                                                                                                                        %>
+                                                                                                                                        <option value="<%=bk.getBankCode()%>" <%=(selectedUserBank != null && bk.getBankCode().equals(selectedUserBank)) ? "selected" : ""%> >
+                                                                                                                                            <%=bk.getBankCode() + " - " + bk.getBankFullName()%>                                                                                                                                        </option>
+                                                                                                                                        <%
+
+                                                                                                                                                }
                                                                                                                                             }
 
                                                                                                                                         %>
+                                                                                                                                    </select></td>
+                                                                                                                            </tr>
+                                                                                                                        <tr>
+                                                                                                                                <td align="left" valign="middle" class="ddm_tbl_header_text">Merchant :</td>
+                                                                                                                                <td valign="middle"class="ddm_tbl_common_text">
+                                                                                                                                    <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_merchant_su) || selectedUserLevel.equals(DDM_Constants.user_type_merchant_op)) ? "" : "disabled"%> >
+                                                                                                                                        <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserMerchant != null && selectedUserMerchant.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+                                                                                                                                        <%
+                                                                                                                                            if (colMerchant != null && colMerchant.size() > 0)
+                                                                                                                                            {
+                                                                                                                                                for (Merchant merchant : colMerchant)
+                                                                                                                                                {
+                                                                                                                                        %>
+                                                                                                                                        <option value="<%=merchant.getMerchantID()%>" <%=(selectedUserMerchant != null && merchant.getMerchantID().equals(selectedUserMerchant)) ? "selected" : ""%> ><%=merchant.getMerchantID()%> - <%=merchant.getMerchantName()%></option>
+                                                                                                                                        <%
+                                                                                                                                                }
+                                                                                                                                            }
+                                                                                                                                        %>
+                                                                                                                                    </select>                                                                                                                                </td>
+                                                                                                                            </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td align="left" valign="middle" class="ddm_tbl_header_text">Status :</td>
+                                                                                                                            <td valign="middle"class="ddm_tbl_common_text"><select name="cmbStatus" id="cmbStatus" class="ddm_field_border" onChange="isRequest(false);frmActivateUser.submit()" onFocus="hideMessage_onFocus()">
+                                                                                                                                    <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
+                                                                                                                                    <option value="<%=DDM_Constants.status_deactive%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_deactive)) ? "selected" : ""%>>Inactive</option>
+                                                                                                                                    <option value="<%=DDM_Constants.status_expired%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_expired)) ? "selected" : ""%>>Expired</option>
+                                                                                                                                    <option value="<%=DDM_Constants.status_locked%>" <%=(selectedUserStatus != null && selectedUserStatus.equals(DDM_Constants.status_locked)) ? "selected" : ""%>>Locked</option>
                                                                                                                                 </select></td>
                                                                                                                         </tr>
                                                                                                                         <!--tr>
@@ -661,16 +688,16 @@
                                                                                                                                     %>
                                                                                                                                 </select>  </td></tr>
                                                                                                                         <tr>
-                                                                                                                            <td height="35" colspan="2" align="right" valign="middle" class="ddm_tbl_footer_text"><input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />                                                                                                                            <table border="0" cellpadding="0" cellspacing="0">
+                                                                                                                            <td height="35" colspan="2" align="right" valign="middle" class="ddm_tbl_footer_text">                                                                                                                            <table border="0" cellpadding="0" cellspacing="0">
                                                                                                                                     <tr>
-                                                                                                                                        <td><input type="button" value="Activate" name="btnChange" id="btnChange" class="ddm_custom_button" onClick="isRequest(true);
-                                                                                                                                                validate();" <%=((isReq != null && isReq.equals("1")) && result) ? "disabled" : ""%> />                             </td>
-                                                                                                                                        <td width="5"></td>
-                                                                                                                                        <td><input name="btnClear" id="btnClear" value="<%=((isReq != null && isReq.equals("1")) && result) ? "Done" : "Cancel"%>" type="button" onClick="clearRecords()"  class="ddm_custom_button" />                                                </td></tr>
-                                                                                                                                </table></td>
+                                                                                                                                        <td><input type="button" value="&nbsp;&nbsp; Activate &nbsp;&nbsp;" name="btnChange" id="btnChange" class="ddm_custom_button" onClick="isRequest(true);
+                                                                                                                                                validate();" <%=((isReq != null && isReq.equals("1")) && result) ? "disabled" : ""%> /></td>
+                                                                                                                                      <td width="5"></td>
+                                                                                                                                        <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; <%=((isReq != null && isReq.equals("1")) && result) ? "Done" : "Cancel"%> &nbsp;&nbsp;" type="button" onClick="clearRecords()"  class="ddm_custom_button" />                                                </td></tr>
+                                                                                                                          </table></td>
                                                                                                                         </tr>
 
-                                                                                                                    </table></td>
+                                                                                                              </table></td>
                                                                                                             </tr>
                                                                                                         </table></td>
                                                                                                 </tr>

@@ -56,15 +56,17 @@
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
 
-        if (session_userType.equals(DDM_Constants.user_type_ddm_administrator) || session_userType.equals(DDM_Constants.user_type_ddm_helpdesk_user))
+        boolean isAccessOK = DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, DDM_Constants.directory_previous + request.getServletPath());
+
+        if (!isAccessOK)
         {
-            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - DDM Request Inquiry' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
+            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - SLA Breached DDM Request Inquiry (As Issuing Bank)' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
             {
                 response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp");
             }
             else
             {
-                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fpDDM_Requests_Inquiry");
+                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=SLA_Breached_DDM_Requests_Inquiry_As_Issuing_Bank");
             }
         }
         else
@@ -112,58 +114,92 @@
     {
         initialRequest = true;
         isSearchReq = "0";
+
+        issuingBankCode = DDM_Constants.status_all;
+        issuingBranchCode = DDM_Constants.status_all;
+
         acquiringBankCode = DDM_Constants.status_all;
         acquiringBranchCode = DDM_Constants.status_all;
 
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su)|| session_userType.equals(DDM_Constants.user_type_merchant_op))
+        selMerchant = DDM_Constants.status_all;
+
+        selRequestStatus = DDM_Constants.ddm_request_status_02;
+        fromRequestDate = webBusinessDate;
+        toRequestDate = webBusinessDate;
+
+        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
         {
             issuingBankCode = session_bankCode;
-            issuingBranchCode = DDM_Constants.status_all;
-
             colIssuingBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(issuingBankCode, DDM_Constants.status_pending);
         }
-        else
+        else if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        {
+            selMerchant = session_cocuId;
+        }
+
+    }
+    else
+    {
+        issuingBankCode = (String) request.getParameter("cmbIssuingBank");
+        issuingBranchCode = (String) request.getParameter("cmbIssuingBranch");
+
+        acquiringBankCode = (String) request.getParameter("cmbAcquiringBank");
+        acquiringBranchCode = (String) request.getParameter("cmbAcquiringBranch");
+
+        selMerchant = (String) request.getParameter("cmbMerchant");
+
+        //selRequestStatus = (String) request.getParameter("cmbReqStatus");
+        selRequestStatus = DDM_Constants.ddm_request_status_02;
+
+        fromRequestDate = (String) request.getParameter("txtFromRequestDate");
+        toRequestDate = (String) request.getParameter("txtToRequestDate");
+
+        if (selMerchant == null)
+        {
+            selMerchant = DDM_Constants.status_all;
+        }
+
+        if (issuingBankCode == null)
         {
             issuingBankCode = DDM_Constants.status_all;
             issuingBranchCode = DDM_Constants.status_all;
         }
 
-        selMerchant = DDM_Constants.status_all;
-        selRequestStatus = DDM_Constants.status_all;
-        fromRequestDate = webBusinessDate;
-        toRequestDate = webBusinessDate;
+        if (acquiringBankCode == null)
+        {
+            acquiringBankCode = DDM_Constants.status_all;
+            acquiringBranchCode = DDM_Constants.status_all;
+        }
 
-    }
-    else
-    {
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su)|| session_userType.equals(DDM_Constants.user_type_merchant_op))
+        if (fromRequestDate == null || fromRequestDate.isEmpty())
+        {
+            fromRequestDate = DDM_Constants.status_all;
+        }
+
+        if (toRequestDate == null || toRequestDate.isEmpty())
+        {
+            toRequestDate = DDM_Constants.status_all;
+        }
+
+        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
         {
             issuingBankCode = session_bankCode;
+            //colIssuingBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(issuingBankCode, DDM_Constants.status_pending);
+        }
+        else if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+        {
+            selMerchant = session_cocuId;
+        }
+
+        if (!issuingBankCode.equals(DDM_Constants.status_all))
+        {
             colIssuingBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(issuingBankCode, DDM_Constants.status_pending);
         }
-        else
-        {
-            issuingBankCode = (String) request.getParameter("cmbIssuingBank");
-
-            if (!issuingBankCode.equals(DDM_Constants.status_all))
-            {
-                colIssuingBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(issuingBankCode, DDM_Constants.status_pending);
-            }
-        }
-
-        acquiringBankCode = (String) request.getParameter("cmbAcquiringBank");
 
         if (!acquiringBankCode.equals(DDM_Constants.status_all))
         {
             colAcquiringBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(acquiringBankCode, DDM_Constants.status_pending);
         }
-
-        issuingBranchCode = (String) request.getParameter("cmbIssuingBranch");
-        acquiringBranchCode = (String) request.getParameter("cmbAcquiringBranch");
-        selMerchant = (String) request.getParameter("cmbMerchant");
-        selRequestStatus = (String) request.getParameter("cmbReqStatus");
-        fromRequestDate = (String) request.getParameter("txtFromRequestDate");
-        toRequestDate = (String) request.getParameter("txtToRequestDate");
 
         if (isSearchReq.equals("0"))
         {
@@ -174,7 +210,7 @@
             initialRequest = false;
 
             //colDDMRequestDetails = DAOFactory.getDDMRequestDAO().getDDARequestDetailsForIssuingBankApproval(issuingBankCode);
-            colDDMRequestDetails = DAOFactory.getDDMRequestDAO().getDDARequestDetails(selMerchant, issuingBankCode, issuingBranchCode, acquiringBankCode, acquiringBranchCode, selRequestStatus, fromRequestDate, toRequestDate);
+            colDDMRequestDetails = DAOFactory.getDDMRequestDAO().getSLABreachByIssuingBankDDAReqDetails(selMerchant, issuingBankCode, issuingBranchCode, acquiringBankCode, acquiringBranchCode, selRequestStatus, fromRequestDate, toRequestDate);
 
             String strReqStatDes = "All";
 
@@ -188,7 +224,7 @@
                 }
             }
 
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_bank_user_ddm_request_inquiry_search_as_issuing_bank, "| Search Criteria - (Issuing Bank : " + issuingBankCode + ", Issuing Branch : " + issuingBranchCode + ", Acquiring Bank : " + acquiringBankCode + ", Acquiring Branch : " + acquiringBranchCode + ", Merchant : " + selMerchant + ", Status : " + strReqStatDes + ", DDM Request Date : From - " + fromRequestDate + "  To - " + toRequestDate + ") | Result Count - " + (colDDMRequestDetails != null ? colDDMRequestDetails.size() : "0") + " | Searched By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_bank_user_slab_ddm_request_inquiry_search_as_issuing_bank, "| Search Criteria - (Issuing Bank : " + issuingBankCode + ", Issuing Branch : " + issuingBranchCode + ", Acquiring Bank : " + acquiringBankCode + ", Acquiring Branch : " + acquiringBranchCode + ", Merchant : " + selMerchant + ", Status : " + strReqStatDes + ", DDM Request Date : From - " + fromRequestDate + "  To - " + toRequestDate + ") | Result Count - " + (colDDMRequestDetails != null ? colDDMRequestDetails.size() : "0") + " | Searched By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
     }
 
@@ -420,8 +456,8 @@
 
             function doSubmit()
             {
-                document.frmInquiryDDMR_AsIssuingBank.action = "inqddmisb.jsp";
-                document.frmInquiryDDMR_AsIssuingBank.submit();
+                document.frmSLBDDMR_AsIssuingBank.action = "slbddmisb.jsp";
+                document.frmSLBDDMR_AsIssuingBank.submit();
             }
 
 
@@ -523,7 +559,7 @@
                                                                                                     <td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
-                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** SLIPS ****</div>
+                                                                                                            <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
                                                                                                             <script language="JavaScript" vqptag="doc_level_settings" is_vqp_html=1 vqp_datafile0="<%=request.getContextPath()%>/js/<%=session_menuName%>" vqp_uid0=<%=session_menuId%>>cdd__codebase = "<%=request.getContextPath()%>/js/";
                                                                                                                 cdd__codebase<%=session_menuId%> = "<%=request.getContextPath()%>/js/";</script>
                                                                                                             <script language="JavaScript" vqptag="datafile" src="<%=request.getContextPath()%>/js/<%=session_menuName%>"></script>
@@ -597,7 +633,7 @@
                                                                                             String userTypeDescription = "Issuing Bank";
 
                                                                                         %>
-                                                                                        <td align="left" valign="top" class="ddm_header_text">DDM Request Inquiry - As Issuing Bank</td>
+                                                                                        <td align="left" valign="top" class="ddm_header_text">SLA Breached DDM Request Inquiry - As Issuing Bank</td>
                                                                                         <td width="10">&nbsp;</td>
                                                                                     </tr>
                                                                                     <tr>
@@ -607,7 +643,7 @@
                                                                                     </tr>
                                                                                     <tr>
                                                                                         <td></td>
-                                                                                        <td align="center" valign="top"><form name="frmInquiryDDMR_AsIssuingBank" id="frmInquiryDDMR_AsIssuingBank" method="post" >
+                                                                                        <td align="center" valign="top"><form name="frmSLBDDMR_AsIssuingBank" id="frmSLBDDMR_AsIssuingBank" method="post" >
                                                                                                 <table width="100%"  border="0" cellspacing="0" cellpadding="0">
                                                                                                     <tr>
                                                                                                         <td align="center" valign="top">
@@ -621,7 +657,7 @@
 
 
                                                                                                                                     %>
-                                                                                                                                    <select name="cmbIssuingBank" id="cmbIssuingBank" class="ddm_field_border"  onChange="isSearchRequest(false);doSubmit();"  <%=(session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su)|| session_userType.equals(DDM_Constants.user_type_merchant_op)) ? "disabled" : ""%>>
+                                                                                                                                    <select name="cmbIssuingBank" id="cmbIssuingBank" class="ddm_field_border"  onChange="isSearchRequest(false);doSubmit();"  <%=(session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user)) ? "disabled" : ""%>>
                                                                                                                                         <%
                                                                                                                                             if (issuingBankCode == null || issuingBankCode.equals(DDM_Constants.status_all))
                                                                                                                                             {
@@ -720,7 +756,7 @@
 
 
                                                                                                                                     %>
-                                                                                                                                    <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="clearResultData()" >
+                                                                                                                                    <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="clearResultData()" <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? "disabled" : ""%>>
                                                                                                                                         <%                                                                                                                                if (selMerchant == null || selMerchant.equals(DDM_Constants.status_all))
                                                                                                                                             {
                                                                                                                                         %>
@@ -873,7 +909,7 @@
 
 
                                                                                                                                     %>
-                                                                                                                                    <select name="cmbReqStatus" id="cmbReqStatus" class="ddm_field_border"  onChange="clearResultData()" >
+                                                                                                                                    <select name="cmbReqStatus" id="cmbReqStatus" class="ddm_field_border"  onChange="clearResultData()" disabled>
                                                                                                                                         <%                                                                                                                                if (selRequestStatus == null || selRequestStatus.equals(DDM_Constants.status_all))
                                                                                                                                             {
                                                                                                                                         %>
@@ -922,10 +958,10 @@
                                                                                                                                 <td align="right" valign="middle" class="ddm_tbl_header_text">Request Date :                                                                                                                        </td>
                                                                                                                                 <td align="right" valign="middle" class="ddm_tbl_common_text"><table border="0" cellspacing="0" cellpadding="0">
                                                                                                                                         <tr>
-                                                                                                                                            <td valign="middle"><input name="txtFromRequestDate" id="txtFromRequestDate" type="text" onFocus="this.blur()" class="tcal" size="8" value="<%=(fromRequestDate == null || fromRequestDate.equals("0") || fromRequestDate.equals(DDM_Constants.status_all)) ? "" : fromRequestDate%>" >                                                                                                                    </td>
+                                                                                                                                            <td valign="middle"><input name="txtFromRequestDate" id="txtFromRequestDate" type="text" onFocus="this.blur()" class="tcal" size="9" value="<%=(fromRequestDate == null || fromRequestDate.equals("0") || fromRequestDate.equals(DDM_Constants.status_all)) ? "" : fromRequestDate%>" ></td>
                                                                                                                                             <td width="5" valign="middle"></td>
                                                                                                                                             <td width="10" valign="middle"></td>
-                                                                                                                                            <td valign="middle"><input name="txtToRequestDate" id="txtToRequestDate" type="text" onFocus="this.blur()" class="tcal" size="8" value="<%=(toRequestDate == null || toRequestDate.equals("0") || toRequestDate.equals(DDM_Constants.status_all)) ? "" : toRequestDate%>" onChange="clearResultData()">                                                                                                                    </td>
+                                                                                                                                            <td valign="middle"><input name="txtToRequestDate" id="txtToRequestDate" type="text" onFocus="this.blur()" class="tcal" size="9" value="<%=(toRequestDate == null || toRequestDate.equals("0") || toRequestDate.equals(DDM_Constants.status_all)) ? "" : toRequestDate%>" onChange="clearResultData()"></td>
                                                                                                                                             <td width="5" valign="middle"></td>
                                                                                                                                             <td width="10px" valign="middle"></td>
                                                                                                                                             <td valign="middle"><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; Reset Dates &nbsp;&nbsp;" type="button" onClick="resetDates()" class="ddm_custom_button_small" /></td>
@@ -1043,7 +1079,7 @@
                                                                                                                                                 <td nowrap class="ddm_common_text" title="<%=ddmr.getAcquiringBranch()%> - <%=ddmr.getAcquiringBranchName()%>"><%=ddmr.getAcquiringBranch()%> - <%=ddmr.getAcquiringBranchName().length() > 10 ? (ddmr.getAcquiringBranchName().substring(0, 8) + "..") : ddmr.getAcquiringBranchName()%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getAcquiringAccountNumber()%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getAcquiringAccountName()%></td>
-                                                                                                                                                <td class="ddm_common_text" align="right" ><%=strMaxLimit%></td>
+                                                                                                                                                <td class="ddm_common_text" align="right" ><%=new DecimalFormat("###,##0.00").format(maxLimit) %></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getStartDate()%></td>
                                                                                                                                                 <td class="ddm_common_text"><%=ddmr.getEndDate()%></td>
                                                                                                                                                 <%

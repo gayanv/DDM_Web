@@ -87,13 +87,13 @@ public class SendHTMLEmail2
                     {
                         if (usr.getMinPwdValidDays() == 0)
                         {
-                            //new SendHTMLEmail2().sendEmailForPasswordExpiry(usr.getEmail(), "Warning - SLIPS BCM Password Will Expire Today", "This is the final reminder you will get and your <b>SLIPS BCM</b> system password will be expired after today!", " Please change the password immediately.");
-                            new SendHTMLEmail2().sendEmailForPasswordExpiry(usr.getEmail(), "Warning - LankaPay DDM System Password Will Expire Today", "Dear " + (usr.getName() != null ? usr.getName() : "PB SLIPS User") + ",This is the final reminder you will get and your password of <b>LankaPay DDM System</b> will be expired after today!", "<br/><br/>If your password expires, you will not be able to login to SLIPS System and perform your work. So please change the password immediately. <br/><br/> You can reset your password via <b>'My Profile'</b> function of People's Bank SLIPS Web Module.");
+                            
+                            new SendHTMLEmail2().sendEmailForPasswordExpiry(usr.getEmail(), "Warning - LankaPay DDM System Password Will Expire Today", "Dear " + (usr.getName() != null ? usr.getName() : "LankaPay DDM User") + ",This is the final reminder you will get and your password of <b>LankaPay DDM System</b> will be expired after today!", "<br/><br/>If your password expires, you will not be able to login to LankaPay DDM System and perform your work. So please change the password immediately. <br/><br/> You can reset your password via <b>'My Profile'</b> function of LankaPay DDM System Web.");
                         }
                         else if ((usr.getMinPwdValidDays() > 0) && (usr.getMinPwdValidDays() <= pwdExpireWarningDays))
                         {
-                            //new SendHTMLEmail2().sendEmailForPasswordExpiry(usr.getEmail(), "Alert - SLIPS BCM Password Will Expire Soon!", " Your password for the <b>SLIPS BCM</b> system will be expired within " + usr.getMinPwdValidDays() + " days!", " Please change the password.");
-                            new SendHTMLEmail2().sendEmailForPasswordExpiry(usr.getEmail(), "Alert - LankaPay DDM System Password Will Expire Soon!", "Dear " + (usr.getName() != null ? usr.getName() : "PB SLIPS User") + ", <br/><br/> The password of <b>LankaPay DDM System</b> needs to be reset within next " + usr.getMinPwdValidDays() + " days!", "<br/><br/>If your password expires, you will not be able to login to SLIPS System and perform your work. <br/><br/> Please reset your password via <b>'My Profile'</b> function of People's Bank SLIPS Web Module.");
+                            
+                            new SendHTMLEmail2().sendEmailForPasswordExpiry(usr.getEmail(), "Alert - LankaPay DDM System Password Will Expire Soon!", "Dear " + (usr.getName() != null ? usr.getName() : "PB SLIPS User") + ", <br/><br/> The password of <b>LankaPay DDM System</b> needs to be reset within next " + usr.getMinPwdValidDays() + " days!", "<br/><br/>If your password expires, you will not be able to login to LankaPay DDM System and perform your work. <br/><br/> Please reset your password via <b>'My Profile'</b> function of LankaPay DDM System Web.");
                         }
                     }
                 }

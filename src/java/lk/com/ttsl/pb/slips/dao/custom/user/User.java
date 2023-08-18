@@ -12,17 +12,21 @@ public class User
 {
 
     private String userId;
+    
     private String userLevelId;
-    private String userLevelIdModify;
+    private String userLevelIdModify;    
     private String userLevelDesc;
     private String userLevelDescModify;
+    
     private String bankCode;
     private String bankShortName;
     private String bankFullName;
+    private String bankCodeModify;
+    private String bankShortNameModify;
+    private String bankFullNameModify;
 
     private String branchCode;
     private String branchName;
-
     private String branchCodeModify;
     private String branchNameModify;
 
@@ -106,6 +110,15 @@ public class User
         this.branchCode = branchCode;
         this.status = status;
     }
+    
+    public User(String userLevelId, String bankCode, String branchCode, String coCuId, String status)
+    {
+        this.userLevelId = userLevelId;
+        this.bankCode = bankCode;
+        this.branchCode = branchCode;
+        this.coCuId = coCuId;
+        this.status = status;
+    }
 
     public String getUserId()
     {
@@ -186,6 +199,38 @@ public class User
     {
         this.bankFullName = bankFullName;
     }
+
+    public String getBankCodeModify()
+    {
+        return bankCodeModify;
+    }
+
+    public void setBankCodeModify(String bankCodeModify)
+    {
+        this.bankCodeModify = bankCodeModify;
+    }
+
+    public String getBankShortNameModify()
+    {
+        return bankShortNameModify;
+    }
+
+    public void setBankShortNameModify(String bankShortNameModify)
+    {
+        this.bankShortNameModify = bankShortNameModify;
+    }
+
+    public String getBankFullNameModify()
+    {
+        return bankFullNameModify;
+    }
+
+    public void setBankFullNameModify(String bankFullNameModify)
+    {
+        this.bankFullNameModify = bankFullNameModify;
+    }
+    
+    
 
     public String getBranchCode()
     {
