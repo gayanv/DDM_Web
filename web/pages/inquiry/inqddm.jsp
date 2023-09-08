@@ -996,6 +996,8 @@
                                                                                                                                         <table border="0" cellspacing="1" cellpadding="3"  bgcolor="#FFFFFF" >
                                                                                                                                             <tr>
                                                                                                                                                 <td class="ddm_tbl_header_text_horizontal_small"></td>
+                                                                                                                                                  <td align="center" class="ddm_tbl_header_text_horizontal_small">DDA<br/>
+                                                                                                                                                    ID</td>
                                                                                                                                                 <td align="center" class="ddm_tbl_header_text_horizontal_small">Req.<br/>
                                                                                                                                                     Time</td>
                                                                                                                                                 <td align="center" class="ddm_tbl_header_text_horizontal_small">Merchant</td>
@@ -1051,6 +1053,7 @@
                                                                                                                                             %>
                                                                                                                                             <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>"   onMouseOver="cOn(this)" onMouseOut="cOut(this)">
                                                                                                                                                 <td align="right" class="ddm_common_text"><%=rowNum%>.</td>
+                                                                                                                                                <td class="ddm_common_text"><%=ddmr.getDDA_ID()%></td>
                                                                                                                                                 <td align="center" nowrap class="ddm_common_text"><%=ddmr.getCreatedDate()%></td>
                                                                                                                                                 <td nowrap class="ddm_common_text"><%=ddmr.getMerchantID()%> - <%=ddmr.getMerchantName()%></td>
 
