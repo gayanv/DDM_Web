@@ -2679,4 +2679,57 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
 
     }
 
+    @Override
+    public boolean isCSVFileAlreadyUploaded(String csvFileName)
+    {
+        boolean isFileAlreadyUpload = false;
+        Connection con = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+
+        if (csvFileName == null)
+        {
+            System.out.println("WARNING : Null csvFileName parameter.");
+            return isFileAlreadyUpload;
+        }
+
+        try
+        {
+            con = DBUtil.getInstance().getConnection();
+
+            StringBuilder sbQuery = new StringBuilder();
+
+            sbQuery.append("select * from ");
+            sbQuery.append(DDM_Constants.tbl_ddmrequest + " ");
+            sbQuery.append("where CSVFileName = ? ");
+
+            System.out.println("isCSVFileAlreadyUploaded ---> " + sbQuery.toString());
+
+            pstm = con.prepareStatement(sbQuery.toString());
+
+            pstm.setString(1, csvFileName);
+
+            rs = pstm.executeQuery();
+
+            if (rs != null && rs.isBeforeFirst())
+            {
+                isFileAlreadyUpload = true;
+            }
+
+        }
+        catch (SQLException | ClassNotFoundException e)
+        {
+            msg = DDM_Constants.msg_error_while_processing;
+            System.out.println(e.getMessage());
+        }
+        finally
+        {
+            DBUtil.getInstance().closeResultSet(rs);
+            DBUtil.getInstance().closeStatement(pstm);
+            DBUtil.getInstance().closeConnection(con);
+        }
+
+        return isFileAlreadyUpload;
+    }
+
 }

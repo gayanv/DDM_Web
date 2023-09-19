@@ -182,5 +182,13 @@ public interface DDMRequestDAO
      * @return
      */
     public boolean updateDDMRequestStatus(String ddaRequestId, String curStatus, String newStatus, String modifiedBy, String remarks);
+    
+    /**
+     * 
+     * @param csvFileName
+     * @return 
+     */
+    public boolean isCSVFileAlreadyUploaded(String csvFileName);
+    
 
 }

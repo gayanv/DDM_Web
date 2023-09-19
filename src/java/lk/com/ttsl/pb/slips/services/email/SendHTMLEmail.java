@@ -10,6 +10,7 @@ import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -262,6 +263,97 @@ public class SendHTMLEmail
         }
 
         return sendHTML_Email;
+    }
+    
+    public boolean sendEmailForApprovedNewUsers(String toEmail, String subject, String bodyContentPart1, String bodyContentPart2)
+    {
+        final Session mailSession = Session.getInstance(this.getEmailProperties(), new Authenticator()
+        {
+
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication()
+            {
+                return new PasswordAuthentication(PropertyLoader.getInstance().getSMTP_USR(), PropertyLoader.getInstance().getSMTP_PWD());
+            }
+
+        });
+
+        try
+        {
+            System.out.println("Start sending mail (sendEmailForApprovedNewUsers) --> 1");
+
+            mailSession.setDebug(true);
+            //Transport transport = mailSession.getTransport("smtp");
+
+            System.out.println("Start sending mail --> 2");
+
+            Message message = new MimeMessage(mailSession);
+            message.setFrom(new InternetAddress("LankaPay DDM System - New User Account! <" + PropertyLoader.getInstance().getSMTP_USR() + ">"));
+            message.setRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
+            message.setSubject(subject);
+
+            MimeMultipart multipart = new MimeMultipart("related");
+
+            BodyPart messageBodyPart = new MimeBodyPart();
+
+            StringBuilder strBuilBodyContent = new StringBuilder();
+
+            strBuilBodyContent.append(bodyContentPart1);
+
+            strBuilBodyContent.append(bodyContentPart2);
+
+            strBuilBodyContent.append("<br/>");
+            strBuilBodyContent.append("<br/>");
+
+            strBuilBodyContent.append("This is a system generated email and please don't reply! ");
+
+            strBuilBodyContent.append("<br/>");
+            strBuilBodyContent.append("<br/>");
+            strBuilBodyContent.append("<br/>");
+
+            strBuilBodyContent.append("<img src=\"cid:image\" height=\"58\" width=\"150\" >");
+
+            strBuilBodyContent.append("<br/>");
+            strBuilBodyContent.append("<br/>");
+
+            messageBodyPart.setContent(strBuilBodyContent.toString(), "text/html");
+
+            multipart.addBodyPart(messageBodyPart);
+
+            // second part (the image)  
+            messageBodyPart = new MimeBodyPart();
+
+            System.out.println("PropertyLoader.getInstance().getMailLogoPath() ---->" + PropertyLoader.getInstance().getMailLogoPath());
+
+            DataSource fds = new FileDataSource(PropertyLoader.getInstance().getMailLogoPath());
+
+            messageBodyPart.setDataHandler(new DataHandler(fds));
+            messageBodyPart.setHeader("Content-ID", "<image>");
+
+            // add it  
+            multipart.addBodyPart(messageBodyPart);
+            System.out.println("addBodyPart");
+
+            // put everything together  
+            message.setContent(multipart);
+            System.out.println("setContent");
+            message.setSentDate(new Date());
+
+            //transport.connect();
+            System.out.println("sendEmailForApprovedNewUsers (" + toEmail + ") : Sending...");
+            Transport.send(message);
+            System.out.println("sendEmailForApprovedNewUsers (" + toEmail + ") : Done");
+            //transport.close();
+
+            return true;
+
+        }
+        catch (MessagingException e)
+        {
+            e.printStackTrace();
+
+            return false;
+        }
     }
 
     public boolean sendEmailForPasswordExpiry(String toEmail, String subject, String bodyContentPart1, String bodyContentPart2)

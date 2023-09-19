@@ -14,6 +14,7 @@ import lk.com.ttsl.pb.slips.common.utils.DBUtil;
 import lk.com.ttsl.pb.slips.common.utils.DDM_Constants;
 import lk.com.ttsl.pb.slips.dao.DAOFactory;
 import lk.com.ttsl.pb.slips.services.utils.RandomPasswordGenerator;
+import lk.com.ttsl.pb.slips.services.email.SendHTMLEmail;
 
 /**
  *
@@ -2999,6 +3000,7 @@ public class UserDAOImpl implements UserDAO
             sbQuery.append("update ");
             sbQuery.append(DDM_Constants.tbl_user + " ");
             sbQuery.append("set ");
+            sbQuery.append("Password = MD5(?), ");
             sbQuery.append("Status = ?, ");
             sbQuery.append("Status_Modify = ?, ");
             sbQuery.append("AuthorizedBy = ?, ");
@@ -3007,21 +3009,69 @@ public class UserDAOImpl implements UserDAO
 
             psmt = con.prepareStatement(sbQuery.toString());
 
-            psmt.setString(1, DDM_Constants.status_active);
-            psmt.setString(2, DDM_Constants.status_active);
-            psmt.setString(3, authBy);
-            psmt.setString(4, userId);
+            int minPwdLength = 8;
 
-            count = psmt.executeUpdate();
-
-            if (count > 0)
+            try
             {
-                con.commit();
-                status = true;
+                minPwdLength = Integer.parseInt(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_minimum_pwd_length));
+            }
+            catch (NumberFormatException e)
+            {
+
+                minPwdLength = 8;
+            }
+
+            String defaultPassword = RandomPasswordGenerator.generatePassword(minPwdLength);
+
+            if (defaultPassword == null)
+            {
+                defaultPassword = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);;
+            }
+
+            String userEmail = null;
+
+            User objUser = DAOFactory.getUserDAO().getUserDetails(userId, DDM_Constants.status_pending);
+
+            if (objUser != null)
+            {
+                userEmail = objUser.getEmail();
             }
             else
             {
-                con.rollback();
+                msg = DDM_Constants.msg_no_records_found_for_user;
+            }
+
+            if (userEmail != null && userEmail.length() > 5)
+            {
+                psmt.setString(1, userId + defaultPassword);
+                psmt.setString(2, DDM_Constants.status_active);
+                psmt.setString(3, DDM_Constants.status_active);
+                psmt.setString(4, authBy);
+                psmt.setString(5, userId);
+
+                count = psmt.executeUpdate();
+
+                if (count > 0)
+                {
+                    con.commit();
+                    status = true;
+
+                    String webURL = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_ddm_web_url);
+
+                    String finalURL = "<a href=\"" + webURL + "\" title=\"Login To LPPL Direct Debit Mandate System\">Login To LankaPay DDM System</a>";
+
+                    // Send an email to newly approved user with his/her userId and password
+                    new SendHTMLEmail().sendEmailForApprovedNewUsers(userEmail, "LankaPay DDM System - New User Account!", "Dear " + objUser.getName() + ", <br/><br/> You have successfully added to the <b> LankaPay DDM System </b>.<br/>In order to login to the system please click on the below link,", "<br/><br/>" + finalURL + "<br/><br/>Use below username and password which assigned to you to login to the system.<br/><br/><b>Username - <b>" + objUser.getUserId() + "<br/><b>Password - <b>" + defaultPassword + " <br/><br/>Thank You!");
+                }
+                else
+                {
+                    msg = DDM_Constants.msg_error_while_processing;
+                    con.rollback();
+                }
+            }
+            else
+            {
+                msg = DDM_Constants.msg_invalid_email;
             }
 
         }

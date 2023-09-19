@@ -131,6 +131,8 @@ public class DDM_Constants
     public static final String default_merchant_pwd_hash = "$2a$10$SNt/ROoHwh0EjjTWWAusxeBLM.XrczvZ6ga1frGp38LmRpJdw6EoO";
     ///////////////////
     
+    public static final String ddm_csv_file_suffix = ".csv"; 
+    public static final String ddm_csv_file_Type = "CSV";
     
     public static final String ddm_cust1_file_Type = "CUST1";
     public static final String ddm_cust1_file_suffix = "cust1.txt";
@@ -524,6 +526,8 @@ public class DDM_Constants
     public static final String msg_duplicate_records = "Duplicate records were found.";
     public static final String msg_not_available = "N/A";
     public static final String msg_invalid_or_expired_otp = "Invalid or Expired OTP.";
+    public static final String msg_invalid_email = "Invalid email found for the selected user.";
+    public static final String msg_no_records_found_for_user = "No records were found for the selected user.";
 
     /**
      * Directory details
@@ -568,7 +572,7 @@ public class DDM_Constants
      */
     public static final String decimal_number_format_comma_sep_for_non_decimal_values = "###,###";
 
-    public static final String path_ddm_data_file_temp_upload = "/DDA/DATA_FILES_TMP/";
+    public static final String path_ddm_csv_file_upload_path = "/DDA/CSV_FILES/";
     public static final String path_ddm_report_common_path = "/DDA/REPORTS/";
     public static final String path_ddm_jasper_file_base_path = "/DDA/JASPER/";
     public static final String path_ddm_mail_logo_path = "/DDA/LOGO/PB_Mail_Logo.jpg";
@@ -801,9 +805,9 @@ public class DDM_Constants
     public static final String log_type_user_message_reply_message_init = "0188";
     public static final String log_type_user_message_reply_message_send = "0189";
 
-    public static final String log_type_user_upload_ddm_file_init = "0200";
-    public static final String log_type_user_upload_ddm_file_confirmation = "0201";
-    public static final String log_type_user_upload_ddm_file_confirmation_download_vs_file = "0202";
+    public static final String log_type_user_upload_ddm_csv_file_init = "0200";
+    public static final String log_type_user_upload_ddm_csv_file_confirmation = "0201";
+    public static final String log_type_user_upload_ddm_csv_file_confirmation_download_vs_file = "0202";
 
     public static final String log_type_user_confirm_on_uploaded_ddm_files_search = "0203";
     public static final String log_type_user_confirm_on_uploaded_ddm_transactions = "0204";

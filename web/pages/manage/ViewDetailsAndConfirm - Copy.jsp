@@ -1,21 +1,15 @@
 
-<%@page import="lk.com.ttsl.pb.slips.dao.custom.report.ReportDAO"%>
-<%@page import="java.io.File,java.util.*,java.sql.*,java.text.DecimalFormat" errorPage="../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.branch.Branch" errorPage="../../error.jsp"%>
+>
+<%@page import="java.util.*,java.sql.*,java.text.DecimalFormat" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.DAOFactory" errorPage="../../error.jsp"  %>
 <%@page import="lk.com.ttsl.pb.slips.dao.bank.*" errorPage="../../error.jsp" %>
+<%@page import="lk.com.ttsl.pb.slips.dao.branch.Branch" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.userLevel.*" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.parameter.*" errorPage="../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.user.*" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../error.jsp" %>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate"  errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.custom.owdetails.OWDetails" errorPage="../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.custom.owdetails.OWSummaryDetails" errorPage="../../error.jsp"%>
-<%@page import="com.pronto.lcpl.filereader.processor.OWDFileUploader" errorPage="../../error.jsp"%>
-<%@page import="com.pronto.lcpl.filereader.validationflow.FlowOrganizer" errorPage="../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.services.utils.*" errorPage="../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.window.Window" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.Log" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.LogDAO" errorPage="../../error.jsp"%>
 
@@ -64,22 +58,23 @@
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
 
-        if (!(session_userType.equals(DDM_Constants.user_type_ddm_manager) || session_userType.equals(DDM_Constants.user_type_ddm_supervisor)))
+        if (session_userType.equals(DDM_Constants.user_type_ddm_administrator) || session_userType.equals(DDM_Constants.user_type_ddm_helpdesk_user))
         {
-            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'Generate Bank Core System Outward SLIPS File' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
+            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'View and Confirm SLIPS Transactions' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
             {
                 response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp");
             }
             else
             {
-                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=Generate_Bank_Core_System_Outward_SLIPS_File");
+                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=View_and_Confirm_SLIPS_Transactions");
             }
         }
         else
         {
+
 %>
-<%
-    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
+
+<%    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
     String winSession = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_session);
     Window window = DAOFactory.getWindowDAO().getWindow(session_bankCode, winSession);
     String currentDate = DAOFactory.getCustomDAO().getCurrentDate();
@@ -90,29 +85,33 @@
 
 <%
     boolean confirmStatus = false;
+    boolean duplicatesAvailable = false;
+    boolean isOkToConfirm = false;
 
-    String hoglFileName = null;
-    String hoglReportPath = null;
+    String cocuID = null;
+    String fileID = null;
+    String fileBDate = null;
+    String batchNo = null;
+    String orgAccNo = null;
+    String afvd = null;
+
     String hdnConfirmRequest = null;
-    String hdnAlreadyConfirmed = null;   
-
-
+    String hdnAlreadyConfirmed = null;
+    long totalRecordCount = 0;
     int totalPageCount = 0;
     int reqPageNo = 1;
-
-    long totalRecordCount = 0;
-    
-    long totalTransactionCount = 0;
+    long validTrCountForConfirmation = 0;
+    long invalidPBAccounts = 0;
+    long invalidValueDates = 0;
+    long invalidOther = 0;
     long totalTransactionAmount = 0;
-    
-    long totalTransactionCountCredit = 0;
-    long totalTransactionCountDebit = 0;
-    
-    long totalTransactionAmountCredit = 0;
-    long totalTransactionAmountDebit = 0;
 
-    OWSummaryDetails owSummary = null;
+    FileInfo fileInfo = null;
+
     Collection<OWDetails> colResult = null;
+    Collection<FileInfo> colDupFile = null;
+
+    Collection<OWDetails> colIWDesBr999 = null;
 
     if (request.getParameter("hdnReqPageNo") != null)
     {
@@ -121,6 +120,18 @@
 
     hdnConfirmRequest = (String) request.getParameter("hdnConfirmRequest");
     hdnAlreadyConfirmed = (String) request.getParameter("hdnAlreadyConfirmed");
+
+    cocuID = (String) request.getParameter("hdnCoCuID");
+    fileID = (String) request.getParameter("hdnFileName");
+    fileBDate = (String) request.getParameter("hdnFileBDate");
+    batchNo = (String) request.getParameter("hdnBatchNo");
+    orgAccNo = (String) request.getParameter("hdnOrgAccNo");
+    afvd = (String) request.getParameter("hdnAFVD");
+
+    if (fileBDate == null)
+    {
+        fileBDate = webBusinessDate;
+    }
 
     if (hdnConfirmRequest == null)
     {
@@ -135,24 +146,49 @@
     System.out.println("hdnConfirmRequest--->" + hdnConfirmRequest);
     System.out.println("hdnAlreadyConfirmed--->" + hdnAlreadyConfirmed);
 
-    owSummary = DAOFactory.getOWDetailsDAO().getSlipsTransactionSummaryDetailsByStatusForHOGL(DDM_Constants.status_all, webBusinessDate, DDM_Constants.ddm_transaction_status_04);
-
-    if(owSummary != null)
+    if (cocuID == null)
     {
-        totalTransactionCountCredit = owSummary.getTotalAcceptedCreditTransactionCount() + owSummary.getTotalRejectedCreditTransactionCount();
-        totalTransactionCountDebit = owSummary.getTotalAcceptedDebitTransactionCount() + owSummary.getTotalRejectedDebitTransactionCount();
-
-        totalTransactionAmountCredit = owSummary.getTotalAcceptedCreditTransactionAmount() + owSummary.getTotalRejectedCreditTransactionAmount();
-        totalTransactionAmountDebit = owSummary.getTotalAcceptedDebitTransactionAmount() + owSummary.getTotalRejectedDebitTransactionAmount();
-
-        totalTransactionCount = totalTransactionCountCredit + totalTransactionCountDebit;
-        totalTransactionAmount = totalTransactionAmountCredit + totalTransactionAmountDebit;
+        cocuID = DDM_Constants.status_all;
     }
-    
-    totalRecordCount = DAOFactory.getOWDetailsDAO().getRecordCountOWDetailsByStatusForHOGL(DDM_Constants.status_all, webBusinessDate, DDM_Constants.ddm_transaction_status_04);
+
+    if (batchNo == null)
+    {
+        batchNo = DDM_Constants.status_all;
+    }
+
+    if (orgAccNo == null)
+    {
+        orgAccNo = DDM_Constants.status_all;
+    }
+
+    if (afvd == null)
+    {
+        afvd = DDM_Constants.status_all;
+    }
+
+    System.out.println("cocuID--->" + cocuID);
+    System.out.println("fileID--->" + fileID);
+    System.out.println("fileBDate--->" + fileBDate);
+    System.out.println("orgAccNo--->" + orgAccNo);
+
+    fileInfo = DAOFactory.getFileInfoDAO().getFileDetails(fileID, fileBDate, DDM_Constants.status_all, DDM_Constants.status_all);
+
+    String fromDate = DAOFactory.getBCMCalendarDAO().getPreviousBusinessDate(webBusinessDate, 14);
+
+    totalRecordCount = DAOFactory.getOWDetailsDAO().getRecordCountOWDetails(fileID, fileBDate, batchNo);
+
+    validTrCountForConfirmation = DAOFactory.getOWDetailsDAO().getRecordCountOWDetails(fileID, fileBDate, batchNo, DDM_Constants.ddm_transaction_status_00);
+
+    invalidOther = DAOFactory.getOWDetailsDAO().getRecordCountOWDetails(fileID, fileBDate, batchNo, DDM_Constants.ddm_transaction_status_09);
+    invalidPBAccounts = DAOFactory.getOWDetailsDAO().getRecordCountOWDetailsByRejectCode(fileID, fileBDate, batchNo, DDM_Constants.ddm_reject_code_invalid_pb_account);
+    invalidValueDates = DAOFactory.getOWDetailsDAO().getRecordCountOWDetailsByRejectCode(fileID, fileBDate, batchNo, DDM_Constants.ddm_reject_code_invalid_value_date);
 
     System.out.print("totalRecordCount ---> " + totalRecordCount);
 
+    if (fileInfo.getUploadedBy().equals(session_userName))
+    {
+        isOkToConfirm = true;
+    }
 
     if (totalRecordCount > 0)
     {
@@ -160,49 +196,379 @@
 
         System.out.print("totalPageCount ---> " + totalPageCount);
 
-        colResult = DAOFactory.getOWDetailsDAO().getOWDetailsByStatusForHOGL(DDM_Constants.status_all, webBusinessDate, DDM_Constants.ddm_transaction_status_04, reqPageNo, DDM_Constants.noPageRecords);
+        colResult = DAOFactory.getOWDetailsDAO().getOWDetails(fileID, fileBDate, batchNo, reqPageNo, DDM_Constants.noPageRecords);
+        colIWDesBr999 = DAOFactory.getOWDetailsDAO().getIWDetailsWithDesBr999(fileID, fileBDate, DDM_Constants.status_all);
 
-        DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_generate_hogl_report_initial, "| Business Date - " + webBusinessDate + ", SLIPS Tr. Status - SLIPS Manager Approved (Ready for OWD File Creation), Page No. - " + reqPageNo + " | Record Count - " + colResult.size() + ", Total Record Count - " + totalRecordCount + " | Viewed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        totalTransactionAmount = DAOFactory.getOWDetailsDAO().getTotalTransactionAmount(fileID, fileBDate, batchNo, DDM_Constants.status_all, DDM_Constants.status_yes);
+
+        String statusNotIn = "'" + DDM_Constants.slip_file_status_error + "','" + DDM_Constants.slip_file_status_rejected_insufficient_fund + "','" + DDM_Constants.slip_file_status_ddm_manager_rejected + "','" + DDM_Constants.slip_file_status_timeout + "','" + DDM_Constants.slip_file_status_upload_rejected_cocu_supervisor + "'";
+
+        colDupFile = DAOFactory.getFileInfoDAO().getFileDetailsByCriteria(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), fileInfo.getFileType(), DDM_Constants.status_all, statusNotIn, DDM_Constants.status_all, fileInfo.getNooftransactionexpected(), totalTransactionAmount, fromDate, webBusinessDate);
+
+        if (colDupFile != null && colDupFile.size() > 0)
+        {
+            int dfCount = 0;
+
+            for (FileInfo fi : colDupFile)
+            {
+                if (!fi.getFileId().equals(fileID))
+                {
+                    dfCount++;
+                }
+            }
+
+            if (dfCount > 0)
+            {
+                duplicatesAvailable = true;
+            }
+        }
+
+        DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| File Id - " + fileID + ", File Business Date - " + fileBDate + ", Batch No. - " + batchNo + ", Page No. - " + reqPageNo + " | Record Count - " + colResult.size() + ", Total Record Count - " + totalRecordCount + " | Viewed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
     }
     else
     {
-        DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_generate_hogl_report_initial, "| Business Date- " + webBusinessDate + ", SLIPS Tr. Status - SLIPS Manager Approved (Ready for OWD File Creation) | Total Record Count - 0 | Viewed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| File Id - " + fileID + ", File Business Date - " + fileBDate + ", Batch No. - " + batchNo + " | Total Record Count - 0 | Viewed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
     }
 
-    //int confirmedTrCount = -1;
+    int confirmedTrCount = -1;
+    int confirmedTrCount_Rejected = -1;
+
     if (hdnConfirmRequest.equals("1"))
     {
-        String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);               
-        
-        ReportDAO reportDAO = DAOFactory.getReportDAO();
-        
-        hoglReportPath = reportDAO.generateHOGL_Report(businessDate, winSession, session_userName);
-        
-        System.out.println("hoglReportPath ----->" + hoglReportPath);
-        
-        hoglFileName = new File(hoglReportPath).getName();
-        
-        
-        if (hoglReportPath!= null)
-        {  
-            confirmStatus = true;
-            hdnAlreadyConfirmed = "1";
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_generate_hogl_report, "| HOGL Report - " + hoglFileName + ", Date - " + webBusinessDate + " |File Generation Status - Success, SLIPS Transaction Count - " + totalRecordCount + ", Generated By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        //String cDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate).substring(2);
+        String cDate = fileBDate.replaceAll("-", "").substring(2);
+
+        if (fileInfo.getFileType() != null && (fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type) || fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type)))
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_02, session_userName);
         }
         else
         {
-            String errMsg = reportDAO.getMsg();
-            
-            confirmStatus = false;
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_01, session_userName);
+        }
+
+        if (confirmedTrCount > 0)
+        {
+            //String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);
+            String businessDate = fileBDate.replaceAll("-", "");
+
+            if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsIW(DDM_Constants.default_bank_code, DDM_Constants.status_all, fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    System.out.println("colCBfileDetails.size() ---> " + colCBfileDetails.size());
+
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_uploader_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "1";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Success, Confirmed Valid Transaction Count - " + confirmedTrCount + ", Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+        else
+        {
+            confirmStatus = true;
             hdnAlreadyConfirmed = "0";
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_generate_hogl_report, "| HOGL Report - " + hoglFileName + ", Date - " + webBusinessDate + " |File Generation Status - Unsuccess, Failed to generate the HOGL report file (" + errMsg + "), Generated By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Unsuccess, Couldn't Confirmed Any Valid Transaction, Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+    }
+
+    if (hdnConfirmRequest.equals("2"))
+    {
+        //String cDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate).substring(2);
+        String cDate = fileBDate.replaceAll("-", "").substring(2);
+
+        if (fileInfo.getFileType() != null && (fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type) || fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type)))
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_02, session_userName);
+            confirmedTrCount_Rejected = DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_02, DDM_Constants.ddm_reject_code_invalid_pb_account, afvd, session_userName);
+        }
+        else
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_01, session_userName);
+            confirmedTrCount_Rejected = DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_01, DDM_Constants.ddm_reject_code_invalid_pb_account, afvd, session_userName);
+        }
+
+        if ((confirmedTrCount + confirmedTrCount_Rejected) > 0)
+        {
+            //String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);
+            String businessDate = fileBDate.replaceAll("-", "");
+
+            if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsIW(DDM_Constants.default_bank_code, DDM_Constants.status_all, fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_uploader_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "1";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Success, Confirmed Valid Transaction Count - " + confirmedTrCount + ", Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+        else
+        {
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "0";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Unsuccess, Couldn't Confirmed Any Valid Transaction, Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+    }
+
+    if (hdnConfirmRequest.equals("3"))
+    {
+        //String cDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate).substring(2);
+        String cDate = fileBDate.replaceAll("-", "").substring(2);
+
+        if (fileInfo.getFileType() != null && (fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type) || fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type)))
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_02, session_userName);
+            confirmedTrCount_Rejected = DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_02, DDM_Constants.ddm_reject_code_invalid_value_date, afvd, session_userName);
+        }
+        else
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_01, session_userName);
+            confirmedTrCount_Rejected = DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_01, DDM_Constants.ddm_reject_code_invalid_value_date, afvd, session_userName);
+        }
+
+        if ((confirmedTrCount + confirmedTrCount_Rejected) > 0)
+        {
+            //String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);
+            String businessDate = fileBDate.replaceAll("-", "");
+
+            if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsIW(DDM_Constants.default_bank_code, DDM_Constants.status_all, fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_uploader_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "1";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Success, Confirmed Valid Transaction Count - " + confirmedTrCount + ", Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+        else
+        {
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "0";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Unsuccess, Couldn't Confirmed Any Valid Transaction, Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+    }
+
+    if (hdnConfirmRequest.equals("4"))
+    {
+        //String cDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate).substring(2);
+        String cDate = fileBDate.replaceAll("-", "").substring(2);
+
+        if (fileInfo.getFileType() != null && (fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type) || fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type)))
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_02, session_userName);
+            confirmedTrCount_Rejected = DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_02, DDM_Constants.ddm_reject_code_invalid_pb_account, afvd, session_userName);
+            confirmedTrCount_Rejected = confirmedTrCount_Rejected + DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_02, DDM_Constants.ddm_reject_code_invalid_value_date, afvd, session_userName);
+            confirmedTrCount_Rejected = confirmedTrCount_Rejected + DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_02, DDM_Constants.ddm_reject_code_invalid_pb_account_and_value_date, afvd, session_userName);
+        }
+        else
+        {
+            confirmedTrCount = DAOFactory.getSlipsTransactionDAO().updateTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_00, DDM_Constants.ddm_transaction_status_01, session_userName);
+            confirmedTrCount_Rejected = DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_01, DDM_Constants.ddm_reject_code_invalid_pb_account, afvd, session_userName);
+            confirmedTrCount_Rejected = confirmedTrCount_Rejected + DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_01, DDM_Constants.ddm_reject_code_invalid_value_date, afvd, session_userName);
+            confirmedTrCount_Rejected = confirmedTrCount_Rejected + DAOFactory.getSlipsTransactionDAO().updateRejectedTransactionStatusByUploader(fileID, cDate, DDM_Constants.ddm_transaction_status_01, DDM_Constants.ddm_reject_code_invalid_pb_account_and_value_date, afvd, session_userName);
+        }
+
+        if ((confirmedTrCount + confirmedTrCount_Rejected) > 0)
+        {
+            //String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);
+            String businessDate = fileBDate.replaceAll("-", "");
+
+            if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsIW(DDM_Constants.default_bank_code, DDM_Constants.status_all, fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else if (fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_non_core_return_file_Type))
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_fund_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+            else
+            {
+                DAOFactory.getFileInfoDAO().updateFileStatus(fileID, businessDate, DDM_Constants.slip_file_status_uploader_confirmed, null, session_userName);
+
+                Collection<CustomBatch> colCBfileDetails = DAOFactory.getCustomBatchDAO().getBatchDetailsOW(DDM_Constants.default_bank_code, fileInfo.getOwBranch(), fileInfo.getCoCuID(), DDM_Constants.status_all, fileID, fileBDate, fileBDate);
+
+                if (colCBfileDetails != null && colCBfileDetails.size() == 1)
+                {
+                    CustomBatch cbFileDetail = colCBfileDetails.iterator().next();
+
+                    DAOFactory.getFileInfoDAO().updateCreditDebitTotalsAndUploadConfirmation(fileID, businessDate, cbFileDetail.getItemCountCredit(), cbFileDetail.getAmountCredit(), cbFileDetail.getItemCountDebit(), cbFileDetail.getAmountDebit(), totalTransactionAmount, session_userName);
+                }
+            }
+
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "1";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Success, Confirmed Valid Transaction Count - " + confirmedTrCount + ", Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+        else
+        {
+            confirmStatus = true;
+            hdnAlreadyConfirmed = "0";
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id - " + fileID + ", Date - " + cDate + " |Confirmed Status - Unsuccess, Couldn't Confirmed Any Valid Transaction, Confirmed By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+        }
+    }
+
+    if (hdnConfirmRequest.equals("5"))
+    {        
+        System.out.println("hdnConfirmRequest ---> " + hdnConfirmRequest);
+        System.out.println("fileID - " + fileID + ", fileBDate - " + fileBDate);
+        
+        String fBussinessDate = fileBDate.replaceAll("-", "");
+        
+        System.out.println("fBussinessDate ---> " + fBussinessDate);
+        
+        if (DAOFactory.getFileInfoDAO().isFileCurrentlyProcessing(fileID, fBussinessDate))
+        {
+            System.out.println("isFileCurrentlyProcessing ---> is ture (fileID - " + fileID + ", fBussinessDate - " + fBussinessDate);
+            
+            if (DAOFactory.getSlipsTransactionDAO().deleteSlipsTransactions(fileID, fBussinessDate.substring(2)))
+            {
+                System.out.println("deleteSlipsTransactions ---> is ture (fileID - " + fileID + ", fBussinessDate - " + fBussinessDate);
+                
+                if (DAOFactory.getCustomBatchDAO().deleteSlipsBatch(fileID))
+                {
+                    System.out.println("deleteSlipsBatch ---> is ture (fileID - " + fileID + ", fBussinessDate - " + fBussinessDate);
+                    
+                    if (DAOFactory.getFileInfoDAO().deleteSlipsFile(fileID, fBussinessDate))
+                    {
+                        System.out.println("deleteSlipsFile ---> is ture (fileID - " + fileID + ", fBussinessDate - " + fBussinessDate);
+                        
+                        confirmStatus = true;
+                        hdnAlreadyConfirmed = "1";
+                        DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_confirm_on_uploaded_ddm_transactions, "| SLIPS File Id : " + fileID + ", Date : " + fileBDate + " | Reject and Remove Uploaded File Status - Success, Done By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+
+                        System.out.println("Previous Slips Data and SLIPS File Successfily Deleted ------> " + fileID + ", " + fileBDate);
+                    }
+                }
+            }
         }
     }
 
 %>
 <html>
     <head>
-        <title>LankaPay Direct Debit Mandate Exchange System - Generate HOGL Report</title>
+        <title>LankaPay Direct Debit Mandate Exchange System - View & Confirm Uploaded SLIPS Data</title>
         <link href="<%=request.getContextPath()%>/css/ddm.css" rel="stylesheet" type="text/css" />
         <link href="<%=request.getContextPath()%>/css/tcal.css" rel="stylesheet" type="text/css" />
         <link href="../../css/ddm.css" rel="stylesheet" type="text/css" />
@@ -216,7 +582,6 @@
         <script language="JavaScript" type="text/JavaScript" src="<%=request.getContextPath()%>/js/tcal.js"></script>
 
         <script language="javascript" type="text/JavaScript">
-
 
             function showClock(type)
             {
@@ -293,14 +658,14 @@
             function setReqPageNoForCombo2()
             {
             document.getElementById('hdnReqPageNo').value = document.getElementById('cmbPageNo2').value;
-            document.frmPageNavi.action="GenerateHOGL.jsp";
+            document.frmPageNavi.action="ViewDetailsAndConfirm.jsp";
             document.frmPageNavi.submit();
             }
 
             function setReqPageNoForCombo()
             {
             document.getElementById('hdnReqPageNo').value = document.getElementById('cmbPageNo').value;
-            document.frmPageNavi.action="GenerateHOGL.jsp";
+            document.frmPageNavi.action="ViewDetailsAndConfirm.jsp";
             document.frmPageNavi.submit();
             }
 
@@ -308,24 +673,37 @@
             {
             document.getElementById('hdnReqPageNo').value = no;
 
-            document.frmPageNavi.action="GenerateHOGL.jsp";
+            document.frmPageNavi.action="ViewDetailsAndConfirm.jsp";
             document.frmPageNavi.submit();				
             }
 
 
-            function doSubmit()
+            function doSubmit(val)
             { 
+            if(val==1)
+            {
             document.getElementById('hdnConfirmRequest').value = "1";
-            document.frmConfirmTransactions.action="GenerateHOGL.jsp";
-            document.frmConfirmTransactions.submit();
-
+            }
+            if(val==2)
+            {
+            document.getElementById('hdnConfirmRequest').value = "2";
+            }
+            if(val==3)
+            {
+            document.getElementById('hdnConfirmRequest').value = "3";
+            }
+            if(val==4)
+            {
+            document.getElementById('hdnConfirmRequest').value = "4";
+            }
+            if(val==5)
+            {
+            document.getElementById('hdnConfirmRequest').value = "5";
             }
 
+            document.frmConfirmTransactions.action="ViewDetailsAndConfirm.jsp";
+            document.frmConfirmTransactions.submit();
 
-            function downloadFile()
-            {
-            document.frmDownload.action="DownloadHOGLFile.jsp";
-            document.frmDownload.submit();			
             }
 
         </script>
@@ -457,7 +835,7 @@
                                                                             <td align="left" valign="top" ><table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                                                     <tr>
                                                                                         <td width="10">&nbsp;</td>
-                                                                                        <td align="left" valign="top" class="ddm_header_text">Generate HOGL Report</td>
+                                                                                        <td align="left" valign="top" class="ddm_header_text">View &amp; Confirm SLIPS Transactions <span class="ddm_header_small_text">(Confirm Uploaded SLIPS Data)</span></td>
                                                                                         <td width="10">&nbsp;</td>
                                                                                     </tr>
                                                                                     <tr>
@@ -478,7 +856,7 @@
                                                                                                                 <td height="15" align="center" class="ddm_header_text"></td>
                                                                                                             </tr>
                                                                                                             <tr>
-                                                                                                                <td align="center"><div id="noresultbanner" class="ddm_header_small_text">No records available for 'HOGL Report File' generation!</div></td>
+                                                                                                                <td align="center"><div id="noresultbanner" class="ddm_header_small_text">No records Available !</div></td>
                                                                                                             </tr>
                                                                                                             <%   }
                                                                                                             else if (colResult.size() > DDM_Constants.maxWebRecords)
@@ -496,31 +874,15 @@
                                                                                                             %>
 
                                                                                                             <%
-                                                                                                                if (hdnConfirmRequest.equals("1"))
+                                                                                                                if (hdnConfirmRequest.equals("1") || hdnConfirmRequest.equals("2") || hdnConfirmRequest.equals("3") || hdnConfirmRequest.equals("4") || hdnConfirmRequest.equals("5"))
                                                                                                                 {
                                                                                                                     if (confirmStatus)
                                                                                                                     {
+                                                                                                                        if (hdnConfirmRequest.equals("5"))
+                                                                                                                        {
                                                                                                             %>
                                                                                                             <tr>
-                                                                                                                <td align="center" ><table border="0" cellspacing="0" cellpadding="0">
-                                                                                                                        <tr>
-                                                                                                                            <td height="10" align="center" class="ddm_Display_Success_msg">You have successfully generated the HOGL Report File - <%=hoglFileName %> for the business date - <%=webBusinessDate %>, using following slips transactions! <br/>
-                                                                                                                                <span class="ddm_success">(You can download the generated 'HOGL Report') using following download button)</span></td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                            <td>&nbsp;</td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                            <td align="center">
-                                                                                                                                <form id="frmDownload" name="frmDownload" method="post" target="_blank"><input type="hidden" id="hdnFileName" name="hdnFileName" value="<%=hoglFileName%>"  />
-                                                                                                                                    <input type="hidden" id="hdnFilePath" name="hdnFilePath" value="<%=hoglReportPath %>"  />
-                                                                                                                                    <input type="button" name="btnDwnReport" id="btnDwnReport" value="Download - <%=hoglFileName%>" class="ddm_custom_button" onClick="downloadFile()">
-                                                                                                                                </form>
-
-                                                                                                                            </td>
-                                                                                                                        </tr>
-                                                                                                                    </table>
-                                                                                                                </td>
+                                                                                                                <td height="10" align="center" class="ddm_Display_Success_msg">You have successfully reject and remove the uploaded SLIPS data file and following transaction details!</td>
                                                                                                             </tr>
                                                                                                             <%
                                                                                                             }
@@ -528,7 +890,16 @@
                                                                                                             {
                                                                                                             %>
                                                                                                             <tr>
-                                                                                                                <td align="center" class="ddm_Display_Error_msg">Error occurred while generating the HOGL Report File - <%=hoglFileName%>  for the business date - <%=webBusinessDate %> !</td>
+                                                                                                                <td height="10" align="center" class="ddm_Display_Success_msg">You have successfully confirmed the following transactions!</td>
+                                                                                                            </tr>
+                                                                                                            <%
+                                                                                                                }
+                                                                                                            }
+                                                                                                            else
+                                                                                                            {
+                                                                                                            %>
+                                                                                                            <tr>
+                                                                                                                <td align="center" class="ddm_Display_Error_msg">Error occurred while confirming the transactions!</td>
                                                                                                             </tr>
 
                                                                                                             <%
@@ -539,6 +910,110 @@
                                                                                                             <tr>
                                                                                                                 <td height="10" align="center" class="ddm_header_text"></td>
                                                                                                             </tr>
+
+                                                                                                            <%
+                                                                                                                if (duplicatesAvailable)
+                                                                                                                {
+                                                                                                            %>
+                                                                                                            <tr>
+                                                                                                                <td height="10" align="center" class="ddm_header_text"><table border="0" cellspacing="0" cellpadding="1" bgcolor="#F8EFFA" class="ddm_table_boder">
+                                                                                                                        <tr>
+                                                                                                                            <td colspan="3"><table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#EFB4BC" class="ddm_table_boder_light">
+                                                                                                                                    <tr>
+                                                                                                                                        <td align="left" class="ddm_Display_Error_msg">
+                                                                                                                                            <table border="0" cellspacing="0" cellpadding="2">
+                                                                                                                                                <tr>
+                                                                                                                                                    <td>&nbsp;</td>
+                                                                                                                                                    <td><img src="<%=request.getContextPath()%>/images/warning2.png" width="48"
+                                                                                                                                                             height="48" border="0" align="middle" ></td>
+                                                                                                                                                    <td>&nbsp;&nbsp;</td>
+                                                                                                                                                    <td valign="middle" ><table border="0" cellspacing="0" cellpadding="0">
+                                                                                                                                                            <tr>
+                                                                                                                                                                <td height="10"></td>
+                                                                                                                                                            </tr>
+                                                                                                                                                            <tr>
+                                                                                                                                                                <td class="ddm_Display_Error_msg"><h1>WARNING!</h1></td>
+                                                                                                                                                            </tr>
+                                                                                                                                                        </table>                                                                                                                    </td>
+                                                                                                                                                    <td valign="middle" >&nbsp;</td>
+                                                                                                                                                    <td align="center" valign="bottom" ><table width="100%" border="0" cellpadding="0" cellspacing="0">
+                                                                                                                                                            <tr>
+                                                                                                                                                                <td width="100" align="center" class="ddm_Display_Error_msg">&nbsp;</td>
+                                                                                                                                                                <td align="center" class="ddm_Display_Error_msg"><h2>Duplicate SLIPS File Data Found    For Last 14 Days.</h2></td>
+                                                                                                                                                            </tr>
+                                                                                                                                                        </table></td>
+                                                                                                                                                </tr>
+                                                                                                                                            </table></td>
+                                                                                                                                    </tr>
+                                                                                                                                    <tr>
+                                                                                                                                        <td height="5"></td>
+                                                                                                                                    </tr>
+                                                                                                                                </table></td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td>&nbsp;&nbsp;</td>
+                                                                                                                            <td>
+
+                                                                                                                                <table border="0" cellpadding="3" cellspacing="1"  bgcolor="#FFFFFF" class="ddm_table_boder_light" >
+                                                                                                                                    <tr>
+                                                                                                                                        <td  class="ddm_tbl_header_text"></td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">File Id</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Business<br/>Date</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Session</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Corporate<br/>Customer</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Orginator<br/>Account No.</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Total<br/>Transactions</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Total<br/>Amount</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Status</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Uploaded<br/>By</td>
+                                                                                                                                        <td align="center" bgcolor="#D7BBE1" class="ddm_tbl_header_text_horizontal">Uploaded<br/>Time</td>
+                                                                                                                                    </tr>
+                                                                                                                                    <%
+                                                                                                                                        int rowNum = 0;
+
+                                                                                                                                        for (FileInfo fi : colDupFile)
+                                                                                                                                        {
+                                                                                                                                            if (!fi.getFileId().equals(fileID))
+                                                                                                                                            {
+                                                                                                                                                rowNum++;
+
+                                                                                                                                    %>
+                                                                                                                                    <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>"   onMouseOver="cOn(this)" onMouseOut="cOut(this)">
+                                                                                                                                        <td align="right" class="ddm_common_text"><%=rowNum%>.</td>
+                                                                                                                                        <td nowrap class="ddm_common_text"><%=fi.getFileId()%></td>
+                                                                                                                                        <td align="center" nowrap class="ddm_common_text"><%=fi.getBusinessDate()%></td>
+                                                                                                                                        <td align="center" class="ddm_common_text"><%=fi.getSession()%></td>
+                                                                                                                                        <td nowrap class="ddm_common_text"><%=fi.getCoCuID()%> - <%=fi.getCoCuName()%></td>
+                                                                                                                                        <td nowrap class="ddm_common_text" title="<%=fi.getOriginatorAccName()%>"><%=fi.getOriginatorAccNo()%></td>
+                                                                                                                                        <td align="right" class="ddm_common_text"><%=fi.getNooftransactionexpected()%></td>                                                                                                                                  
+
+                                                                                                                                        <td align="right" class="ddm_common_text"><%=new DecimalFormat("###,##0.00").format((new Long(fi.getTotalAmountExpected()).doubleValue()) / 100)%></td>
+                                                                                                                                        <td class="ddm_common_text"><%=fi.getStatusDesc()%></td>
+                                                                                                                                        <td class="ddm_common_text"><%=fi.getUploadedBy()%></td>
+                                                                                                                                        <td align="center" class="ddm_common_text"><%=fi.getUploadedTime()%></td>
+                                                                                                                                    </tr>
+                                                                                                                                    <%
+                                                                                                                                            }
+
+                                                                                                                                        }
+                                                                                                                                    %>
+                                                                                                                                </table>                                                                                                                    </td>
+                                                                                                                            <td>&nbsp;&nbsp;</td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td height="10"></td>
+                                                                                                                            <td></td>
+                                                                                                                            <td></td>
+                                                                                                                        </tr>
+                                                                                                                    </table></td>
+                                                                                                            </tr>
+                                                                                                            <tr><td height="10">&nbsp;</td>
+                                                                                                            </tr>
+                                                                                                            <%
+                                                                                                                }
+                                                                                                            %>
+
+
                                                                                                             <tr>
                                                                                                                 <td align="center"><div id="resultdata">
 
@@ -560,31 +1035,54 @@
                                                                                                                                                                     <tr>
                                                                                                                                                                         <td width="5" nowrap class="ddm_common_text_bold">&nbsp;</td>
                                                                                                                                                                         <td nowrap class="ddm_common_text_bold_large">B. Date :</td>
-                                                                                                                                                                      <td width="3"></td>
-                                                                                                                                                                        <td class="ddm_common_text_large"><%=webBusinessDate%></td>
-                                                                                                                                                                        <td width="8"></td>
-                                                                                                                                                                        <td nowrap class="ddm_common_text_bold_large">Total Transaction :</td>
-                                                                                                                                                                        
-                                                                                                                                                                        <td nowrap class="ddm_common_text_large"><%=new DecimalFormat("###,###").format(new Long(totalTransactionCount).doubleValue())%></td>
-                                                                                                                                                                      <td width="8"></td>
-                                                                                                                                                                        <td nowrap class="ddm_common_text_bold_large">Total Credit Tr. (</td>
-                                                                                                                                                                      <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold" title="Total Credit Transaction Count"> Count :</span></td>
-                                                                                                                                                                        <td class="ddm_common_text_large"><%=new DecimalFormat("###,###").format(new Long(totalTransactionCountCredit).doubleValue())%></td><td width="8"></td>
-                                                                                                                                                                        <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold_large" title="Total Credit Transaction Amount">Amount :</span></td>
-                                                                                                                                                                      <td class="ddm_common_text_large"><%=new DecimalFormat("###,##0.00").format((new Long(totalTransactionAmountCredit).doubleValue()) / 100)%></td><td nowrap class="ddm_common_text_bold_large"> &nbsp;)</td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getBusinessDate()%></td>
+                                                                                                                                                                        <td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold_large">Session :</td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getSession()%></td>
+                                                                                                                                                                        <td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold_large"><span class="ddm_common_text_bold_large" title="Corporate Customer ID">CoCu :</span></td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getCoCuID() != null ? fileInfo.getCoCuID() : "N/A"%></td>
+                                                                                                                                                                        <td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold_large">File :</td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getFileId()%></td>
+                                                                                                                                                                        <td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold_large" title="Total Number of Transactions">Total Tr. :</span></td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getNooftransactionexpected()%></td><td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold_large" title="Number of Accepted Transactions">Acc. Tr. :</span></td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getNoOfTransaction()%></td>
+                                                                                                                                                                        <td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold_large" title="Number Of Rejected Transactions">Rej. Tr. :</span></td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=fileInfo.getNooftransactionrejected()%> <% if (fileInfo.getNooftransactionrejected() > 0)
+                                                                                                                                                                            {%><span class="ddm_link" title="Click To View The Rejected Transcation Details">(<a href="javascript:void(0)" class="ddm_link" onClick="javascript:window.open('ViewRejectDetails.jsp?fileId=<%=fileID%>&bDate=<%=fileBDate%>', 'ViewRejectTr', 'width=960,height=650,location=0,status=0,manubar=0,resizable=1,scrollbars=1,toolbar=0')"> View </a>)</span><% }%></td>
 
-                                                                                                                                                                        <td width="8"></td>
-                                                                                                                                                                        <td nowrap class="ddm_common_text_bold_large">Total Debit Tr. (</td>
-                                                                                                                                                                      <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold_large" title="Total Debit Transaction Count"> Count :</span></td>
-                                                                                                                                                                        <td class="ddm_common_text_large"><%=new DecimalFormat("###,###").format(new Long(totalTransactionCountDebit).doubleValue())%></td><td width="8"></td>
-                                                                                                                                                                        <td><span class="ddm_common_text_bold_large" title="Total Debit Transaction Amount">Amount :</span></td>
-                                                                                                                                                                      <td class="ddm_common_text_large"><%=new DecimalFormat("###,##0.00").format((new Long(totalTransactionAmountDebit).doubleValue()) / 100)%></td><td nowrap class="ddm_common_text_bold_large"> &nbsp;)</td>
+                                                                                                                                                                        <%
+                                                                                                                                                                            if ((fileInfo.getFileType() != null && fileInfo.getFileType().equalsIgnoreCase(DDM_Constants.ddm_iwd_file_Type)) && (colIWDesBr999 != null && colIWDesBr999.size() > 0))
+                                                                                                                                                                            {
+                                                                                                                                                                        %>
+
+                                                                                                                                                                        <td width="5"></td>
+                                                                                                                                                                      <td nowrap class="ddm_common_text_bold"><span class="ddm_common_text_bold_large" title="Inward Transactions with Destination Branch 999">IW Des. Br. 999 Tr. :</span></td>
+                                                                                                                                                                        <td class="ddm_common_text_large"><%=colIWDesBr999.size()%> (<span class="ddm_link" title="Click To View The Details of Inward Transactions with Destination Branch 999"><a href="javascript:void(0)" class="ddm_link" onClick="javascript:window.open('ViewIWDesBr999.jsp?fileId=<%=fileID%>&bDate=<%=fileBDate%>', 'ViewIWDesBr999', 'width=960,height=650,location=0,status=0,manubar=0,resizable=1,scrollbars=1,toolbar=0')"> View </a></span>)</td>
+                                                                                                                                                                        <%
+                                                                                                                                                                            }
+                                                                                                                                                                        %>
+
+                                                                                                                                                                        <td width="20" class="ddm_common_text_large">&nbsp;</td>
                                                                                                                                                                     </tr>
-                                                                                                                                                          </table></td>
+                                                                                                                                                                </table></td>
                                                                                                                                                             <td align="right"><table border="0" cellspacing="0" cellpadding="2">
                                                                                                                                                                     <tr>
-                                                                                                                                                                        <td class="ddm_common_text">
-                                                                                                                                                                            <!-- input type="hidden" id="hdnConfirmRequest" name="hdnConfirmRequest" value="<%=hdnConfirmRequest%>" /-->         
+                                                                                                                                                                        <td class="ddm_common_text"><input type="hidden" id="hdnFileName" name="hdnFileName" value="<%=fileID%>" />
+                                                                                                                                                                            <input type="hidden" id="hdnFileBDate" name="hdnFileBDate" value="<%=fileBDate%>" />
+
+                                                                                                                                                                            <input type="hidden" id="hdnBatchNo" name="hdnBatchNo" value="<%=batchNo%>" />   
+
+                                                                                                                                                                            <input type="hidden" id="hdnCoCuID" name="hdnCoCuID" value="<%=cocuID%>" /> 
+
+                                                                                                                                                                            <input type="hidden" id="hdnOrgAccNo" name="hdnOrgAccNo" value="<%=orgAccNo%>" /> 
+                                                                                                                                                                            <input type="hidden" id="hdnAFVD" name="hdnAFVD" value="<%=afvd%>" /> 
+
+<!-- input type="hidden" id="hdnConfirmRequest" name="hdnConfirmRequest" value="<%=hdnConfirmRequest%>" /-->         
                                                                                                                                                                             <input type="hidden" id="hdnAlreadyConfirmed" name="hdnAlreadyConfirmed" value="<%=hdnAlreadyConfirmed%>" />                                                                 
                                                                                                                                                                             <input type="hidden" id="hdnReqPageNo" name="hdnReqPageNo" value="<%=reqPageNo%>" />                                                                                                                        </td>
                                                                                                                                                                         <td align="right" valign="middle" class="ddm_common_text"> Page <%=reqPageNo%> of <%=totalPageCount%>.</td>
@@ -697,7 +1195,10 @@
 
                                                                                                                                                 //itemCountCredit += owdetails.getItemCountCredit();
                                                                                                                                                 //itemCountDebit += owdetails.getItemCountDebit();
-                                                                                                                                                totalAmount += owdetails.getAmount();
+                                                                                                                                                if (owdetails.getAmount() > 0)
+                                                                                                                                                {
+                                                                                                                                                    totalAmount += owdetails.getAmount();
+                                                                                                                                                }
                                                                                                                                                 //totalAmountCredit += owdetails.getAmountCredit();
                                                                                                                                         %>
                                                                                                                                                                                                         <!--form action="" id="frmRemarks_<%=rowNum%>" name="frmRemarks_<%=rowNum%>" method="post" target="_self"-->
@@ -715,13 +1216,13 @@
                                                                                                                                             <td align="center"  class="ddm_common_text"><%=owdetails.getValueDate()%></td>
                                                                                                                                             <td align="center"  class="ddm_common_text"><%=owdetails.getCurrencyCode()%></td>
                                                                                                                                             <td align="right"  class="ddm_common_text"><%=new DecimalFormat("###,##0.00").format((new Long(owdetails.getAmount()).doubleValue()) / 100)%></td>
-                                                                                                                                            <td align="center"  class="ddm_common_text"><%=owdetails.getParticulars()%></td>
-                                                                                                                                            <td align="center"  class="ddm_common_text"><%=owdetails.getReference()%></td>
+                                                                                                                                            <td  class="ddm_common_text"><%=owdetails.getParticulars()%></td>
+                                                                                                                                          <td  class="ddm_common_text"><%=owdetails.getReference()%></td>
 
 
 
-                                                                                                                                            <td align="center"  class="ddm_common_text"><%=owdetails.getStatusDesc() != null ? owdetails.getStatusDesc() : "N/A"%></td>
-                                                                                                                                            <td align="center" nowrap  class="ddm_common_text"><%=owdetails.getRJCodes() != null ? owdetails.getRJCodes().equals("00") ? "-" : owdetails.getRJCodes() : "-"%></td>
+                                                                                                                                          <td  class="ddm_common_text"><%=owdetails.getStatusDesc() != null ? owdetails.getStatusDesc() : "N/A"%></td>
+                                                                                                                                          <td align="center" nowrap  class="ddm_common_text"><%=owdetails.getRJCodes() != null ? owdetails.getRJCodes().equals("00") ? "-" : owdetails.getRJCodes() : "-"%></td>
                                                                                                                                         </tr>
                                                                                                                                         <!--/form-->
                                                                                                                                         <%
@@ -736,12 +1237,12 @@
                                                                                                                                             <td colspan="4" align="center" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal">&nbsp;</td>
                                                                                                                                         </tr>
                                                                                                                                         <tr  class="ddm_common_text">
-                                                                                                                                          <td height="20" colspan="10" align="right" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal" ></td>
-                                                                                                                                          <td align="center" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal">Grand Total</td>
-                                                                                                                                          <td align="right" bgcolor="#B4C4D3" class="ddm_tbl_header_text"><%=new DecimalFormat("###,##0.00").format((new Long(totalTransactionAmount).doubleValue()) / 100)%></td>
-                                                                                                                                          <td colspan="4" align="center" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal">&nbsp;</td>
+                                                                                                                                            <td height="20" colspan="10" align="right" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal" ></td>
+                                                                                                                                            <td align="center" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal">Grand Total</td>
+                                                                                                                                            <td align="right" bgcolor="#B4C4D3" class="ddm_tbl_header_text"><%=new DecimalFormat("###,##0.00").format((new Long(totalTransactionAmount).doubleValue()) / 100)%></td>
+                                                                                                                                            <td colspan="4" align="center" bgcolor="#B4C4D3" class="ddm_tbl_header_text_horizontal">&nbsp;</td>
                                                                                                                                         </tr>
-                                                                                                                              </table></td>
+                                                                                                                                    </table></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
                                                                                                                                 <td height="10"></td>
@@ -828,19 +1329,87 @@
                                                                                                             <tr><td height="10"></td>
                                                                                                             </tr>
                                                                                                             <tr><td align="center"><form name="frmConfirmTransactions" id="frmConfirmTransactions"  method="post" >
+                                                                                                                        <input type="hidden" id="hdnFileName" name="hdnFileName" value="<%=fileID%>" />
+                                                                                                                        <input type="hidden" id="hdnFileBDate" name="hdnFileBDate" value="<%=fileBDate%>" />
+                                                                                                                        <input type="hidden" id="hdnBatchNo" name="hdnBatchNo" value="<%=batchNo%>" />         
 
+                                                                                                                        <input type="hidden" id="hdnCoCuID" name="hdnCoCuID" value="<%=cocuID%>" /> 
 
-                                                                                                                        <input type="hidden" id="hdnConfirmRequest" name="hdnConfirmRequest" value="<%=hdnConfirmRequest%>" />                                                                          
+                                                                                                                        <input type="hidden" id="hdnOrgAccNo" name="hdnOrgAccNo" value="<%=orgAccNo%>" />  
+
+                                                                                                                        <input type="hidden" id="hdnConfirmRequest" name="hdnConfirmRequest" value="<%=hdnConfirmRequest%>" />  
+                                                                                                                        <input type="hidden" id="hdnAFVD" name="hdnAFVD" value="<%=afvd%>" />                                                                        
                                                                                                                         <input type="hidden" id="hdnReqPageNo" name="hdnReqPageNo" value="<%=reqPageNo%>" />                                                                                                                        
-                                                                                                                        <%
-                                                                                                                            if (totalRecordCount > 0)
-                                                                                                                            {
-                                                                                                                        %>
+                                                                                                                        <table border="0" cellspacing="0" cellpadding="0">
+                                                                                                                            <%
+                                                                                                                                if (isOkToConfirm)
+                                                                                                                                {
+                                                                                                                            %>  
+                                                                                                                            <tr>
+                                                                                                                                <td align="center"><table border="0" cellspacing="0" cellpadding="0">
+                                                                                                                                        <tr>
+                                                                                                                                            <td>
 
-                                                                                                                        <input type="button" name="btnConfirm" id="btnConfirm" value=" Generate HOGL Report " class="ddm_custom_button_large" onClick="doSubmit()" <%=(hdnConfirmRequest.equals("1") || hdnAlreadyConfirmed.equals("1")) ? "disabled" : ""%>  > 
-                                                                                                                        <%
+                                                                                                                                                <input type="button" name="btnConfirm1" id="btnConfirm1" value="Confirm (Only Valid)" class="ddm_custom_button_large" onClick="doSubmit(1)" <%=((invalidOther != 0) || (afvd.equals(DDM_Constants.status_all) && (invalidValueDates > 0)) || (invalidOther > (invalidPBAccounts + invalidValueDates)) || validTrCountForConfirmation == 0 || hdnConfirmRequest.equals("1") || hdnConfirmRequest.equals("2") || hdnConfirmRequest.equals("3") || hdnConfirmRequest.equals("4") || hdnConfirmRequest.equals("5") || hdnAlreadyConfirmed.equals("1")) ? "disabled" : ""%>  ></td>
+
+                                                                                                                                            <%
+                                                                                                                                                if ((!(invalidOther > (invalidPBAccounts + invalidValueDates))) && ((invalidPBAccounts > 0) && (!(invalidValueDates > 0))))
+                                                                                                                                                {
+
+                                                                                                                                            %>
+
+                                                                                                                                            <td width="15">&nbsp;</td>
+                                                                                                                                            <td><input type="button" name="btnConfirm2" id="btnConfirm2" value="Confirm (Valid + Invalid PB Accounts)" class="ddm_custom_button_large" onClick="doSubmit(2)" <%=(hdnConfirmRequest.equals("1") || hdnConfirmRequest.equals("2") || hdnConfirmRequest.equals("3") || hdnConfirmRequest.equals("4") || hdnConfirmRequest.equals("5") || hdnAlreadyConfirmed.equals("1")) ? "disabled" : ""%>  ></td>
+                                                                                                                                                <%
+                                                                                                                                                    }
+
+                                                                                                                                                    if ((!(invalidOther > (invalidPBAccounts + invalidValueDates))) && (!afvd.equals(DDM_Constants.status_all)) && ((invalidValueDates > 0) && (!(invalidPBAccounts > 0))))
+                                                                                                                                                    {
+                                                                                                                                                %>
+
+                                                                                                                                            <td width="15">&nbsp;</td>
+                                                                                                                                            <td><input type="button" name="btnConfirm3" id="btnConfirm3" value="Confirm (Valid + Invalid Value Dates)" class="ddm_custom_button_large" onClick="doSubmit(3)" <%=(hdnConfirmRequest.equals("1") || hdnConfirmRequest.equals("2") || hdnConfirmRequest.equals("3") || hdnConfirmRequest.equals("4") || hdnConfirmRequest.equals("5") || hdnAlreadyConfirmed.equals("1")) ? "disabled" : ""%>  ></td>
+                                                                                                                                                <%
+                                                                                                                                                    }
+
+                                                                                                                                                    if ((!(invalidOther > (invalidPBAccounts + invalidValueDates))) && (!afvd.equals(DDM_Constants.status_all)) && ((invalidPBAccounts > 0) && (invalidValueDates > 0)))
+                                                                                                                                                    {
+                                                                                                                                                %>           
+
+                                                                                                                                            <td width="15">&nbsp;</td>
+                                                                                                                                            <td><input type="button" name="btnConfirm4" id="btnConfirm4" value="Confirm (Valid + Invalid PB Accounts and Value Dates)" class="ddm_custom_button_large" onClick="doSubmit(4)" <%=(hdnConfirmRequest.equals("1") || hdnConfirmRequest.equals("2") || hdnConfirmRequest.equals("3") || hdnConfirmRequest.equals("4") || hdnConfirmRequest.equals("5") || hdnAlreadyConfirmed.equals("1")) ? "disabled" : ""%>  ></td>
+
+                                                                                                                                            <%
+                                                                                                                                                }
+                                                                                                                                            %>
+
+                                                                                                                                            <td width="15">&nbsp;</td>
+                                                                                                                                            <td><input type="button" name="btnConfirm4" id="btnConfirm4" value="Reject and Remove Uploaded File" class="ddm_custom_button_large" onClick="doSubmit(5)" <%=(hdnConfirmRequest.equals("1") || hdnConfirmRequest.equals("2") || hdnConfirmRequest.equals("3") || hdnConfirmRequest.equals("4") || hdnConfirmRequest.equals("5") || hdnAlreadyConfirmed.equals("1")) ? "disabled" : ""%>  ></td>
+                                                                                                                                        </tr>
+                                                                                                                                    </table></td>
+                                                                                                                            </tr>
+
+                                                                                                                            <%
                                                                                                                             }
-                                                                                                                        %>
+                                                                                                                            else
+                                                                                                                            {
+                                                                                                                            %>
+                                                                                                                            <tr>
+                                                                                                                                <td align="center" class="ddm_Display_Error_msg">Only the person who uploaded the slips data file can confirm and continue with the process!</td>
+                                                                                                                            </tr>
+                                                                                                                            <%
+                                                                                                                                }
+                                                                                                                            %>
+
+                                                                                                                        </table>
+
+
+
+
+
+
+
+
                                                                                                                     </form></td></tr>
 
 
@@ -904,35 +1473,31 @@
                 </td>
             </tr>
         </table>
-
+        <span  ></span>
     </body>
-    
     <script language="javascript" type="text/JavaScript">
         if (!document.layers)
         {
-		
-		document.write('<div id="GotoDown" style="position:absolute">');
-            document.write('<layer id="GotoDown">');
-            document.write('<a href="javascript:void(0)" onClick="gotoDown()"><img src="<%=request.getContextPath()%>/images/down.png" border="0" width="40" height="40" title="Go To Bottom" class="gradualshine" onMouseOver="slowhigh(this)" onMouseOut="slowlow(this)" /></a>');
-            document.write('</layer>');
-            document.write('</div>');
-		
-            document.write('<div id="GotoTop" style="position:absolute">');
-            document.write('<layer id="GotoTop">');
-            document.write('<a href="javascript:void(0)" onClick="gotoTop()"><img src="<%=request.getContextPath()%>/images/up.png" border="0" width="40" height="40" title="Go To Top" class="gradualshine" onMouseOver="slowhigh(this)" onMouseOut="slowlow(this)" /></a>');
-            document.write('</layer>');
-            document.write('</div>');
-			
-            
+
+        document.write('<div id="GotoDown" style="position:absolute">');
+        document.write('<layer id="GotoDown">');
+        document.write('<a href="javascript:void(0)" onClick="gotoDown()"><img src="<%=request.getContextPath()%>/images/down.png" border="0" width="40" height="40" title="Go To Bottom" class="gradualshine" onMouseOver="slowhigh(this)" onMouseOut="slowlow(this)" /></a>');
+        document.write('</layer>');
+        document.write('</div>');
+
+        document.write('<div id="GotoTop" style="position:absolute">');
+        document.write('<layer id="GotoTop">');
+        document.write('<a href="javascript:void(0)" onClick="gotoTop()"><img src="<%=request.getContextPath()%>/images/up.png" border="0" width="40" height="40" title="Go To Top" class="gradualshine" onMouseOver="slowhigh(this)" onMouseOut="slowlow(this)" /></a>');
+        document.write('</layer>');
+        document.write('</div>');
+
+
         }
 
     </script>
-    
-    <script language="javascript">floatItem("GotoDown",40,40,"right",2,"top",125);</script>
-    <script language="javascript">floatItem("GotoTop",40,40,"right",2,"bottom",25);</script>
-    
 
-    
+    <script language="javascript">floatItem("GotoDown", 40, 40, "right", 2, "top", 125);</script>
+    <script language="javascript">floatItem("GotoTop", 40, 40, "right", 2, "bottom", 25);</script>
 </html>
 <%
         }

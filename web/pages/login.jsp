@@ -6,7 +6,7 @@
 %>
 <html>
     <head>
-        <title>LankaPay Direct Debit Mandate Exchange System - Login (Ver 1.0.0)</title>
+        <title>LankaPay Direct Debit Mandate Exchange System - Login (Version 1.0.0)</title>
         <link rel="shortcut icon" type="image/png" href="<%=request.getContextPath()%>/images/favicon.png">
         <link href="<%=request.getContextPath()%>/css/animbg4.css" rel="stylesheet" type="text/css" />
         <link href="<%=request.getContextPath()%>/css/ddm.css" rel="stylesheet" type="text/css" />

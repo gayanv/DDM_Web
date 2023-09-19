@@ -22,7 +22,7 @@ public class PropertyLoader
     private static PropertyLoader pl;
     private static String lcpl_cert_revoke_jar_path;
     private static String pb_logo_path;
-    private static String ddm_data_file_temp_upload_path;
+    private static String ddm_csv_file_upload_path;
     private static String msg_attachment_file_path;
     private static String ddm_report_common_path;
 
@@ -210,22 +210,22 @@ public class PropertyLoader
     }
 
 
-    public String getSLIPS_DataFileTempUploadPath()
+    public String getCSVFileUploadPath()
     {
 
-        if (ddm_data_file_temp_upload_path == null)
+        if (ddm_csv_file_upload_path == null)
         {
 
-            ddm_data_file_temp_upload_path = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_ddm_data_tmp_file_path);
+            ddm_csv_file_upload_path = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_ddm_data_tmp_file_path);
 
-            if (ddm_data_file_temp_upload_path == null || ddm_data_file_temp_upload_path.isEmpty())
+            if (ddm_csv_file_upload_path == null || ddm_csv_file_upload_path.isEmpty())
             {
-                ddm_data_file_temp_upload_path = DDM_Constants.path_ddm_data_file_temp_upload;
+                ddm_csv_file_upload_path = DDM_Constants.path_ddm_csv_file_upload_path;
 
             }
         }
 
-        return ddm_data_file_temp_upload_path;
+        return ddm_csv_file_upload_path;
     }
 
     public File getMessageAttachmentFilePath()
