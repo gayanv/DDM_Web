@@ -77,8 +77,7 @@
 
 %>
 
-<%    
-    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
+<%    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
     String currentDate = DAOFactory.getCustomDAO().getCurrentDate();
     long serverTime = DAOFactory.getCustomDAO().getServerTime();
     CustomDate customDate = DAOFactory.getCustomDAO().getServerTimeDetails();
@@ -104,9 +103,8 @@
     String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);
 
     System.out.println("UploadSLIPSFiles : businessDate -----> " + businessDate);
-    
-    
-    if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
+
+    if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
     {
         colMerchant = DAOFactory.getMerchantDAO().getMerchant(DDM_Constants.status_all, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_active);
     }
@@ -114,7 +112,7 @@
     {
         colMerchant = DAOFactory.getMerchantDAO().getMerchant(DDM_Constants.status_all, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_active);
     }
-    
+
     System.out.println("UploadCSVFiles : colMerchant -----> " + colMerchant.size());
 
     isReq = (String) request.getParameter("hdnReq");
@@ -136,9 +134,8 @@
         OrgAccountName = "";
         OrgAccountBranch = "";
         csvFilePath = "";
-        
-        //System.out.println("UploadSLIPSFiles : orgAccountNo -----> " + orgAccountNo);
 
+        //System.out.println("UploadSLIPSFiles : orgAccountNo -----> " + orgAccountNo);
         DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_upload_ddm_csv_file_init, "| Upload DDM CSV Files - Initial | Visited By - " + session_userName + " (" + session_userTypeDesc + ") |"));
 
     }
@@ -162,15 +159,27 @@
         {
             orgAccountNo = DDM_Constants.status_all;
         }
+        else
+        {
+            colAccNoMap = DAOFactory.getMerchantAccNoMapDAO().getMerchantAccounts(merchantID, DDM_Constants.status_active);
+        }
+
         if (orgAccountNo == null)
         {
             orgAccountNo = DDM_Constants.status_all;
         }
+        else
+        {
+            MerchantAccNoMap mAccNo = DAOFactory.getMerchantAccNoMapDAO().getMerchantAccount(merchantID, session_bankCode, DDM_Constants.status_all, orgAccountNo);
+
+            OrgAccountName = mAccNo.getAcName();
+            OrgAccountBranch = mAccNo.getBranchName() + " - " + mAccNo.getBranchName();
+        }
+
         if (csvFilePath == null)
         {
             csvFilePath = "";
         }
-
 
 //        Collection<FileInfo> alreadyProcessingFileInfo = DAOFactory.getFileInfoDAO().getFileDetailsByCriteria(session_bankCode, DDM_Constants.status_all, merchantID, DDM_Constants.status_all, DDM_Constants.slip_file_status_processing, DDM_Constants.status_all, webBusinessDate, webBusinessDate);
 //
@@ -181,7 +190,6 @@
 //                alreadyProcessingFiles = alreadyProcessingFiles + fi.getFileId() + ",";
 //            }
 //        }
-
         DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_upload_ddm_csv_file_init, "| Upload DDM CSV Files - Account Search (Originator Acc. No - " + orgAccountNo + ", SLIPS File - " + csvFilePath + ")  | Searched By - " + session_userName + " (" + session_userTypeDesc + ") |"));
 
     }
@@ -210,48 +218,48 @@
 
             function clearRecords_onPageLoad()
             {
-                showClock(3);
+            showClock(3);
             }
 
             function showClock(type)
             {                
-                if (type == 1)
-                {
-                    clock(document.getElementById('showText'), type, null);
-                } else if (type == 2)
-                {
-                    var val = new Array(<%=serverTime%>);
-                    clock(document.getElementById('showText'), type, val);
-                } else if (type == 3)
-                {
-                    var val = new Array(<%=customDate.getYear()%>, <%=customDate.getMonth()%>, <%=customDate.getDay()%>, <%=customDate.getHour()%>, <%=customDate.getMinitue()%>, <%=customDate.getSecond()%>, <%=customDate.getMilisecond()%>);
-                    clock(document.getElementById('showText'), type, val);
-                }
+            if (type == 1)
+            {
+            clock(document.getElementById('showText'), type, null);
+            } else if (type == 2)
+            {
+            var val = new Array(<%=serverTime%>);
+            clock(document.getElementById('showText'), type, val);
+            } else if (type == 3)
+            {
+            var val = new Array(<%=customDate.getYear()%>, <%=customDate.getMonth()%>, <%=customDate.getDay()%>, <%=customDate.getHour()%>, <%=customDate.getMinitue()%>, <%=customDate.getSecond()%>, <%=customDate.getMilisecond()%>);
+            clock(document.getElementById('showText'), type, val);
             }
-            
+            }
+
             function isSearchRequest(status)
             {
-                if (status)
-                {
-                document.getElementById('hdnReq').value = "1";
-                }
-                else
-                {
-                document.getElementById('hdnReq').value = "0";
-                }
+            if (status)
+            {
+            document.getElementById('hdnReq').value = "1";
+            }
+            else
+            {
+            document.getElementById('hdnReq').value = "0";
+            }
             }
 
             function hideMessage_onFocus()
             {
-                if(document.getElementById('displayMsg_error')!= null)
-                {
-                document.getElementById('displayMsg_error').style.display='none';
+            if(document.getElementById('displayMsg_error')!= null)
+            {
+            document.getElementById('displayMsg_error').style.display='none';
 
-                if(document.getElementById('hdnCheckPOSForClearREcords')!=null && document.getElementById('hdnCheckPOSForClearREcords').value == '1')
-                {
-                clearRecords();
-                document.getElementById('hdnCheckPOSForClearREcords').value = '0';
-                }
+            if(document.getElementById('hdnCheckPOSForClearREcords')!=null && document.getElementById('hdnCheckPOSForClearREcords').value == '1')
+            {
+            clearRecords();
+            document.getElementById('hdnCheckPOSForClearREcords').value = '0';
+            }
             }
 
             if(document.getElementById('displayMsg_success')!=null)
@@ -265,110 +273,112 @@
             }
             }                
             }
-			
-            
+
+
             function doSearch()
             {
-                isSearchRequest(true);
-                document.getElementById('hdnMerchantId').value = document.getElementById('cmbMerchantID').value;
-                document.getElementById('hdnMerchantAccountNo').value = document.getElementById('cmbAccountNo').value;
-                document.getElementById('hdnCSVFilePath').value = document.getElementById('f_CSVFile').value;
-                document.frmUploadSlipsFilesSearch.action = "UploadSLIPSFiles.jsp";
-                document.frmUploadSlipsFilesSearch.submit();
-            	return true;			
+            isSearchRequest(true);
+            document.getElementById('hdnMerchantId').value = document.getElementById('cmbMerchantID').value;
+            document.getElementById('hdnMerchantAccountNo').value = document.getElementById('cmbAccountNo').value;
+            document.getElementById('hdnCSVFilePath').value = document.getElementById('f_CSVFile').value;
+            document.frmUploadSlipsFilesSearch.action = "UploadCSVFiles.jsp";
+            document.frmUploadSlipsFilesSearch.submit();
+            return true;			
             }
 
 
             function doSubmit()
             {
-                var orgAccNo = document.getElementById('cmbAccountNo').value;
-                var f_CSVFilePath = document.getElementById('f_CSVFile').value;
-                
-			
-                var obj_radAFVD = document.getElementById('radAFVD');
-                var obj_radCAVD = document.getElementById('radCAVD');
-				
-                var obj_cmbAFVD = document.getElementById('cmbAFVD');
-                var obj_cmbCAVD = document.getElementById('cmbCAVD');
+            var merchantID = document.getElementById('cmbMerchantID').value;
+            var orgAccNo = document.getElementById('cmbAccountNo').value;
+            var f_CSVFilePath = document.getElementById('f_CSVFile').value;
 
-                var iNumbers = "0123456789";
-                var numbers = /^[0-9]*$/;
-
-                if(orgAccNo==null || orgAccNo=='<%=DDM_Constants.status_all%>')
-                {
-                alert("Please select valid Originator Account No!");
-                document.getElementById('cmbAccountNo').focus();
-                return false;
-                }
+            var iNumbers = "0123456789";
+            var numbers = /^[0-9]*$/;
 
 
-                if(isempty(f_CSVFilePath))
-                {
-                    alert("Please select a valid CSV file to upload!");
-                    document.getElementById('f_CSVFile').focus();
-                    return false;
-                }
-                else
-                {
-                    var objFile = document.getElementById('f_CSVFile');
-                    var fileSize = objFile.files[0].size;
-                    
-                    if(fileSize > 5242880)
-                    {
-                        alert("Selected 'CSV File' exceeds the maximum allowed file size! \nPlease select a 'CSV File' which not exceed 5 MB.");
-                        document.getElementById('f_CSVFile').focus();
-                        return false;                        
-                    }
-                
-                
-                    var f_CSVFileName;
-                    var f_CSVFileExtension;
-                    var correctCertExtension = ".csv";
-                    var isValidCSVFile = false;
+            if(merchantID==null || merchantID=='<%=DDM_Constants.status_all%>')
+            {
+            alert("Please select valid Merchant to proceed with CSV File Upload!");
+            document.getElementById('cmbMerchantID').focus();
+            return false;
+            }
+
+            if(orgAccNo==null || orgAccNo=='<%=DDM_Constants.status_all%>')
+            {
+            alert("Please select valid Originator Account No!");
+            document.getElementById('cmbAccountNo').focus();
+            return false;
+            }
 
 
-                    f_CSVFileName = f_CSVFilePath.substring(f_CSVFilePath.lastIndexOf("\\")+1);
+            if(isempty(f_CSVFilePath))
+            {
+            alert("Please select a valid CSV file to upload!");
+            document.getElementById('f_CSVFile').focus();
+            return false;
+            }
+            else
+            {
+            var objFile = document.getElementById('f_CSVFile');
+            var fileSize = objFile.files[0].size;
 
-                    f_CSVFileExtension = f_CSVFileName.substring(f_CSVFileName.lastIndexOf("."));
+            if(fileSize > 5242880)
+            {
+            alert("Selected 'CSV File' exceeds the maximum allowed file size! \nPlease select a 'CSV File' which not exceed 5 MB.");
+            document.getElementById('f_CSVFile').focus();
+            return false;                        
+            }
 
-                    //alert('f_CSVFileExtension ----> ' + f_CSVFileExtension)                        
-                    
-                    if(f_CSVFileExtension.toUpperCase() == correctCertExtension.toUpperCase())
-                    {
-                        isValidCSVFile = true;
-                    }
-                    else
-                    {
-                        isValidCSVFile = false;
-                        alert("Invalid file type! \nFile exension should be either '.csv' and select a valid CSV file to upload.");
-                        return false;
-                    }                     
 
-                    if(isValidCSVFile)
-                    {
-                        var valNewFileName = '<%=merchantID%>' + '_' + '<%=orgAccountNo%>' + "_" + '<%=businessDate%>' + '_' + f_CSVFileName;     
-                        var valAlreadyProcessingFiles = '<%=alreadyProcessingFiles%>';
+            var f_CSVFileName;
+            var f_CSVFileExtension;
+            var correctCertExtension = ".csv";
+            var isValidCSVFile = false;
 
-                        if(valAlreadyProcessingFiles.toUpperCase().indexOf(valNewFileName.toUpperCase())>=0)
-                        { 
-                            alert("Already uploaded CSV file! \nPlease select a new CSV file to upload.");
-                            return false;               
-                        }
-                        else
-                        {
-                            var answer = confirm("Do you really want to upload this SLIPS data file to the system? \n Press 'OK' to upload the file or 'Cancel' for select another file.");
 
-                            if(answer)
-                            {
-                                document.getElementById('cmbMerchantID').disabled = false;
-                                document.frmUploadSlipsFiles.action="UploadCSVFilesConfirmation.jsp";
-                                document.getElementById('btnUpload').disabled = true;
-                                document.frmUploadSlipsFiles.submit();
-                            }
-                        }
-                    }          
+            f_CSVFileName = f_CSVFilePath.substring(f_CSVFilePath.lastIndexOf("\\")+1);
 
-                }
+            f_CSVFileExtension = f_CSVFileName.substring(f_CSVFileName.lastIndexOf("."));
+
+            //alert('f_CSVFileExtension ----> ' + f_CSVFileExtension)                        
+
+            if(f_CSVFileExtension.toUpperCase() == correctCertExtension.toUpperCase())
+            {
+            isValidCSVFile = true;
+            }
+            else
+            {
+            isValidCSVFile = false;
+            alert("Invalid file type! \nFile exension should be either '.csv' and select a valid CSV file to upload.");
+            return false;
+            }                     
+
+            if(isValidCSVFile)
+            {
+            var valNewFileName = '<%=merchantID%>' + '_' + '<%=orgAccountNo%>' + "_" + '<%=businessDate%>' + '_' + f_CSVFileName;     
+            var valAlreadyProcessingFiles = '<%=alreadyProcessingFiles%>';
+
+            if(valAlreadyProcessingFiles.toUpperCase().indexOf(valNewFileName.toUpperCase())>=0)
+            { 
+            alert("Already uploaded CSV file! \nPlease select a new CSV file to upload.");
+            return false;               
+            }
+            else
+            {
+            var answer = confirm("Do you really want to upload this CSV data file to the system? \n Press 'OK' to upload the file or 'Cancel' for select another file.");
+
+            if(answer)
+            {
+            document.getElementById('cmbMerchantID').disabled = false;
+            document.frmUploadSlipsFiles.action="UploadCSVFilesConfirmation.jsp";
+            document.getElementById('btnUpload').disabled = true;
+            document.frmUploadSlipsFiles.submit();
+            }
+            }
+            }          
+
+            }
             }
 
             function isempty(Value)
@@ -506,7 +516,7 @@
                                                                                         <td width="5" valign="top" nowrap class="ddm_menubar_text_dark">&nbsp;]</td>
 
                                                                                     </tr>
-                                                                          </table></td>
+                                                                                </table></td>
                                                                             <td width="15"></td>
                                                                         </tr>
                                                                     </table></td>
@@ -550,7 +560,7 @@
                                                                                                                 <tr>
                                                                                                                     <td><table border="0" cellpadding="5" cellspacing="1" bgcolor="#FFFFFF" >
                                                                                                                             <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Corporate Customer ID : </td>
+                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant : </td>
                                                                                                                                 <td valign="middle" class="ddm_tbl_common_text"><%
 
                                                                                                                                     try
@@ -577,9 +587,8 @@
                                                                                                                                                     if (merchantID != null && merchant.getMerchantID().equals(merchantID))
                                                                                                                                                     {
                                                                                                                                                         selectedMerchant = merchant;
-                                                                                                                                                        colAccNoMap = DAOFactory.getMerchantAccNoMapDAO().getMerchantAccounts(merchantID, DDM_Constants.status_active);
                                                                                                                                         %>
-                                                                                                                                        <option value="<%=merchant.getMerchantID() %>" selected > <%=merchant.getMerchantID() + " - " + merchant.getMerchantName() %></option>
+                                                                                                                                        <option value="<%=merchant.getMerchantID()%>" selected > <%=merchant.getMerchantID() + " - " + merchant.getMerchantName()%></option>
                                                                                                                                         <%
                                                                                                                                         }
                                                                                                                                         else
@@ -606,13 +615,13 @@
                                                                                                                                     %>                                                                                                                                                                                                                                                                    </td>
                                                                                                                             </tr>
                                                                                                                             <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Originator Acc. No :</td>
+                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant Account No. :</td>
                                                                                                                                 <td valign="middle" class="ddm_tbl_common_text"><%
                                                                                                                                     try
                                                                                                                                     {
                                                                                                                                     %>
                                                                                                                                     <select name="cmbAccountNo" id="cmbAccountNo" class="ddm_field_border" onChange="doSearch()" >
-                                                                                                                                        
+
                                                                                                                                         <%
                                                                                                                                             if (colAccNoMap != null && colAccNoMap.size() > 0)
                                                                                                                                             {
@@ -639,17 +648,17 @@
                                                                                                                                     %>                                                                                                        </td>
                                                                                                                             </tr>
                                                                                                                             <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Originator Acc. Name :</td>
+                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant Account Name :</td>
                                                                                                                                 <td valign="middle" class="ddm_tbl_common_text"><%=OrgAccountName%> <input type="hidden" name="hdnOrgAccName" id="hdnOrgAccName" value="<%=OrgAccountName%>" /></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Originator Acc. Branch : </td>
+                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant Account Branch : </td>
                                                                                                                                 <td valign="middle" class="ddm_tbl_common_text"><%=OrgAccountBranch%><input type="hidden" name="hdnOrgAccBranch" id="hdnOrgAccBranch" value="<%=OrgAccountBranch%>" /></td>
                                                                                                                             </tr>
 
                                                                                                                             <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">
-                                                                                                                                    SLIPS File <span class="ddm_required_field">*</span> :        </td>
+                                                                                                                                    CSV File <span class="ddm_required_field">*</span> :        </td>
 
                                                                                                                                 <td valign="middle" class="ddm_tbl_common_text">
 
@@ -660,7 +669,7 @@
                                                                                                                             <tr>
                                                                                                                                 <td colspan="2" align="center" class="ddm_tbl_footer_text"><input type="button" value="Upload" name="btnUpload" id="btnUpload" class="ddm_custom_button"  onclick="doSubmit()" /></td>
                                                                                                                             </tr>
-                                                                                                                  </table></td>
+                                                                                                                        </table></td>
                                                                                                                 </tr>
                                                                                                             </table></td>
                                                                                                     </tr>
@@ -672,10 +681,10 @@
                                                                                             </form>
 
                                                                                             <form  method="post" name="frmUploadSlipsFilesSearch" id="frmUploadSlipsFilesSearch">		                                                                         						<input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />
-                                                                                                <input type="hidden" name="hdnMerchantId" id="hdnMerchantId" value="<%=merchantID %>" />
-                                                                                                <input type="hidden" name="hdnMerchantAccountNo" id="hdnMerchantAccountNo" value="<%=orgAccountNo %>" />
-                                                                                                <input type="hidden" name="hdnCSVFilePath" id="hdnCSVFilePath" value="<%=csvFilePath %>" /> 
-                                                                                                
+                                                                                                <input type="hidden" name="hdnMerchantId" id="hdnMerchantId" value="<%=merchantID%>" />
+                                                                                                <input type="hidden" name="hdnMerchantAccountNo" id="hdnMerchantAccountNo" value="<%=orgAccountNo%>" />
+                                                                                                <input type="hidden" name="hdnCSVFilePath" id="hdnCSVFilePath" value="<%=csvFilePath%>" /> 
+
                                                                                             </form>
 
                                                                                         </td>
