@@ -50,8 +50,10 @@ public class MerchantAccNoMapDAOImpl implements MerchantAccNoMapDAO
 
             StringBuilder sbQuery = new StringBuilder();
 
-            sbQuery.append("SELECT manm.merchantid, manm.bankcode, manm.branchcode, manm.acno, manm.acname, "
-                    + "manm.isprimary, manm.Status as AccNoMapStatus, manm.Status_Modify as AccNoMapStatusModify,"
+            sbQuery.append("SELECT manm.merchantid, manm.bankcode, bk.FullName as BankName, "
+                    + "bk.ShortName as BankShortName, manm.branchcode, br.BranchName, "
+                    + "manm.acno, manm.acname, manm.isprimary, "
+                    + "manm.Status as AccNoMapStatus, manm.Status_Modify as AccNoMapStatusModify,"
                     + " manm.CreatedBy as AccNoMapCreatedBy, "
                     + "manm.CreatedDate as AccNoMapCreatedDate, manm.AuthorizedBy as AccNoMapAuthorizedBy, "
                     + "manm.AuthorizedDate as AccNoMapAuthorizedDate, "
@@ -137,8 +139,10 @@ public class MerchantAccNoMapDAOImpl implements MerchantAccNoMapDAO
 
             StringBuilder sbQuery = new StringBuilder();
 
-            sbQuery.append("SELECT manm.merchantid, manm.bankcode, manm.branchcode, manm.acno, manm.acname, "
-                    + "manm.isprimary, manm.Status as AccNoMapStatus, manm.Status_Modify as AccNoMapStatusModify,"
+            sbQuery.append("SELECT manm.merchantid, manm.bankcode, bk.FullName as BankName, "
+                    + "bk.ShortName as BankShortName, manm.branchcode, br.BranchName, "
+                    + "manm.acno, manm.acname, manm.isprimary, "
+                    + "manm.Status as AccNoMapStatus, manm.Status_Modify as AccNoMapStatusModify,"
                     + " manm.CreatedBy as AccNoMapCreatedBy, "
                     + "manm.CreatedDate as AccNoMapCreatedDate, manm.AuthorizedBy as AccNoMapAuthorizedBy, "
                     + "manm.AuthorizedDate as AccNoMapAuthorizedDate, "
@@ -220,8 +224,10 @@ public class MerchantAccNoMapDAOImpl implements MerchantAccNoMapDAO
 
             StringBuilder sbQuery = new StringBuilder();
 
-            sbQuery.append("SELECT manm.merchantid, manm.bankcode, manm.branchcode, manm.acno, manm.acname, "
-                    + "manm.isprimary, manm.Status as AccNoMapStatus, manm.Status_Modify as AccNoMapStatusModify,"
+            sbQuery.append("SELECT manm.merchantid, manm.bankcode, bk.FullName as BankName, "
+                    + "bk.ShortName as BankShortName, manm.branchcode, br.BranchName, "
+                    + "manm.acno, manm.acname, manm.isprimary, "
+                    + "manm.Status as AccNoMapStatus, manm.Status_Modify as AccNoMapStatusModify,"
                     + " manm.CreatedBy as AccNoMapCreatedBy, "
                     + "manm.CreatedDate as AccNoMapCreatedDate, manm.AuthorizedBy as AccNoMapAuthorizedBy, "
                     + "manm.AuthorizedDate as AccNoMapAuthorizedDate, "

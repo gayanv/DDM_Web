@@ -17,26 +17,23 @@ public class DDM_Constants
 
     //Property file paths
     //local 
-    public static final String path_common_properties = "E:\\TTS\\LCPL\\conf\\web.properties";
-    public static final String path_dbProperty = "E:\\TTS\\LCPL\\conf\\db_properties_ddm.properties";
-    public static final String path_email_properties = "E:\\TTS\\LCPL\\conf\\email.properties";
-
-    //server
-//    public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
-//    public static final String path_common_properties = "/DDA/properties/common.properties";
-//    public static final String path_email_properties = "/DDA/properties/email_properties.properties";
-    
-    
+//     public static final String path_common_properties = "D:\\Projects\\DDA\\properties\\common.properties";
+//     public static final String path_dbProperty = "D:\\Projects\\DDA\\properties\\db_properties_ddm.properties";
+//     public static final String path_email_properties = "D:\\Projects\\DDA\\properties\\email.properties";
+//   // server
+    public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
+    public static final String path_common_properties = "/DDA/properties/common.properties";
+    public static final String path_email_properties = "/DDA/properties/email_properties.properties";
     public static final String param_id_user_system = "System";
     public static final String param_id_businessdate = "BatchBusinessDate";
     public static final String param_id_batch_businessdate = "BatchBusinessDate";
     public static final String param_id_cits_cutoff_time = "CITS";
     public static final String param_id_default_pwd = "DefaultPwd";
     public static final String param_id_db_enc_pw_1 = "DBEncPW_1";
-    public static final String param_id_db_enc_pw_2 = "DBEncPW_2";    
-    
-    public static final String param_id_ddm_web_url = "DDM_WebUrl"; 
-            
+    public static final String param_id_db_enc_pw_2 = "DBEncPW_2";
+
+    public static final String param_id_ddm_web_url = "DDM_WebUrl";
+
     public static final String param_id_no_of_sessions = "NoOfSessions";
 
     public static final String param_id_session = "Session";
@@ -102,10 +99,8 @@ public class DDM_Constants
     public static final String param_id_email_mail_smtp_socketFactory_class = "mail_smtp_socketFactory_class";
     public static final String param_id_email_mail_smtp_socketFactory_port = "mail_smtp_socketFactory_port";
 
-     
     public static final String param_id_ddm_sla_breach_for_acquiring_bank = "DDMSLABreachCountAquiringBank";
     public static final String param_id_ddm_sla_breach_for_issuing_bank = "DDMSLABreachCountIssuingBank";
-    
 
     public static final String email_notification_type_bank_branch_update = "01";
     public static final String email_notification_type_inward_readiness = "02";
@@ -113,7 +108,7 @@ public class DDM_Constants
     public static final String email_notification_type_session_summary = "04";
     public static final String email_notification_type_cbsl_mlns = "05";
 
-    public static final String lcpl_bank_code = "9991";    
+    public static final String lcpl_bank_code = "9991";
     public static final String default_bank_code = "9999";
     public static final String default_branch_code = "999";
     public static final String bank_default_branch_code = "001";
@@ -126,14 +121,14 @@ public class DDM_Constants
     public static final String default_ddm_acc_name = "PB SLIPS Default Account";
     public static final String default_merchant_id = "9999";
     public static final String default_return_code = "00";
-    
+
     ///////////////////
     public static final String default_merchant_pwd_hash = "$2a$10$SNt/ROoHwh0EjjTWWAusxeBLM.XrczvZ6ga1frGp38LmRpJdw6EoO";
     ///////////////////
-    
-    public static final String ddm_csv_file_suffix = ".csv"; 
+
+    public static final String ddm_csv_file_suffix = ".csv";
     public static final String ddm_csv_file_Type = "CSV";
-    
+
     public static final String ddm_cust1_file_Type = "CUST1";
     public static final String ddm_cust1_file_suffix = "cust1.txt";
     public static final String ddm_dddm_file_Type = "DSLIPS";
@@ -189,6 +184,7 @@ public class DDM_Constants
 
     public static final String ddm_ibt_file_suffix = "_SLIPS.TXT";
 
+    public static final String ddm_file_process_status_initial = "0";
     public static final String ddm_file_process_status_processing = "1";
     public static final String ddm_file_process_status_completed = "2";
     public static final String ddm_file_process_status_uploaded = "3";
@@ -207,16 +203,16 @@ public class DDM_Constants
     public static final String ddm_main_finction_path_auth_modified_merchant = "/pages/admin/merchant_maintenance/AuthModifiedMerchant.jsp";
 
     public static final String ddm_main_finction_path_auth_modified_params = "/pages/admin/parameter_maintenance/AuthModifiedParams.jsp";
-    
+
     public static final String ddm_main_finction_path_auth_modified_userlevel_functionmap = "/pages/admin/usrlvlfunction_maintenance/AuthModifiedUsrLvlFunctions.jsp";
 
     public static final String ddm_main_finction_path_auth_new_user = "/pages/admin/user_maintenance/AuthNewUser.jsp";
-    public static final String ddm_main_finction_path_auth_modified_user = "/pages/admin/user_maintenance/AuthModifiedUser.jsp";    
+    public static final String ddm_main_finction_path_auth_modified_user = "/pages/admin/user_maintenance/AuthModifiedUser.jsp";
 
     public static final String ddm_main_finction_path_auth_ddm_req_acquiring_bank = "/pages/manage/apddmacb.jsp";
     public static final String ddm_main_finction_path_auth_ddm_req_issuing_bank = "/pages/manage/apddmisb.jsp";
-    public static final String ddm_main_finction_path_auth_ddm_req_terminated = "/pages/manage/apddmter.jsp";    
-    
+    public static final String ddm_main_finction_path_auth_ddm_req_terminated = "/pages/manage/apddmter.jsp";
+
     public static final String ddm_main_finction_path_inquiry_sla_breach_ddm_req_inquiry = "/pages/inquiry/inqddm.jsp";
     public static final String ddm_main_finction_path_inquiry_sla_breach_ddm_req_issuing_bank = "/pages/inquiry/slbddmisb.jsp";
     public static final String ddm_main_finction_path_inquiry_sla_breach_ddm_req_acquiring_bank = "/pages/inquiry/slbddmacb.jsp";
@@ -573,6 +569,7 @@ public class DDM_Constants
     public static final String decimal_number_format_comma_sep_for_non_decimal_values = "###,###";
 
     public static final String path_ddm_csv_file_upload_path = "/DDA/CSV_FILES/";
+//    public static final String path_ddm_csv_file_upload_path = "D:\\CBSL\\DDA\\CSV_FILES\\";
     public static final String path_ddm_report_common_path = "/DDA/REPORTS/";
     public static final String path_ddm_jasper_file_base_path = "/DDA/JASPER/";
     public static final String path_ddm_mail_logo_path = "/DDA/LOGO/PB_Mail_Logo.jpg";
@@ -609,21 +606,18 @@ public class DDM_Constants
     public static final String report_type_owd_rj1_report_name_suffix = "REJ1";
     public static final String report_type_owd_vl1_report_name_suffix = "VLD1";
     public static final String report_type_owd_vld_summary_sufix = "_ValidationSummary.txt";
-    
-    
+
     public static final String report_type_daily = "D";
     public static final String report_type_monthly = "M";
     public static final String report_type_annual = "Y";
-    
+
     public static final String report_type_bank_daily = "BNKD";
     public static final String report_type_bank_monthly = "BNKM";
     public static final String report_type_bank_annual = "BNKY";
-    
+
     public static final String report_type_lppl_daily = "LCPLD";
     public static final String report_type_lppl_monthly = "LCPLM";
     public static final String report_type_lppl_annual = "LCPLY";
-    
-    
 
     public static final String report_type_owd_bk1_report = "OWDUPL_BNK1";
     public static final String report_type_owd_rj1_report = "OWDUPL_REJ1";
@@ -771,9 +765,6 @@ public class DDM_Constants
     public static final String log_type_admin_parameter_maintenance_auth_modified_param_value = "0082";
     public static final String log_type_admin_parameter_maintenance_add_param_value = "0083";
 
-
-
-
     public static final String log_type_admin_functions_view_log_details = "0120";
 
     public static final String log_type_admin_reportmap_maintenance_add_new_reportmap_details = "0130";
@@ -842,7 +833,7 @@ public class DDM_Constants
     public static final String log_type_user_reports_download_reports = "0300";
     public static final String log_type_user_reports_generate_ih_baranch_summary_report = "0301";
     public static final String log_type_user_reports_generate_ow_baranch_summary_report = "0302";
-    
+
     public static final String log_type_user_reports_view_daily_reports = "0310";
     public static final String log_type_user_reports_view_monthly_reports = "0320";
     public static final String log_type_user_reports_view_annual_reports = "0330";

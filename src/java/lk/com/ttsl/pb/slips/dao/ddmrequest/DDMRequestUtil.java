@@ -6,7 +6,10 @@ package lk.com.ttsl.pb.slips.dao.ddmrequest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import lk.com.ttsl.pb.slips.common.utils.DDM_Constants;
 import lk.com.ttsl.pb.slips.common.utils.DateFormatter;
 
@@ -16,7 +19,98 @@ import lk.com.ttsl.pb.slips.common.utils.DateFormatter;
  */
 public class DDMRequestUtil
 {
+   public static boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str); 
+            return true;
+        } catch (NumberFormatException e) {
+            return false; 
+        }
+    }
+   
+   public static boolean isValidFrequency(String str) {
+        try {
+            //D,W,M,Q,Y
+            
+            if ((str.toUpperCase().equals("D"))||(str.toUpperCase().equals("W"))||(str.toUpperCase().equals("M"))||(str.toUpperCase().equals("Q"))||(str.toUpperCase().equals("Y")))
+            {
+                System.out.println("Valid Frequency "+ str );
+                return true;
+            }else{
+                System.out.println("In-Valid Frequency "+ str );
+                return false;
+            } 
+                
+        } catch (Exception e) {
+            return false; 
+        }
+    }
+   
+   public static boolean isValidDate(String strDate){
+        SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyymmdd");      
+        sdfrmt.setLenient(false);
+        
+        try
+	    {
+	        Date javaDate = sdfrmt.parse(strDate); 
+	        System.out.println(strDate+" is valid date format");
+                
+                
+	    }
+	    /* Date format is invalid */
+	    catch (ParseException e)
+	    {
+	        System.out.println(strDate+" is Invalid Date format");
+	        return false;
+	    }
+	    /* Return true if date format is valid */
+	    return true;
+    }
+   
+   public static boolean isValidSDateEDate(String strSDate,String strEDate){
+        SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyymmdd");      
+        sdfrmt.setLenient(false);
+        
+        try
+	    {
+	        int isdate=Integer.parseInt(strSDate);
+                int iedate=Integer.parseInt(strEDate);
+                
+                if (isdate<iedate){
+                    return true;
+                }else{
+                    return false;
+                }
+	    }
+	    
+	    catch (NumberFormatException e)
+	    {
+	        System.out.println(" is Invalid Date format");
+	        return false;
+	    }
+	    
+	   
+    }
+   
+   public static boolean isNotB4BusinessDate(String strDate,String strBdate){
+       SimpleDateFormat sdfrmt = new SimpleDateFormat("yyyymmdd");
+       sdfrmt.setLenient(false);
 
+       try {
+           int isdate = Integer.parseInt(strDate);
+           int iedate = Integer.parseInt(strBdate);
+
+           if (isdate < iedate) {
+               return true;
+           } else {
+               return false;
+           }
+       } catch (NumberFormatException e) {
+           System.out.println(" is Invalid Date format");
+           return false;
+       }
+    }
+   
     public static DDMRequest makeDDMRequestObject(ResultSet rs) throws SQLException
     {
         if (rs == null)

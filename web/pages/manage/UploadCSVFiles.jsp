@@ -110,7 +110,7 @@
     }
     else
     {
-        colMerchant = DAOFactory.getMerchantDAO().getMerchant(DDM_Constants.status_all, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_active);
+        colMerchant = DAOFactory.getMerchantDAO().getMerchant(DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_active);
     }
 
     System.out.println("UploadCSVFiles : colMerchant -----> " + colMerchant.size());
@@ -162,24 +162,32 @@
         else
         {
             colAccNoMap = DAOFactory.getMerchantAccNoMapDAO().getMerchantAccounts(merchantID, DDM_Constants.status_active);
+            selectedMerchant = DAOFactory.getMerchantDAO().getMerchantDetails(merchantID);
         }
 
-        if (orgAccountNo == null)
+        if (selectedMerchant == null)
         {
-            orgAccountNo = DDM_Constants.status_all;
+            //orgAccountNo = DDM_Constants.status_all;
+            orgAccountNo = "N/A";
+            OrgAccountName = "N/A";
+            OrgAccountBranch = "N/A";
+            
         }
         else
         {
-            MerchantAccNoMap mAccNo = DAOFactory.getMerchantAccNoMapDAO().getMerchantAccount(merchantID, session_bankCode, DDM_Constants.status_all, orgAccountNo);
+            //MerchantAccNoMap mAccNo = DAOFactory.getMerchantAccNoMapDAO().getMerchantAccount(merchantID, session_bankCode, DDM_Constants.status_all, orgAccountNo);
 
-            OrgAccountName = mAccNo.getAcName();
-            OrgAccountBranch = mAccNo.getBranchName() + " - " + mAccNo.getBranchName();
+            orgAccountNo = selectedMerchant.getPrimaryAccountNo();
+            OrgAccountName = selectedMerchant.getPrimaryAccountName();
+            OrgAccountBranch = selectedMerchant.getBranchCode() + " - " + selectedMerchant.getBranchName();
         }
 
         if (csvFilePath == null)
         {
             csvFilePath = "";
         }
+        
+        
 
 //        Collection<FileInfo> alreadyProcessingFileInfo = DAOFactory.getFileInfoDAO().getFileDetailsByCriteria(session_bankCode, DDM_Constants.status_all, merchantID, DDM_Constants.status_all, DDM_Constants.slip_file_status_processing, DDM_Constants.status_all, webBusinessDate, webBusinessDate);
 //
@@ -279,7 +287,7 @@
             {
             isSearchRequest(true);
             document.getElementById('hdnMerchantId').value = document.getElementById('cmbMerchantID').value;
-            document.getElementById('hdnMerchantAccountNo').value = document.getElementById('cmbAccountNo').value;
+            //document.getElementById('hdnMerchantAccountNo').value = document.getElementById('cmbAccountNo').value;
             document.getElementById('hdnCSVFilePath').value = document.getElementById('f_CSVFile').value;
             document.frmUploadSlipsFilesSearch.action = "UploadCSVFiles.jsp";
             document.frmUploadSlipsFilesSearch.submit();
@@ -290,7 +298,7 @@
             function doSubmit()
             {
             var merchantID = document.getElementById('cmbMerchantID').value;
-            var orgAccNo = document.getElementById('cmbAccountNo').value;
+            //var orgAccNo = document.getElementById('cmbAccountNo').value;
             var f_CSVFilePath = document.getElementById('f_CSVFile').value;
 
             var iNumbers = "0123456789";
@@ -304,12 +312,12 @@
             return false;
             }
 
-            if(orgAccNo==null || orgAccNo=='<%=DDM_Constants.status_all%>')
+            /* if(orgAccNo==null || orgAccNo=='<%=DDM_Constants.status_all%>')
             {
             alert("Please select valid Originator Account No!");
             document.getElementById('cmbAccountNo').focus();
             return false;
-            }
+            } */
 
 
             if(isempty(f_CSVFilePath))
@@ -371,6 +379,7 @@
             if(answer)
             {
             document.getElementById('cmbMerchantID').disabled = false;
+           
             document.frmUploadSlipsFiles.action="UploadCSVFilesConfirmation.jsp";
             document.getElementById('btnUpload').disabled = true;
             document.frmUploadSlipsFiles.submit();
@@ -615,37 +624,8 @@
                                                                                                                                     %>                                                                                                                                                                                                                                                                    </td>
                                                                                                                             </tr>
                                                                                                                             <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant Account No. :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><%
-                                                                                                                                    try
-                                                                                                                                    {
-                                                                                                                                    %>
-                                                                                                                                    <select name="cmbAccountNo" id="cmbAccountNo" class="ddm_field_border" onChange="doSearch()" >
-
-                                                                                                                                        <%
-                                                                                                                                            if (colAccNoMap != null && colAccNoMap.size() > 0)
-                                                                                                                                            {
-                                                                                                                                                for (MerchantAccNoMap merchantAccNoMap : colAccNoMap)
-                                                                                                                                                {
-                                                                                                                                        %>
-                                                                                                                                        <option value="<%=merchantAccNoMap.getAcNo()%>" <%=(orgAccountNo != null && merchantAccNoMap.getAcNo().equals(orgAccountNo)) ? "selected" : ""%> > <%=merchantAccNoMap.getAcNo() + " - " + merchantAccNoMap.getAcName()%></option>
-                                                                                                                                        <%
-                                                                                                                                            }
-                                                                                                                                        %>
-                                                                                                                                    </select>
-                                                                                                                                    <%
-                                                                                                                                    }
-                                                                                                                                    else
-                                                                                                                                    {
-                                                                                                                                    %>
-                                                                                                                                    <span class="ddm_error">No active accounts available for this merchant.</span>
-                                                                                                                                    <%}
-                                                                                                                                        }
-                                                                                                                                        catch (Exception e)
-                                                                                                                                        {
-                                                                                                                                            System.out.println(e.getMessage());
-                                                                                                                                        }
-                                                                                                                                    %>                                                                                                        </td>
+                                                                                                                              <td valign="middle" class="ddm_tbl_header_text">Merchant Account No. :</td>
+                                                                                                                              <td valign="middle" class="ddm_tbl_common_text"><%=orgAccountNo%> <input type="hidden" name="hdnOrgAccNo" id="hdnOrgAccNo" value="<%=orgAccountNo%>" /></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">Merchant Account Name :</td>
@@ -669,7 +649,7 @@
                                                                                                                             <tr>
                                                                                                                                 <td colspan="2" align="center" class="ddm_tbl_footer_text"><input type="button" value="Upload" name="btnUpload" id="btnUpload" class="ddm_custom_button"  onclick="doSubmit()" /></td>
                                                                                                                             </tr>
-                                                                                                                        </table></td>
+                                                                                                                  </table></td>
                                                                                                                 </tr>
                                                                                                             </table></td>
                                                                                                     </tr>
@@ -682,7 +662,7 @@
 
                                                                                             <form  method="post" name="frmUploadSlipsFilesSearch" id="frmUploadSlipsFilesSearch">		                                                                         						<input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />
                                                                                                 <input type="hidden" name="hdnMerchantId" id="hdnMerchantId" value="<%=merchantID%>" />
-                                                                                                <input type="hidden" name="hdnMerchantAccountNo" id="hdnMerchantAccountNo" value="<%=orgAccountNo%>" />
+                                                                                                <%--<input type="hidden" name="hdnMerchantAccountNo" id="hdnMerchantAccountNo" value="<%=orgAccountNo%>" />--%>
                                                                                                 <input type="hidden" name="hdnCSVFilePath" id="hdnCSVFilePath" value="<%=csvFilePath%>" /> 
 
                                                                                             </form>

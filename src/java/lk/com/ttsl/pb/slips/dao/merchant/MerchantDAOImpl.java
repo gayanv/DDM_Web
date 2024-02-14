@@ -707,16 +707,19 @@ public class MerchantDAOImpl implements MerchantDAO
             if (!bank.equals(DDM_Constants.status_all))
             {
                 sbQuery.append("AND mr.bankcode = ? ");
+                vt.add(val_bank);
             }
 
             if (!branch.equals(DDM_Constants.status_all))
             {
                 sbQuery.append("AND mr.branchcode = ? ");
+                vt.add(val_branch);
             }
 
             sbQuery.append("ORDER BY MerchantID ");
 
-            //System.out.println("sbQuery(getCorporateCustomerNotInStatus)----> " + sbQuery);
+            System.out.println("sbQuery(getCorporateCustomerNotInStatus)----> " + sbQuery);
+            
             pstm = con.prepareStatement(sbQuery.toString());
 
             int i = 1;
@@ -904,7 +907,7 @@ public class MerchantDAOImpl implements MerchantDAO
             sbQuery.append("ORDER BY MerchantID");
 
             System.out.println("getAuthPendingModifiedMerchant(sbQuery)=========>" + sbQuery);
-            
+
             pstm = con.prepareStatement(sbQuery.toString());
 
             pstm.setString(1, modifiedUser);
@@ -1080,20 +1083,19 @@ public class MerchantDAOImpl implements MerchantDAO
             if (count > 0)
             {
                 System.out.println("----> Start addMerchantAccNoMap ");
-                
-                    if (DAOFactory.getMerchantAccNoMapDAO().addMerchantAccNoMap(new MerchantAccNoMap(merchant.getMerchantID(), merchant.getBankCode(), merchant.getBranchCode(), merchant.getPrimaryAccountNo(), merchant.getPrimaryAccountName(), DDM_Constants.status_yes, DDM_Constants.status_pending, merchant.getModifiedBy().trim())))
-                    {
-                        System.out.println("### addMerchantAccNoMap was Success ####");
-                        con.commit();
-                        status = true;
-                    }
-                    else
-                    {
-                        System.out.println("### addMerchantAccNoMap was Failed ####");
-                        status = true;
-                        msg = "Adding records to Merchant Acoount Map Failed.";
-                    }
-                
+
+                if (DAOFactory.getMerchantAccNoMapDAO().addMerchantAccNoMap(new MerchantAccNoMap(merchant.getMerchantID(), merchant.getBankCode(), merchant.getBranchCode(), merchant.getPrimaryAccountNo(), merchant.getPrimaryAccountName(), DDM_Constants.status_yes, DDM_Constants.status_pending, merchant.getModifiedBy().trim())))
+                {
+                    System.out.println("### addMerchantAccNoMap was Success ####");
+                    con.commit();
+                    status = true;
+                }
+                else
+                {
+                    System.out.println("### addMerchantAccNoMap was Failed ####");
+                    status = true;
+                    msg = "Adding records to Merchant Acoount Map Failed.";
+                }
 
             }
             else
@@ -1205,7 +1207,7 @@ public class MerchantDAOImpl implements MerchantDAO
             sbQuery.append("acno_Modify = ?, ");
             sbQuery.append("acname_Modify = ?, ");
             sbQuery.append("id_Modify = ?, ");
-            sbQuery.append("Status_Modify = ?, ");            
+            sbQuery.append("Status_Modify = ?, ");
             sbQuery.append("ModificationRemarks = ?, ");
 
             if (merchant.getPassword() != null)
@@ -1401,13 +1403,13 @@ public class MerchantDAOImpl implements MerchantDAO
             sbQuery.append("branchcode = branchcode_Modify, ");
             sbQuery.append("acno = acno_Modify, ");
             sbQuery.append("acname = acname_Modify, ");
-            sbQuery.append("id = id_Modify, ");            
+            sbQuery.append("id = id_Modify, ");
             sbQuery.append("Status = Status_Modify, ");
 
             sbQuery.append("ModificationAuthBy = ?, ");
             sbQuery.append("ModificationAuthDate = now() ");
             sbQuery.append("where MerchantID = ? ");
-            
+
             System.out.println("doAuthorizeModifiedMerchant(sbQuery)=====>" + sbQuery.toString());
 
             psmt = con.prepareStatement(sbQuery.toString());

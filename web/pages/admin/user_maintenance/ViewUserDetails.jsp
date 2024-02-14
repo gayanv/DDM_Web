@@ -307,7 +307,7 @@
                                                                                                                             <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">User ID</td>
                                                                                                                             <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">User<br/>
                                                                                                                                 Level</td>
-                                                                                                                            <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">Branch</td>
+                                                                                                                            <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">Bank</td>
                                                                                                                             <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">CoCu<br/>ID</td>
                                                                                                                             <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">Name</td>
                                                                                                                             <td align="center" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text_horizontal_small">Designation</td>
@@ -372,7 +372,7 @@
                                                                                                                             <td align="right" class="ddm_common_text"><%=rowNum%>.</td>
                                                                                                                             <td class="ddm_common_text"><%=usr.getUserId()%></td>
                                                                                                                             <td nowrap class="ddm_common_text"><%=usr.getUserLevelDesc()%></td>
-                                                                                                                            <td align="left" nowrap class="ddm_common_text"><%=usr.getBranchCode() %> - <%=usr.getBranchName()  %></td>
+                                                                                                                            <td align="left" nowrap class="ddm_common_text"><%=usr.getBankCode()%> - <%=usr.getBankShortName()  %></td>
                                                                                                                             <td align="center" class="ddm_common_text"><span class="ddm_common_text" title="<%=usr.getCoCuName() %>"><%=usr.getCoCuId()!=null?usr.getCoCuId():"-" %></span></td>
                                                                                                                           <td class="ddm_common_text"><%=usr.getName() != null ? usr.getName() : "N/A"%></td>
                                                                                                                             <td class="ddm_common_text"><%=usr.getDesignation() != null ? usr.getDesignation() : "N/A"%></td>

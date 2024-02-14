@@ -102,7 +102,8 @@
     //colBank = DAOFactory.getBankDAO().getBankNotInStatus(DDM_Constants.status_pending);
     colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(DDM_Constants.default_bank_code, DDM_Constants.status_pending);
 
-    defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
+    //defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
+    defaultPwd = "";
 
     isReq = (String) request.getParameter("hdnReq");
 

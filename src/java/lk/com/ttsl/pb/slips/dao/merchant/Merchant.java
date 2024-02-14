@@ -490,4 +490,8 @@ public class Merchant
         this.colAccNoMap = colAccNoMap;
     }
 
+    @Override
+    public String toString() {
+        return "Merchant{" + "merchantID=" + merchantID + ", merchantName=" + merchantName + ", merchantNameModify=" + merchantNameModify + ", email=" + email + ", emailModify=" + emailModify + ", primaryTP=" + primaryTP + ", primaryTPModify=" + primaryTPModify + ", secondaryTP=" + secondaryTP + ", secondaryTPModify=" + secondaryTPModify + ", password=" + password + ", passwordModify=" + passwordModify + ", bankCode=" + bankCode + ", bankCodeModify=" + bankCodeModify + ", bankName=" + bankName + ", bankNameModify=" + bankNameModify + ", bankShortName=" + bankShortName + ", bankShortNameModify=" + bankShortNameModify + ", branchCode=" + branchCode + ", branchCodeModify=" + branchCodeModify + ", branchName=" + branchName + ", branchNameModify=" + branchNameModify + ", primaryAccountNo=" + primaryAccountNo + ", primaryAccountNoModify=" + primaryAccountNoModify + ", primaryAccountName=" + primaryAccountName + ", primaryAccountNameModify=" + primaryAccountNameModify + ", id=" + id + ", idModify=" + idModify + ", status=" + status + ", statusModify=" + statusModify + ", createdBy=" + createdBy + ", createdDate=" + createdDate + ", authorizedBy=" + authorizedBy + ", authorizedDate=" + authorizedDate + ", modificationRemarks=" + modificationRemarks + ", modifiedBy=" + modifiedBy + ", modifiedDate=" + modifiedDate + ", modificationAuthBy=" + modificationAuthBy + ", modificationAuthDate=" + modificationAuthDate + ", colAccNoMap=" + colAccNoMap + '}';
+    }
 }

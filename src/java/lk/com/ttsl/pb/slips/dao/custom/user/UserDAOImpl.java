@@ -1900,6 +1900,7 @@ public class UserDAOImpl implements UserDAO
             int val_userBank = 3;
             int val_userBranch = 4;
             int val_userMerchant = 5;
+            int val_statusNotIn = 6;
 
             StringBuilder sbQuery = new StringBuilder();
 
@@ -1937,12 +1938,13 @@ public class UserDAOImpl implements UserDAO
             if (!statusNotIn.equals(DDM_Constants.status_all))
             {
                 sbQuery.append("and usr.Status not in (").append(statusNotIn).append(") ");
-                //vt.add(val_statusNotIn);
+               // vt.add(val_statusNotIn);
             }
 
             pstm = con.prepareStatement(sbQuery.toString());
 
             System.out.println("UserDAOImpl:getUsers(User usr, String statusNotIn)----> " + sbQuery.toString());
+            
             pstm.setString(1, DDM_Constants.param_id_user_system);
 
             int i = 2;
@@ -1971,10 +1973,14 @@ public class UserDAOImpl implements UserDAO
                 }
                 if (val_item == val_userMerchant)
                 {
-                    pstm.setString(i, usr.getBranchCode());
+                    pstm.setString(i, usr.getCoCuId());
+                    i++;
+                }                
+                if (val_item == val_statusNotIn)
+                {
+                    pstm.setString(i, statusNotIn);
                     i++;
                 }
-
             }
 
             rs = pstm.executeQuery();

@@ -338,7 +338,7 @@
                                                                                                                     <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>"   onMouseOver="cOn(this)" onMouseOut="cOut(this)">
                                                                                                                         <td align="center" class="ddm_sub_link_large">
                                                                                                                         <%
-																														if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_issuing_bank)))
+																														if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_inquiry_sla_breach_ddm_req_inquiry)))
 																														{
 																														%>
                                                                                                                         <a href="<%=(request.getContextPath() + DDM_Constants.ddm_main_finction_path_inquiry_sla_breach_ddm_req_inquiry)%>?hdnIsSearch=1&cmbMerchant=<%=ddmr.getMerchantID()%>" title="<%=ddmr.getMerchantName() %>" class="ddm_sub_link_large"><%=ddmr.getMerchantID()%></a>

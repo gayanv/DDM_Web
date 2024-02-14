@@ -585,11 +585,11 @@
                                                                             <td><table height="100%" width="100%" border="0" cellpadding="0" cellspacing="0">
                                                                                     <tr>
                                                                                         <td height="75"><table width="900" border="0" cellspacing="0" cellpadding="0">
-                                                                                                <tr>
-                                                                                                    <td>&nbsp;</td>
-                                                                                                </tr>
-                                                                                            </table></td>
-                                                                                    </tr>
+                                                                                          <tr>
+                                                                                            <td>&nbsp;</td>
+                                                                                          </tr>
+                                                                                        </table></td>
+                                                                              </tr>
                                                                                     <tr>
                                                                                         <td height="22"><table width="100%" height="22" border="0" cellspacing="0" cellpadding="0">
                                                                                                 <tr>
@@ -624,7 +624,7 @@
                                                                                     <tr>
                                                                                         <td height="5">                                        </td>
                                                                                     </tr>
-                                                                                </table></td>
+                                                                          </table></td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -841,10 +841,8 @@
                                                                                                                             </tr>
                                                                                                                             <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">Primary Account No. <span  class="ddm_required_field"> *</span> :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><input type="text" name="txtPrimaryAccNo" id="txtPrimaryAccNo" maxlength="15" size="18" class="ddm_field_border" onChange="isVldAccountNo()" onFocus="isVldAccountNo()" onBlur="isVldAccountNo()" onKeyUp="isVldAccountNo()" onMouseUp="isVldAccountNo()" value="<%=primaryAccountNo != null ? primaryAccountNo : ""%>" <%=isOkToDisable_txtPrimaryAccNo ? "disabled" : ""%>> 
-
-
-                                                                                                                                    <input type="hidden" name="hdnChangeCount" id="hdnChangeCount" value="0" />
+                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><input type="text" name="txtPrimaryAccNo" id="txtPrimaryAccNo" maxlength="15" size="18" class="ddm_field_border" onChange="isVldAccountNo()" onFocus="isVldAccountNo()" onBlur="isVldAccountNo()" onKeyUp="isVldAccountNo()" onMouseUp="isVldAccountNo()" value="<%=primaryAccountNo != null ? primaryAccountNo : ""%>" <%=isOkToDisable_txtPrimaryAccNo ? "disabled" : ""%>>
+                                                                                                                              <input type="hidden" name="hdnChangeCount" id="hdnChangeCount" value="0" />
                                                                                                                                     <input type="hidden" name="hdnPrevAccountNo" id="hdnPrevAccountNo" value="0" /></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
@@ -866,7 +864,7 @@
                                                                                                                                                 <input name="btnClear" id="btnClear" value="&nbsp;&nbsp; <%=((isReq != null && isReq.equals("1")) && result) ? "Done" : "Cancel"%> &nbsp;&nbsp;" type="button" onClick="cancel()" class="ddm_custom_button" />                                                                                            </td></tr>
                                                                                                                                     </table></td>
                                                                                                                             </tr>
-                                                                                                                        </table></td>
+                                                                                                                  </table></td>
                                                                                                                 </tr>
                                                                                                             </table></td>
                                                                                                     </tr>

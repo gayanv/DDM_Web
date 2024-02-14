@@ -29,16 +29,16 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
     }
 
     @Override
-    public DDMRequest getDDARequestDetails(String ddaRequestId)
+    public DDMRequest getDDARequestDetails(String ddmRequestId)
     {
         DDMRequest cbr = null;
         Connection con = null;
         PreparedStatement pstm = null;
         ResultSet rs = null;
 
-        if (ddaRequestId == null)
+        if (ddmRequestId == null)
         {
-            System.out.println("WARNING : Null ddaRequestId parameter.");
+            System.out.println("WARNING : Null ddmRequestId parameter.");
             return cbr;
         }
 
@@ -53,7 +53,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + " ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -81,7 +82,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
 
             System.out.println("sbQuery(getDDARequestDetails) ---> " + sbQuery.toString());
 
-            pstm.setString(1, ddaRequestId);
+            pstm.setString(1, ddmRequestId);
 
             rs = pstm.executeQuery();
 
@@ -92,8 +93,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -179,8 +179,9 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
-                    + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, ddmr.Status, ddmrs.Description as StatusDesc, "
+                    + "ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
                     + "ddmr.TerminationRequestRemarks, ddmr.TerminationRequestedBy, ddmr.TerminationRequestedOn, "
@@ -313,8 +314,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -400,7 +400,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -534,8 +535,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -575,7 +575,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + " ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -616,8 +617,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -689,7 +689,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -790,8 +791,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -831,7 +831,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -872,8 +873,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -945,7 +945,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -1046,8 +1047,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -1081,7 +1081,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -1120,8 +1121,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -1193,7 +1193,8 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     + "ddmr.IssuningBranch, ibr.BranchName as IssuningBranchName, ddmr.IssuningAcNo, ddmr.IssuningAcName, "
                     + "ddmr.AquiringBank, abk.FullName as AquiringBankName, abk.ShortName as AquiringBankShortName, "
                     + "ddmr.AquiringBranch, abr.BranchName as AquiringBranchName, ddmr.AquiringAcNo, ddmr.AquiringAcName, "
-                    + "ddmr.StartDate, ddmr.EndDate, ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
+                    + "ddmr.StartDate, ddmr.EndDate, "
+                    + "ddmr.MaxLimit, ddmr.Frequency, ddmr.Purpose, ddmr.Ref, "
                     + "ddmr.Status, ddmrs.Description as StatusDesc, ddmr.StatusModify, ddmr.CreatedBy, ddmr.CreatedDate, "
                     + "ddmr.IssuingBankAcceptedRemarks, ddmr.IssuingBankAcceptedBy, ddmr.IssuingBankAcceptedOn, "
                     + "ddmr.AquiringBankAcceptedRemarks, ddmr.AquiringBankAcceptedBy, ddmr.AquiringBankAcceptedOn, "
@@ -1294,8 +1295,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -1647,8 +1647,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -1790,8 +1789,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -2006,8 +2004,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -2149,8 +2146,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -2525,8 +2521,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
-        }
-        catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
@@ -2542,16 +2537,193 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
     }
 
     @Override
-    public boolean updateDDMRequestStatus(String ddaRequestId, String curStatus, String newStatus, String modifiedBy, String remarks)
+    public boolean addDDARequest(DDMRequest ddmRequest)
+    {
+        Connection con = null;
+        PreparedStatement psmt = null;
+        boolean status = false;
+        int count;
+
+        if (ddmRequest.getDDA_ID() == null)
+        {
+            System.out.println("WARNING : Null getDDA_ID parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getMerchantID() == null)
+        {
+            System.out.println("WARNING : Null getMerchantID parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getIssuningBankCode() == null)
+        {
+            System.out.println("WARNING : Null getIssuningBankCode parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getIssuningBranch() == null)
+        {
+            System.out.println("WARNING : Null getIssuningBranch parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getIssuningAccountNumber() == null)
+        {
+            System.out.println("WARNING : Null getIssuningAccountNumber parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getIssuningAccountName() == null)
+        {
+            System.out.println("WARNING : Null getIssuningAccountName parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getStartDate() == null)
+        {
+            System.out.println("WARNING : Null getStartDate parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getEndDate() == null)
+        {
+            System.out.println("WARNING : Null getEndDate parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getMaxLimit() == null)
+        {
+            System.out.println("WARNING : Null getMaxLimit parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getFrequency() == null)
+        {
+            System.out.println("WARNING : Null getFrequency parameter.");
+            return false;
+        }
+
+        if (ddmRequest.getPurpose() == null)
+        {
+            System.out.println("WARNING : Null getPurpose parameter.");
+            return false;
+        }
+        if (ddmRequest.getReference() == null)
+        {
+            System.out.println("WARNING : Null getRef parameter.");
+            return false;
+        }
+        if (ddmRequest.getStatus() == null)
+        {
+            System.out.println("WARNING : Null getStatus parameter.");
+            return false;
+        }
+        if (ddmRequest.getAcquiringBankCode() == null)
+        {
+            System.out.println("WARNING : Null getAquiringBank parameter.");
+            return false;
+        }
+        if (ddmRequest.getAcquiringBranch() == null)
+        {
+            System.out.println("WARNING : Null getAquiringBranch parameter.");
+            return false;
+        }
+        if (ddmRequest.getAcquiringAccountNumber() == null)
+        {
+            System.out.println("WARNING : Null getAquiringAcNo parameter.");
+            return false;
+        }
+        if (ddmRequest.getAcquiringAccountName() == null)
+        {
+            System.out.println("WARNING : Null getAquiringAcName parameter.");
+            return false;
+        }
+        if (ddmRequest.getCreatedBy() == null)
+        {
+            System.out.println("WARNING : Null getCreatedBy parameter.");
+            return false;
+        }
+
+        try
+        {
+            con = DBUtil.getInstance().getConnection();
+            con.setAutoCommit(false);
+
+            final StringBuilder sqlQuery = new StringBuilder("INSERT INTO ")
+                    .append(DDM_Constants.tbl_ddmrequest).append(" (")
+                    .append("DDAID, MerchantID, ")
+                    .append("IssuningBank, IssuningBranch, IssuningAcNo, IssuningAcName, ")
+                    .append("StartDate, EndDate, MaxLimit, Frequency, Purpose, Ref, Status, ")
+                    .append("AquiringBank, AquiringBranch, AquiringAcNo, AquiringAcName,IsCSVFileRequest , CSVFileName, CSVFilePath, ")
+                    .append("CreatedBy, CreatedDate ")
+                    .append(") ")
+                    .append("VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())");
+
+            System.out.println("addDDARequest(sqlQuery)=========>" + sqlQuery.toString());
+
+            psmt = con.prepareStatement(sqlQuery.toString());
+
+            psmt.setString(1, ddmRequest.getDDA_ID().trim());
+            psmt.setString(2, ddmRequest.getMerchantID().trim());
+            psmt.setString(3, ddmRequest.getIssuningBankCode().trim());
+            psmt.setString(4, ddmRequest.getIssuningBranch().trim());
+            psmt.setString(5, ddmRequest.getIssuningAccountNumber().trim());
+            psmt.setString(6, ddmRequest.getIssuningAccountName().trim());
+            psmt.setString(7, ddmRequest.getStartDate().trim());
+            psmt.setString(8, ddmRequest.getEndDate().trim());
+            psmt.setString(9, ddmRequest.getMaxLimit().trim());
+            psmt.setString(10, ddmRequest.getFrequency().trim());
+            psmt.setString(11, ddmRequest.getPurpose().trim());
+            psmt.setString(12, ddmRequest.getReference().trim());
+            psmt.setString(13, ddmRequest.getStatus().trim());
+            psmt.setString(14, ddmRequest.getAcquiringBankCode().trim());
+            psmt.setString(15, ddmRequest.getAcquiringBranch().trim());
+            psmt.setString(16, ddmRequest.getAcquiringAccountNumber().trim());
+            psmt.setString(17, ddmRequest.getAcquiringAccountName().trim());
+            psmt.setString(18, ddmRequest.getIsCSVFileRequest().trim());
+            psmt.setString(19, ddmRequest.getCSVFileName().trim());
+            psmt.setString(20, ddmRequest.getCSVFilePath().trim());
+            psmt.setString(21, ddmRequest.getCreatedBy().trim());
+
+            count = psmt.executeUpdate();
+
+            if (count > 0)
+            {
+                System.out.println("### addDDARequest was Success ####");
+                con.commit();
+                status = true;
+            }
+            else
+            {
+                status = false;
+                msg = DDM_Constants.msg_duplicate_records;
+            }
+        } catch (SQLException | ClassNotFoundException e)
+        {
+            msg = e.getMessage();
+            System.out.println(e.toString());
+        }
+        finally
+        {
+            DBUtil.getInstance().closeStatement(psmt);
+            DBUtil.getInstance().closeConnection(con);
+        }
+
+        return status;
+    }
+
+    @Override
+    public boolean updateDDMRequestStatus(String ddmRequestId, String curStatus, String newStatus, String modifiedBy, String remarks)
     {
         boolean updateStatus = false;
         Connection con = null;
         PreparedStatement pstm = null;
         int count = 0;
 
-        if (ddaRequestId == null)
+        if (ddmRequestId == null)
         {
-            System.out.println("WARNING : Null ddaRequestId parameter.");
+            System.out.println("WARNING : Null ddmRequestId parameter.");
             return updateStatus;
         }
 
@@ -2596,7 +2768,6 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     sbQuery.append("IssuingBankAcceptedBy = ?,  IssuingBankAcceptedOn = now()");
                 }
             }
-
             else if (newStatus.equals(DDM_Constants.ddm_request_status_05) || newStatus.equals(DDM_Constants.ddm_request_status_12))
             {
                 if (remarks != null)
@@ -2618,7 +2789,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
 
             System.out.println("sbQuery(updateDDMRequestStatus)---> " + sbQuery.toString());
 
-            System.out.println("ddaRequestId --> " + ddaRequestId);
+            System.out.println("ddmRequestId --> " + ddmRequestId);
             System.out.println("curStatus ---> " + curStatus);
             System.out.println("newStatus ---> " + newStatus);
 
@@ -2635,19 +2806,19 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                 {
                     pstm.setString(2, remarks);
                     pstm.setString(3, modifiedBy);
-                    pstm.setString(4, ddaRequestId);
+                    pstm.setString(4, ddmRequestId);
                     pstm.setString(5, curStatus);
                 }
                 else
                 {
                     pstm.setString(2, modifiedBy);
-                    pstm.setString(3, ddaRequestId);
+                    pstm.setString(3, ddmRequestId);
                     pstm.setString(4, curStatus);
                 }
             }
             else
             {
-                pstm.setString(2, ddaRequestId);
+                pstm.setString(2, ddmRequestId);
                 pstm.setString(3, curStatus);
             }
 
@@ -2663,8 +2834,93 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                 con.rollback();
             }
 
+        } catch (SQLException | ClassNotFoundException ex)
+        {
+            msg = DDM_Constants.msg_error_while_processing;
+            System.out.println(ex.getMessage());
         }
-        catch (SQLException | ClassNotFoundException ex)
+        finally
+        {
+            DBUtil.getInstance().closeStatement(pstm);
+            DBUtil.getInstance().closeConnection(con);
+        }
+
+        return updateStatus;
+
+    }
+
+    @Override
+    public boolean updateDDMRequestStatusByCSVFileName(String csvFileName, String curStatus, String newStatus, String modifiedBy)
+    {
+        boolean updateStatus = false;
+        Connection con = null;
+        PreparedStatement pstm = null;
+        int count = 0;
+
+        if (csvFileName == null)
+        {
+            System.out.println("WARNING : Null csvFileName parameter.");
+            return updateStatus;
+        }
+
+        if (curStatus == null)
+        {
+            System.out.println("WARNING : Null curStatus parameter.");
+            return updateStatus;
+        }
+
+        if (newStatus == null)
+        {
+            System.out.println("WARNING : Null newStatus parameter.");
+            return updateStatus;
+        }
+
+        if (modifiedBy == null)
+        {
+            System.out.println("WARNING : Null modifiedBy parameter.");
+            return updateStatus;
+        }
+
+        try
+        {
+            con = DBUtil.getInstance().getConnection();
+            con.setAutoCommit(false);
+
+            StringBuilder sbQuery = new StringBuilder();
+
+            sbQuery.append("update ");
+            sbQuery.append(DDM_Constants.tbl_ddmrequest + " ");
+            sbQuery.append("set ");
+            sbQuery.append("Status = ? ");
+            sbQuery.append("where CSVFileName = ? ");
+            sbQuery.append("and Status = ? ");
+
+            System.out.println("sbQuery(updateDDMRequestStatusByCSVFileName)---> " + sbQuery.toString());
+
+            System.out.println("csvFileName --> " + csvFileName);
+            System.out.println("modifiedBy ---> " + modifiedBy);
+            System.out.println("curStatus ---> " + curStatus);
+            System.out.println("newStatus ---> " + newStatus);
+
+            pstm = con.prepareStatement(sbQuery.toString());
+
+            pstm.setString(1, newStatus);
+            pstm.setString(2, csvFileName);
+            pstm.setString(3, curStatus);
+
+            count = pstm.executeUpdate();
+
+            if (count > 0)
+            {
+                con.commit();
+                updateStatus = true;
+            }
+            else
+            {
+                con.rollback();
+            }
+
+        } catch (SQLException | ClassNotFoundException ex)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(ex.getMessage());
@@ -2716,8 +2972,69 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                 isFileAlreadyUpload = true;
             }
 
+        } catch (SQLException | ClassNotFoundException e)
+        {
+            msg = DDM_Constants.msg_error_while_processing;
+            System.out.println(e.getMessage());
         }
-        catch (SQLException | ClassNotFoundException e)
+        finally
+        {
+            DBUtil.getInstance().closeResultSet(rs);
+            DBUtil.getInstance().closeStatement(pstm);
+            DBUtil.getInstance().closeConnection(con);
+        }
+
+        return isFileAlreadyUpload;
+    }
+
+    @Override
+    public boolean rmDDARequest(String csvpath) {
+        boolean isFileAlreadyUpload = false;
+        Connection con = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+        boolean status;
+
+        if (csvpath == null)
+        {
+            System.out.println("WARNING : Null csvFileName parameter.");
+            return isFileAlreadyUpload;
+        }
+
+        try
+        {
+//            con = DBUtil.getInstance().getConnection();
+            
+            con = DBUtil.getInstance().getConnection();
+            con.setAutoCommit(false);
+
+            StringBuilder sbQuery = new StringBuilder();
+
+            sbQuery.append("delete from ");
+            sbQuery.append(DDM_Constants.tbl_ddmrequest + " ");
+            sbQuery.append("where CSVFilePath = ? and Status='0' ");
+
+            System.out.println("CSV File Cleaning ---> " + sbQuery.toString());
+
+            pstm = con.prepareStatement(sbQuery.toString());
+
+            pstm.setString(1, csvpath);
+
+            int count = pstm.executeUpdate();
+
+            if (count > 0)
+            {
+                System.out.println("### addDDARequest was Success ####");
+                con.commit();
+                status = true;
+            }
+            else
+            {
+                status = false;
+                msg = DDM_Constants.msg_duplicate_records;
+            }
+
+        } catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());

@@ -172,6 +172,16 @@ public interface DDMRequestDAO
      */
     public Collection<DDMRequest> getSLABreachByAcquiringBankDDAReqDetails(String merchantId, String issuingBankCode, String issuingBranchCode, String acquiringBankCode, String acquiringBranchCode, String status, String fromRequestDate, String toRequestDate);
 
+    
+    /**
+     * 
+     * @param ddmRequest
+     * @return 
+     */
+    public boolean addDDARequest(DDMRequest ddmRequest);
+    public boolean rmDDARequest(String csvpath);
+    
+    
     /**
      *
      * @param ddaRequestId
@@ -182,6 +192,18 @@ public interface DDMRequestDAO
      * @return
      */
     public boolean updateDDMRequestStatus(String ddaRequestId, String curStatus, String newStatus, String modifiedBy, String remarks);
+    
+    /**
+     * 
+     * @param csvFileName
+     * @param curStatus
+     * @param newStatus
+     * @param modifiedBy
+     * @param remarks
+     * @return 
+     */
+    public boolean updateDDMRequestStatusByCSVFileName(String csvFileName, String curStatus, String newStatus, String modifiedBy);
+    
     
     /**
      * 

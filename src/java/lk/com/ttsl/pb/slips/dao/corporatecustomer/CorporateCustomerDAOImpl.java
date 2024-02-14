@@ -571,7 +571,7 @@ public class CorporateCustomerDAOImpl implements CorporateCustomerDAO
                 sbQuery.append("AND cc.Branch = ? ");
             }
 
-            sbQuery.append("ORDER BY CoCuID ");
+            sbQuery.append("ORDER BY ccanm.CoCuID ");
 
             //System.out.println("sbQuery(getCorporateCustomerNotInStatus)----> " + sbQuery);
             pstm = con.prepareStatement(sbQuery.toString());
@@ -650,7 +650,7 @@ public class CorporateCustomerDAOImpl implements CorporateCustomerDAO
                 sbQuery.append("AND cc.Branch = ? ");
             }
 
-            sbQuery.append("ORDER BY CoCuID ");
+            sbQuery.append("ORDER BY ccanm.CoCuID ");
 
             //System.out.println("sbQuery(getCorporateCustomerNotInStatus)----> " + sbQuery);
             pstm = con.prepareStatement(sbQuery.toString());

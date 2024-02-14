@@ -101,7 +101,8 @@
     colBank = DAOFactory.getBankDAO().getBankNotInStatus(DDM_Constants.status_pending);
     colMerchant = DAOFactory.getMerchantDAO().getMerchantNotInStatusBasicDetails(DDM_Constants.status_pending, DDM_Constants.status_all, DDM_Constants.status_all);
 
-    defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
+    //defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
+    defaultPwd="";
 
     isReq = (String) request.getParameter("hdnReq");
 
@@ -847,7 +848,7 @@
                                                                                                                                         <td><input type="button" value="&nbsp;&nbsp; Reset Password &nbsp;&nbsp;" name="btnChange" id="btnChange" class="ddm_custom_button" onClick="isRequest(true);
                                                                                                                                                 validate();"/></td>
                                                                                                                                         <td width="5"></td>
-                                                                                                                                        <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; Reset &nbsp;&nbsp;" type="button" onClick="resetRecords()" class="ddm_custom_button" />                                                </td></tr>
+                                                                                                                                        <td><input name="btnClear" id="btnClear" value="&nbsp;&nbsp; Clear &nbsp;&nbsp;" type="button" onClick="resetRecords()" class="ddm_custom_button" />                                                </td></tr>
                                                                                                                                 </table></td>
                                                                                                                         </tr>
 

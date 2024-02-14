@@ -120,9 +120,19 @@
         selectedUserMerchant = request.getParameter("cmbMerchant");
         selectedUserStatus = request.getParameter("cmbStatus");
         
-        selectedUserId = request.getParameter("cmbUserId");
+        selectedUserId = request.getParameter("cmbUserId");        
+        
+        if(selectedUserBank == null)
+        {
+            selectedUserBank = DDM_Constants.status_all;
+        }
+        
+        if(selectedUserMerchant == null)
+        {
+            selectedUserMerchant = DDM_Constants.status_all;
+        }
 
-        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
+        col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
     }
     else if (isReq.equals("1"))
     {        
@@ -131,7 +141,17 @@
         selectedUserMerchant = request.getParameter("cmbMerchant");
         selectedUserStatus = request.getParameter("cmbStatus");        
         
-        selectedUserId = request.getParameter("cmbUserId");
+        selectedUserId = request.getParameter("cmbUserId");        
+        
+        if(selectedUserBank == null)
+        {
+            selectedUserBank = DDM_Constants.status_all;
+        }
+        
+        if(selectedUserMerchant == null)
+        {
+            selectedUserMerchant = DDM_Constants.status_all;
+        }
 
         col_user = DAOFactory.getUserDAO().getUsers(new User(selectedUserLevel, selectedUserBank, DDM_Constants.status_all, selectedUserMerchant, selectedUserStatus), "'" + DDM_Constants.status_active + "','" + DDM_Constants.status_pending + "'");
 
@@ -142,7 +162,6 @@
             User objUser = DAOFactory.getUserDAO().getUserDetails(selectedUserId, DDM_Constants.status_all);
 
             currentUserStat = objUser.getStatus();
-
         }
         else if (selectedUserStatus != null && (selectedUserStatus.equals(DDM_Constants.status_expired) || selectedUserStatus.equals(DDM_Constants.status_locked)))
         {
@@ -603,7 +622,7 @@
                                                                                                                         <tr>
                                                                                                                                 <td align="left" valign="middle" class="ddm_tbl_header_text">Bank : </td>
                                                                                                                                 <td valign="middle"class="ddm_tbl_common_text">
-                                                                                                                                    <select name="cmbBank" id="cmbBank" class="ddm_field_border" onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_bank_manager) || selectedUserLevel.equals(DDM_Constants.user_type_bank_user)) ? "" : "disabled"%>>
+                                                                                                                                    <select name="cmbBank" id="cmbBank" class="ddm_field_border" onChange="setRequestType(false);frmActivateUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_bank_manager) || selectedUserLevel.equals(DDM_Constants.user_type_bank_user)) ? "" : "disabled"%>>
 
                                                                                                                                         <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserBank != null && selectedUserBank.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
 
@@ -628,7 +647,7 @@
                                                                                                                         <tr>
                                                                                                                                 <td align="left" valign="middle" class="ddm_tbl_header_text">Merchant :</td>
                                                                                                                                 <td valign="middle"class="ddm_tbl_common_text">
-                                                                                                                                    <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="setRequestType(false);frmModifyUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_merchant_su) || selectedUserLevel.equals(DDM_Constants.user_type_merchant_op)) ? "" : "disabled"%> >
+                                                                                                                                    <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="setRequestType(false);frmActivateUser.submit();" onFocus="hideMessage_onFocus()" <%=(selectedUserLevel.equals(DDM_Constants.user_type_merchant_su) || selectedUserLevel.equals(DDM_Constants.user_type_merchant_op)) ? "" : "disabled"%> >
                                                                                                                                         <option value="<%=DDM_Constants.status_all%>" <%=(selectedUserMerchant != null && selectedUserMerchant.equals(DDM_Constants.status_all)) ? "selected" : ""%>>-- All --</option>
                                                                                                                                         <%
                                                                                                                                             if (colMerchant != null && colMerchant.size() > 0)

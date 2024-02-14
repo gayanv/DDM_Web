@@ -43,6 +43,12 @@ public class DDMRequest
     private String createdBy;
     private String createdDate;
     private String reference;
+    
+    private String isCSVFileRequest;
+    private String CSVFileName;
+    private String CSVFilePath; 
+    
+    
     private String issuingBankAcceptedRemarks;
     private String issuingBankAcceptedBy;
     private String issuingBankAcceptedOn;
@@ -378,6 +384,32 @@ public class DDMRequest
     {
         this.reference = reference;
     }
+
+    public String getIsCSVFileRequest() {
+        return isCSVFileRequest;
+    }
+
+    public void setIsCSVFileRequest(String isCSVFileRequest) {
+        this.isCSVFileRequest = isCSVFileRequest;
+    }
+
+    public String getCSVFileName() {
+        return CSVFileName;
+    }
+
+    public void setCSVFileName(String CSVFileName) {
+        this.CSVFileName = CSVFileName;
+    }
+
+    public String getCSVFilePath() {
+        return CSVFilePath;
+    }
+
+    public void setCSVFilePath(String CSVFilePath) {
+        this.CSVFilePath = CSVFilePath;
+    }
+    
+    
 
     public String getIssuingBankAcceptedRemarks()
     {

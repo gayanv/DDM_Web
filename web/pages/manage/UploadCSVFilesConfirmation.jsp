@@ -1,3 +1,6 @@
+<%@page import="lk.com.ttsl.pb.slips.dao.ddmrequest.DDMRequestUtil"%>
+<%@page import="lk.com.ttsl.pb.slips.dda.DDARequest"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.merchant.Merchant"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.*,java.sql.*" errorPage="../../error.jsp" %>
 <%@page import="java.sql.*,java.util.*,java.io.*,java.text.DecimalFormat" errorPage="../../error.jsp"%>
@@ -13,6 +16,7 @@
 <%@page import="lk.com.ttsl.pb.slips.dao.branch.Branch" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.branch.BranchDAO" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.corporatecustomer.CorporateCustomer" errorPage="../../error.jsp"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.ddmrequest.DDMRequest" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.parameter.*" errorPage="../../error.jsp"%>
@@ -44,7 +48,7 @@
     String session_menuId = null;
     String session_menuName = null;
     String session_OTP = null;
-
+//new edit
     session_userName = (String) session.getAttribute("session_userName");
 
     if (session_userName == null || session_userName.equals("null"))
@@ -71,8 +75,7 @@
 
 %>
 
-<%    
-    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
+<%    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
     String currentDate = DAOFactory.getCustomDAO().getCurrentDate();
     long serverTime = DAOFactory.getCustomDAO().getServerTime();
     CustomDate customDate = DAOFactory.getCustomDAO().getServerTimeDetails();
@@ -85,16 +88,21 @@
     String newFileFullPath = null;
     String msg = null;
     String fileType = null;
-    String vsFile = null;
-    String vsFilePath = null;
+    String isConfirmAction = null;
     boolean fileUploadStatus = false;
+    boolean filevalidationStatus = false;
+    boolean fileUploadConfirmStatus = false;
     long initialfileSize = 0;
-
+    Branch branch = null;
+    Merchant merchant = null;
     String merchantID = null;
     String merchantAccNo = null;
     String merchantAccName = null;
     String merchantAccBank = null;
     String merchantAccBranch = null;
+
+    List<DDMRequest> ddaListSuccess = new ArrayList<>();
+    List<DDMRequest> ddaListError = new ArrayList<>();
 
     String businessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate);
     //String lcplBusinessDate = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_batch_businessdate);
@@ -106,6 +114,29 @@
     if (!isMultipart)
     {
         System.out.println("Not Multipart");
+
+        merchantID = request.getParameter("hdnCoCuID");
+        merchantAccNo = request.getParameter("hdnOrgAccNo");
+        GetFileName = request.getParameter("hdnOrgFileName");
+
+        newFileName = request.getParameter("hdnFileName");
+        isConfirmAction = request.getParameter("hdnIsConfirm");
+
+        if (newFileName != null && isConfirmAction != null)
+        {
+            if (isConfirmAction.equals("1"))
+            {
+                fileUploadStatus = true;
+
+                if (DAOFactory.getDDMRequestDAO().updateDDMRequestStatusByCSVFileName(newFileName, DDM_Constants.ddm_file_process_status_initial, DDM_Constants.ddm_file_process_status_processing, session_userName))
+                {
+                    fileUploadConfirmStatus = true;
+                }
+
+            }
+
+        }
+
     }
     else
     {
@@ -122,15 +153,16 @@
             while (itr.hasNext())
             {
                 FileItem item = (FileItem) itr.next();
-                initialfileSize = item.getSize();
 
                 if (item.isFormField())
                 {
+
                     if (item.getFieldName().equals("cmbMerchantID"))
                     {
                         merchantID = item.getString();
+                        merchant = DAOFactory.getMerchantDAO().getMerchantDetails(merchantID);
                     }
-                    if (item.getFieldName().equals("cmbAccountNo"))
+                    if (item.getFieldName().equals("hdnOrgAccNo"))
                     {
                         merchantAccNo = item.getString();
                     }
@@ -150,6 +182,7 @@
                 else
                 {
                     String itemName = item.getName();
+                    initialfileSize = item.getSize();
 
                     System.out.println("itemName ------>" + itemName);
 
@@ -179,7 +212,7 @@
 
                         fileTmpCSVFilePath.mkdirs();
                     }
-
+                    //merchant accNO=000
                     newFileName = merchantID + "_" + merchantAccNo + "_" + businessDate + "_" + GetFileName;
 
                     if (DAOFactory.getDDMRequestDAO().isCSVFileAlreadyUploaded(newFileName))
@@ -214,8 +247,7 @@
                     }
                 }
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             msg = "Sorry! Error occured while transmitting the file. <br/> Please try again. If the issue remains please contact the System Administrator.";
             fileUploadStatus = false;
@@ -241,55 +273,255 @@
             System.out.println("Start CSV File read and Processing ------> ");
 
             File fileSLIPS_Data = new File(newFileFullPath);
-
-            FileReader fr = null;
-            BufferedReader br = null;
-
             String accNos = "," + merchantAccNo;
 
-            try
+            try (FileReader fr = new FileReader(fileSLIPS_Data);
+                    BufferedReader br = new BufferedReader(fr))
             {
-                fr = new FileReader(fileSLIPS_Data);
-                br = new BufferedReader(fr);
-                String headerLine = br.readLine();
 
-                String strLine = null;
+                // Skip the header line (variable names)
+                //String headerLine = br.readLine();
+                String strLine;
+                boolean isFirstLine = true;
+                int lineNo = 0;
 
                 while ((strLine = br.readLine()) != null)
                 {
-                    if (strLine != null && strLine.length() > 22)
+                    lineNo++;
+                    String[] data = strLine.split(",");
+
+                    if (!isFirstLine)
                     {
-                        if (strLine.substring(0, 4).equals(DDM_Constants.default_bank_code))
+                        // Assuming that the order of data columns matches the DDA class attributes
+                        if (data.length >= 12)
                         {
-                            accNos = accNos + "," + strLine.substring(4, 7).replaceAll(" ", "0") + strLine.substring(10, 22).replaceAll(" ", "0");
+                            
+                            DDMRequest ddaRequest = new DDMRequest();
+                            
+                            String strDDAID=data[0].trim();
+                            String strMerchantID= data[1].trim();
+
+                            String issuningBankCode = data[2].trim();
+                            String issuningBranch = data[3].trim();
+                            String issuingAccountNumberValue = data[4].trim();
+                            
+                            //ddaRequest.setDDA_ID(data[0].trim());
+                            //ddaRequest.setMerchantID(data[1].trim());
+                            
+                            //DDAID Validation
+                            
+                            try {
+                                    if (strDDAID.length() != 16) {
+                                        ddaRequest.setDDA_ID(strDDAID);
+                                        filevalidationStatus = false;
+                                        System.out.println(" invalid DDAID Format [Length] (in line no. " + lineNo + ") - " + strLine);
+                                        msg = " invalid DDAID Format [Length] (in line no. " + lineNo + ")";
+                                        break;
+
+                                    }
+
+                                    if (DDMRequestUtil.isValidDate(strDDAID.substring(0, 8))) {
+                                        
+                                    } else {
+                                        filevalidationStatus = false;
+                                        System.out.println(" invalid DDAID Format in Date Part (in line no. " + lineNo + ") - " + strLine);
+                                        msg = " invalid DDAID Format in Date Part (in line no. " + lineNo + ")";
+                                        break;
+
+                                    }
+
+                                    if (merchantID.equals(strDDAID.substring(8, 12))) {
+                                        
+                                    } else {
+                                        filevalidationStatus = false;
+                                        System.out.println(" invalid DDAID Format in Merchant-ID Part (in line no. " + lineNo + ") - " + strLine);
+                                        msg = " invalid DDAID Format in Merchant-ID Part (in line no. " + lineNo + ")";
+                                        break;
+
+                                    }
+
+                                    if (DDMRequestUtil.isNumeric(strDDAID.substring(12, 16))) {
+                                        ddaRequest.setMerchantID(strMerchantID);
+                                        ddaRequest.setDDA_ID(strDDAID);
+                                    } else {
+                                        filevalidationStatus = false;
+                                        System.out.println(" invalid DDAID Format in Sequence Part (in line no. " + lineNo + ") - " + strLine);
+                                        msg = " invalid DDAID Format in Sequence-ID Part (in line no. " + lineNo + ")";
+                                        break;
+
+                                    }
+
+                                } catch (Exception e) {
+                                    filevalidationStatus = false;
+                                    System.out.println(" invalid DDAID Format  (in line no. " + lineNo + ") - " + strLine);
+                                    msg = " invalid DDAID Format  (in line no. " + lineNo + ")";
+                                    break;
+
+                                }
+                              
+                             
+                             
+                            
+                            //DDAID Validation End
+                            
+                            branch = DAOFactory.getBranchDAO().getBranchDetails(issuningBankCode, issuningBranch);
+                            if (branch != null)
+                            {
+                                ddaRequest.setIssuningBankCode(data[2].trim());
+                                ddaRequest.setIssuningBranch(data[3].trim());
+
+                            }
+                            else
+                            {
+                                filevalidationStatus=false;
+                                System.out.println(" invalid BankCode or Branch code (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid BankCode or Branch code (in line no. " + lineNo + ")";
+                                break;
+
+                            }
+                            
+                            if (DDMRequestUtil.isNumeric(issuingAccountNumberValue))
+                            {
+                                ddaRequest.setIssuningAccountNumber(issuingAccountNumberValue);
+                            }
+                            else
+                            {
+                                filevalidationStatus=false;
+                                System.out.println(" invalid Issuing Account NumberValue (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid Issuing Account NumberValue (in line no. " + lineNo + ")";
+                                break;
+
+                            }
+                            //ddaRequest.setIssuningAccountNumber(data[4].trim());
+                            ddaRequest.setIssuningAccountName(data[5].trim());
+                            
+                            String strSdate=data[6].trim();
+                            String strEdate=data[7].trim();
+                            
+                            if ((DDMRequestUtil.isValidDate(strSdate))&&(DDMRequestUtil.isValidDate(strEdate))&&(DDMRequestUtil.isValidSDateEDate(strSdate, strEdate)))
+                            {   
+                                System.out.println("Valid Start End Date Found");
+                                ddaRequest.setStartDate(data[6].trim());
+                                ddaRequest.setEndDate(data[7].trim());
+                                
+                            }else{
+                                filevalidationStatus=false;
+                                System.out.println(" invalid Start or End Date (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid Start or End Date (in line no. " + lineNo + ")";
+                                break;
+                            }
+                            if (DDMRequestUtil.isNotB4BusinessDate(strDDAID.substring(0, 8), businessDate)){
+                                filevalidationStatus=false;
+                                System.out.println(" invalid   Date (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid   Date (in line no. " + lineNo + ")";
+                                break;
+                            }
+                            if (DDMRequestUtil.isNotB4BusinessDate(strSdate, businessDate)){
+                                filevalidationStatus=false;
+                                System.out.println(" invalid   Start Date (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid Start Date (in line no. " + lineNo + ")";
+                                break;
+                            }
+//
+                            //
+                            String maxLimitValue = data[8].trim();
+                            if (DDMRequestUtil.isNumeric(maxLimitValue))
+                            {
+                                ddaRequest.setMaxLimit(maxLimitValue);
+                            }
+                            else
+                            {
+                                filevalidationStatus=false;
+                                System.out.println(" invalid Max Limit Value  (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid Max Limit Value (in line no. " + lineNo + ")";
+                                break;
+
+                            }
+                            String strFreuency=data[9].trim();
+                            if(DDMRequestUtil.isValidFrequency(strFreuency)){
+                                ddaRequest.setFrequency(strFreuency);
+                            }else{
+                                filevalidationStatus=false;
+                                System.out.println(" invalid Frequency  (in line no. " + lineNo + ") - " + strLine);
+                                msg = " invalid Frequency (in line no. " + lineNo + ")";
+                                break;
+                            }
+                            
+                            ddaRequest.setPurpose(data[10].trim());
+                            ddaRequest.setReference(data[11].trim());
+                            // ddaRequest.setStatus(data[12].trim());
+                            ddaRequest.setStatus(DDM_Constants.ddm_file_process_status_initial);
+                            ddaRequest.setCreatedBy(session_userName);
+
+                            if (merchant != null && merchant.getMerchantID().equals(ddaRequest.getMerchantID()))
+                            {
+                                filevalidationStatus = true;
+
+                                ddaRequest.setAcquiringAccountName(merchant.getPrimaryAccountName());
+                                ddaRequest.setAcquiringAccountNumber(merchant.getPrimaryAccountNo());
+                                ddaRequest.setAcquiringBankCode(merchant.getBankCode());
+                                ddaRequest.setAcquiringBranch(merchant.getBranchCode());
+
+                                ddaRequest.setIsCSVFileRequest(DDM_Constants.status_yes);
+                                ddaRequest.setCSVFileName(newFileName);
+                                ddaRequest.setCSVFilePath(newFileFullPath);
+
+                                // save into db
+                                if (DAOFactory.getDDMRequestDAO().addDDARequest(ddaRequest))
+                                {
+                                    ddaListSuccess.add(ddaRequest);
+                                }
+                                else
+                                {
+                                    System.out.println(" Invalid or Duplicate DDAID (in line no. " + lineNo + ") - " + strLine);
+                                    filevalidationStatus = false;
+                                    msg = " Invalid or Duplicate DDAID (in line no. " + lineNo + ")";
+                                    ddaListError.add(ddaRequest);
+                                    break;
+                                }
+                                //new edit
+
+                            }
+                            else
+                            {
+                                System.out.println(" invalid merchant (in line no. " + lineNo + ") - " + strLine);
+                                filevalidationStatus = false;
+                                msg = " invalid merchant (in line no. " + lineNo + ")";
+                                break;
+
+                            }
+
                         }
+                        else
+                        {
+                            // Handle the case where there are missing values
+                            System.out.println(" invalid Format (in line no. " + lineNo + ") - " + strLine);
+                            filevalidationStatus = false;
+                            msg = " invalid Format (in line no. " + lineNo + ")";
+                            break;
+                            // You can choose to skip this row or handle it differently
+                        }
+
                     }
+
+                    System.out.println(); // Move to the next line after printing all items
+                    isFirstLine = false;
                 }
-            }
-            catch (Exception e)
+
+            } catch (Exception e)
             {
                 System.out.println("Error reading file - " + fileSLIPS_Data + "(" + e.getMessage() + ")");
+                filevalidationStatus = false;
+                msg = " Error occured while readingthe uploaded file -(" + fileSLIPS_Data + ")";
             }
-            finally
-            {
-                if (br != null)
-                {
-                    br.close();
-                }
-
-                if (fr != null)
-                {
-                    fr.close();
-                }
-            }
-
+            /*
             System.out.println("accNos ------> " + accNos);
 
             if (accNos.startsWith(","))
             {
                 accNos = accNos.replaceFirst(",", "");
             }
-
+            */
             System.out.println("Start CSV File Processing ########## ------> " + fileType);
 
             System.out.println("End SLIPS File Processing ##########@@@@@@@ ------> " + fileType);
@@ -298,12 +530,14 @@
 //                vsFilePath = fileSLIPS_Data.getAbsolutePath().substring(0, fileSLIPS_Data.getAbsolutePath().lastIndexOf(".")) + "_ValidationSummary.txt";
             System.out.println("Start CSV File Processing ########## ------> " + fileType);
 
-            if (fileUploadStatus)
+            if (fileUploadStatus && filevalidationStatus)
             {
                 DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_upload_ddm_csv_file_confirmation, "|Business Date - " + businessDate + ", Bank - " + session_bankCode + ", Uploded CSV File Name : (Original - " + GetFileName + ", System Assigned - " + newFileName + "), File Size - " + initialfileSize + " bytes, Merchant Acc. No - " + (merchantAccNo != null ? merchantAccNo : "N/A") + " | Upload CSV file Status - Success | Uploaded By - " + session_userName + " (" + session_userTypeDesc + ") |"));
             }
             else
-            {
+            {   
+                ddaListSuccess=null;
+                DAOFactory.getDDMRequestDAO().rmDDARequest(newFileFullPath);
                 DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_upload_ddm_csv_file_confirmation, "|Business Date - " + businessDate + ", Bank - " + session_bankCode + ", Uploded CSV File Name : " + GetFileName + ", System Assigned - " + newFileName + "), File Size - " + initialfileSize + " bytes, Merchant Acc. No - " + (merchantAccNo != null ? merchantAccNo : "N/A") + " | Upload CSV file Status - Unsuccess (" + msg + ") | Uploaded By - " + session_userName + " (" + session_userTypeDesc + ") |"));
             }
         }
@@ -358,19 +592,32 @@
             function doSubmit(val)
             { 
             if(val==1)
-            {				
-            document.frmFileUploadingSummary.action="<%=request.getContextPath()%>/pages/file/ViewDDARequestDetails.jsp";
+            {	
+            isConfirmRequest(true);
+            document.frmFileUploadingSummary.action="UploadCSVFilesConfirmation.jsp";
             document.frmFileUploadingSummary.submit();
             }
             else if(val==2)
             {				
-            document.frmFileUploadingSummary.action="<%=request.getContextPath()%>/pages/file/UploadCSVFiles.jsp";
+            document.frmFileUploadingSummary.action="<%=request.getContextPath()%>/pages/manage/UploadCSVFiles.jsp";
             document.frmFileUploadingSummary.submit();
             }
             else
             {
             document.frmFileUploadingSummary.action="<%=request.getContextPath()%>/pages/homepage.jsp";
             document.frmFileUploadingSummary.submit();
+            }
+            }
+
+            function isConfirmRequest(status)
+            {
+            if (status)
+            {
+            document.getElementById('hdnIsConfirm').value = "1";
+            }
+            else
+            {
+            document.getElementById('hdnIsConfirm').value = "0";
             }
             }
 
@@ -533,7 +780,7 @@
                                                                             <td align="left" valign="top" ><table width="100%" border="0" cellspacing="0" cellpadding="0">
                                                                                     <tr>
                                                                                         <td width="10">&nbsp;</td>
-                                                                                        <td align="left" valign="top" class="ddm_header_text">SLIPS Data  File Uploading Summary</td>
+                                                                                        <td align="left" valign="top" class="ddm_header_text">DDM CSV File Uploading Summary</td>
                                                                                         <td width="10">&nbsp;</td>
                                                                                     </tr>
                                                                                     <tr>
@@ -541,157 +788,320 @@
                                                                                         <td align="left" valign="top" class="ddm_header_text"></td>
                                                                                         <td></td>
                                                                                     </tr>
-                                                                                    <tr>
-                                                                                        <td></td>
-                                                                                        <td align="center" valign="top">
-                                                                                            <form method="post" name="frmFileUploadingSummary" id="frmFileUploadingSummary" >
 
-
-                                                                                                <table border="0" cellspacing="1" cellpadding="1">
-                                                                                                    <tr>
-                                                                                                        <td align="center" class="ddm_Display_Error_msg">
-
-                                                                                                            <%=fileUploadStatus == true ? "<span class=\"ddm_Display_Success_msg\">SLIPS Data file uploading process is completed.<br/>First please make sure to check the validation summary file inorder to identify transaction level validation details and status.</span>" : (msg != null ? msg : "")%></td>
+                                                                                    <td></td>
+                                                                                    <td align="center" valign="top">
 
 
 
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td height="10"></td>
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td align="center" valign="middle"><table width="" border="0" cellspacing="0" cellpadding="0" class="ddm_table_boder">
-                                                                                                                <tr>
-                                                                                                                    <td><table border="0" cellpadding="6" cellspacing="1" bgcolor="#FFFFFF" >
-                                                                                                                            <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><%=merchantID != null ? merchantID : ""%><input name="hdnCoCuID" id="hdnCoCuID" type="hidden" value="<%=merchantID%>"  ></td>
-                                                                                                                            </tr>
-                                                                                                                            <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant Acc. No  :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><%=merchantAccNo != null ? merchantAccNo : ""%><input name="hdnOrgAccNo" id="hdnOrgAccNo" type="hidden" value="<%=merchantAccNo%>"  ></td>
-                                                                                                                            </tr>
-                                                                                                                            <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">
-                                                                                                                                    Original CSV File Name :        </td>
+                                                                                        <table border="0" cellspacing="1" cellpadding="1">
+                                                                                            <tr>
+                                                                                                <td align="center" class="ddm_Display_Error_msg">
 
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><%=GetFileName%></td>
-                                                                                                                            </tr>
-                                                                                                                            <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">System Assigned File Name :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><%=newFileName%><input name="hdnFileName" id="hdnFileName" type="hidden" value="<%=newFileName%>"  ></td>
-                                                                                                                            </tr>
+                                                                                                    <%=(fileUploadStatus && filevalidationStatus) == true ? "<span class=\"ddm_Display_Success_msg\">SLIPS Data file uploading process is completed.<br/>First please make sure to check the uploaded DDM request details.</span>" : (msg != null ? msg : "")%>
 
+                                                                                                    <%
+                                                                                                        if (fileUploadConfirmStatus)
+                                                                                                        {
+                                                                                                    %>
 
-                                                                                                                            <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Validation Summary :</td>
+                                                                                                    <br/>
+                                                                                                    <span class="ddm_Display_Success_msg"> Uploaded DDM Requests Confirmed Successfully! </span>
+
+                                                                                                    <%
+                                                                                                        }
+                                                                                                    %>
+
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td height="10"></td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td align="center" valign="middle">
 
 
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text">
-                                                                                                                                    <%
-                                                                                                                                        if (fileUploadStatus)
-                                                                                                                                        {
-                                                                                                                                    %>
+                                                                                                    <form method="post" name="frmFileUploadingSummary" id="frmFileUploadingSummary" >
+
+                                                                                                        <table width="" border="0" cellspacing="0" cellpadding="0" class="ddm_table_boder">
+                                                                                                            <tr>
+                                                                                                                <td><table border="0" cellpadding="6" cellspacing="1" bgcolor="#FFFFFF" >
+                                                                                                                        <tr>
+                                                                                                                            <td valign="middle" class="ddm_tbl_header_text">Merchant :</td>
+                                                                                                                            <td valign="middle" class="ddm_tbl_common_text"><%=merchantID != null ? merchantID : ""%><input name="hdnCoCuID" id="hdnCoCuID" type="hidden" value="<%=merchantID%>"  ></td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td valign="middle" class="ddm_tbl_header_text">Merchant Acc. No  :</td>
+                                                                                                                            <td valign="middle" class="ddm_tbl_common_text"><%=merchantAccNo != null ? merchantAccNo : ""%><input name="hdnOrgAccNo" id="hdnOrgAccNo" type="hidden" value="<%=merchantAccNo%>"  ></td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td valign="middle" class="ddm_tbl_header_text">
+                                                                                                                                Original CSV File Name :        </td>
+
+                                                                                                                            <td valign="middle" class="ddm_tbl_common_text"><%=GetFileName%> <input name="hdnOrgFileName" id="hdnOrgFileName" type="hidden" value="<%=GetFileName%>"  ></td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td valign="middle" class="ddm_tbl_header_text">System Assigned File Name :</td>
+                                                                                                                            <td valign="middle" class="ddm_tbl_common_text"><%=newFileName%><input name="hdnFileName" id="hdnFileName" type="hidden" value="<%=newFileName%>"  > <input name="hdnIsConfirm" id="hdnIsConfirm" type="hidden" ></td>
+                                                                                                                        </tr>
 
 
-                                                                                                                                    <input type="button" name="btnDwnReport" id="btnDwnReport" value="Download - <%=vsFile%>" class="ddm_custom_button_small" onClick="downloadFile()">
-                                                                                                                                    <%
-                                                                                                                                    }
-                                                                                                                                    else
-                                                                                                                                    {
-                                                                                                                                    %>
-                                                                                                                                    N/A
-                                                                                                                                    <%
-                                                                                                                                        }
-                                                                                                                                    %>                                                                                                                                </td>
-                                                                                                                            </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td colspan="2" align="center" class="ddm_tbl_footer_text"><table border="0" cellspacing="0" cellpadding="0">
+                                                                                                                                    <tr>
+                                                                                                                                        <td>                                                                                                                                                
+                                                                                                                                            <input type="button" value="Confirm" name="btnUpload1" id="btnUpload1" class="ddm_custom_button"  onclick="doSubmit(1)" <%=(fileUploadStatus && filevalidationStatus) ? "" : "disabled"%>  <%=(fileUploadConfirmStatus) ? "disabled" : ""%>/>                                                                                                                                            </td>
+                                                                                                                                        <td>&nbsp;</td>
+                                                                                                                                        <td><input type="button" value="Go To Upload Page" name="btnUpload2" id="btnUpload2" class="ddm_custom_button"  onclick="doSubmit(2)" /></td>
+                                                                                                                                    </tr>
+                                                                                                                                </table>                                                                                                                                </td>
+                                                                                                                        </tr>
+                                                                                                                    </table></td>
+                                                                                                            </tr>
+                                                                                                        </table>
+
+                                                                                                    </form>
 
 
-                                                                                                                            <tr>
-                                                                                                                                <td colspan="2" align="center" class="ddm_tbl_footer_text"><table border="0" cellspacing="0" cellpadding="0">
-                                                                                                                                        <tr>
-                                                                                                                                            <td>                                                                                                                                                
-                                                                                                                                                <input type="button" value="View Details and Confirm" name="btnUpload1" id="btnUpload1" class="ddm_custom_button"  onclick="doSubmit(1)" <%=(fileUploadStatus) ? "" : "disabled"%> />
-                                                                                                                                            </td>
-                                                                                                                                            <td>&nbsp;</td>
-                                                                                                                                            <td><input type="button" value="Go To Upload Page" name="btnUpload2" id="btnUpload2" class="ddm_custom_button"  onclick="doSubmit(2)" /></td>
-                                                                                                                                        </tr>
-                                                                                                                                    </table>                                                                                                                                </td>
-                                                                                                                            </tr>
-                                                                                                                        </table></td>
-                                                                                                                </tr>
-                                                                                                            </table></td>
-                                                                                                    </tr>
-                                                                                                </table>
+
+                                                                                                </td>
+                                                                                            </tr>
+
+                                                                                            <tr></tr>
+                                                                                            <tr>
+                                                                                                <td height="20" valign="middle">&nbsp;</td>
+                                                                                            </tr>
+
+                                                                                            <%
+                                                                                                if ((fileUploadStatus && filevalidationStatus) && !fileUploadConfirmStatus)
+                                                                                                {
+                                                                                            %>
+                                                                                            <tr>
+                                                                                                <td valign="middle" class="ddm_tbl_common_text_bold"> CSV File Based DDM Request Upload Details</td>
+                                                                                            </tr>
+                                                                                            <%
+                                                                                                }
+                                                                                            %>
+
+                                                                                            <%
+                                                                                                if (ddaListSuccess != null && !ddaListSuccess.isEmpty())
+                                                                                                {
+                                                                                            %>
+
+                                                                                            <tr>
+                                                                                                <td height="30" align="center" valign="middle" class="ddm_Display_Success_msg">Successfully Added DDM Requests</td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td align="center" valign="middle">
+                                                                                                    <table border="0" cellspacing="1" cellpadding="3" class="ddm_table_boder" bgcolor="#FFFFFF">
+                                                                                                        <tr>
+                                                                                                            <td class="ddm_tbl_header_text_horizontal"></td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">DDA ID</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Merchant ID</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing Bank</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing Branch</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing AcNo</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing AcName</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Start Date</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">End Date</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Max Limit</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Frequency</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Purpose</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Ref</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Status</td>
+                                                                                                        </tr>
 
 
-                                                                                            </form>
+                                                                                                        <%  int rowNum = 0;
+                                                                                                            for (DDMRequest ddaReq : ddaListSuccess)
+                                                                                                            {
+                                                                                                                rowNum++;
+                                                                                                        %>
 
-                                                                                            <form id="frmDownload" name="frmDownload" method="post" target="_blank"><input type="hidden" id="hdnFileName" name="hdnFileName" value="<%=vsFile%>"  />
-                                                                                                <input type="hidden" id="hdnFilePath" name="hdnFilePath" value="<%=vsFilePath%>"  /></form>
+                                                                                                        <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" onMouseOvr="cOn(this)" onMouseOut="cOut(this)">
+                                                                                                            <td align="right" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text"><%=rowNum%>.</td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getDDA_ID()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getMerchantID()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningBankCode()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningBranch()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningAccountNumber()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningAccountName()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getStartDate()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getEndDate()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getMaxLimit()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getFrequency()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getPurpose()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getReference()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getStatus()%>                                                                                                                    </td>
+                                                                                                        </tr>
+                                                                                                        <%
+                                                                                                            }
+                                                                                                        %>
+                                                                                                    </table>                                                                                                        </td>
+                                                                                            </tr>
 
-                                                                                        </td>
-                                                                                        <td></td>
-                                                                                    </tr>
-                                                                                </table></td>
-                                                                            <td width="15">&nbsp;</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td height="50">&nbsp;</td>
-                                                                            <td align="left" valign="top" >&nbsp;</td>
-                                                                            <td>&nbsp;</td>
+
+                                                                                            <%
+                                                                                                }
+
+                                                                                            %>
+
+                                                                                            <%                                                                                                        if (ddaListError != null && !ddaListError.isEmpty())
+                                                                                                {
+                                                                                            %>
+
+                                                                                            <tr>
+                                                                                                <td height="30" align="center" valign="middle" class="ddm_Display_Error_msg">Erroneously Added DDM Requests</td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td align="center" valign="middle">
+                                                                                                    <table border="0" cellspacing="1" cellpadding="3" class="ddm_table_boder" bgcolor="#FFFFFF">
+                                                                                                        <tr>
+                                                                                                            <td class="ddm_tbl_header_text_horizontal"></td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">DDA ID</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Merchant ID</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing Bank</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing Branch</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing AcNo</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Issuing AcName</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Start Date</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">End Date</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Max Limit</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Frequency</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Purpose</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Ref</td>
+                                                                                                            <td align="center" valign="middle" class="ddm_tbl_header_text_horizontal">Status</td>
+                                                                                                        </tr>
+
+
+                                                                                                        <%  int rowNum = 0;
+                                                                                                            for (DDMRequest ddaReq : ddaListError)
+                                                                                                            {
+                                                                                                                rowNum++;
+                                                                                                        %>
+
+                                                                                                        <tr bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" onMouseOvr="cOn(this)" onMouseOut="cOut(this)">
+                                                                                                            <td align="right" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text"><%=rowNum%>.</td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getDDA_ID()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getMerchantID()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningBankCode()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningBranch()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningAccountNumber()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getIssuningAccountName()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getStartDate()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getEndDate()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getMaxLimit()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getFrequency()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getPurpose()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getReference()%>                                                                                                                    </td>
+                                                                                                            <td align="left" bgcolor="<%=rowNum % 2 == 0 ? "#E8E8EA" : "#F9F9F9"%>" class="ddm_common_text">
+                                                                                                                <%= ddaReq.getStatus()%>                                                                                                                    </td>
+                                                                                                        </tr>
+                                                                                                        <%
+                                                                                                            }
+                                                                                                        %>
+                                                                                                    </table>                                                                                                        </td>
+                                                                                            </tr>
+
+
+                                                                                            <%
+                                                                                                }
+
+                                                                                            %>
+
+                                                                                        </table>
+
+
+
+
+
+
+                                                                                    </td>
+                                                                                    <td></td>
                                                                         </tr>
                                                                     </table></td>
+                                                                <td width="15">&nbsp;</td>
                                                             </tr>
-                                                        </table>                          </td>
+                                                            <tr>
+                                                                <td height="50">&nbsp;</td>
+                                                                <td align="left" valign="top" >&nbsp;</td>
+                                                                <td>&nbsp;</td>
+                                                            </tr>
+                                                        </table></td>
                                                 </tr>
-
-
-                                            </table></td>
+                                            </table>                          </td>
                                     </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
 
-                </td></tr>
-            <tr>
-                <td height="32" class="ddm_footter_center">                  
-                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="ddm_footter_left">
-                        <tr>
-                            <td height="32">
-                                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="ddm_footter_right">
-                                    <tr>
-                                        <td height="32" valign="bottom">
-                                            <table width="100%" height="32" border="0" cellpadding="0" cellspacing="0">
-                                                <tr>
-                                                    <td height="10"></td>
-                                                    <td valign="middle" class="ddm_copyRight"></td>
-                                                    <td align="right" valign="middle" class="ddm_copyRight"></td>
-                                                    <td></td>
-                                                </tr>
-                                                <tr>
-                                                    <td width="25"></td>
-                                                    <td valign="middle" class="ddm_copyRight">&copy; 2023 LankaPay (Pvt) Ltd. All rights reserved. | Tel: 011 2334455 | Mail: helpdesk.ddm@lankapay.net</td>
-                                                    <td align="right" valign="middle" class="ddm_copyRight">Developed By - Transnational Technology Solutions Lanka (Pvt) Ltd.</td>
-                                                    <td width="25"></td>
-                                                </tr>
-                                            </table></td>
-                                    </tr>
+
                                 </table></td>
                         </tr>
                     </table>
-
-
-
-
                 </td>
             </tr>
         </table>
 
-    </body>
+    </td></tr>
+<tr>
+    <td height="32" class="ddm_footter_center">                  
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="ddm_footter_left">
+            <tr>
+                <td height="32">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="ddm_footter_right">
+                        <tr>
+                            <td height="32" valign="bottom">
+                                <table width="100%" height="32" border="0" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td height="10"></td>
+                                        <td valign="middle" class="ddm_copyRight"></td>
+                                        <td align="right" valign="middle" class="ddm_copyRight"></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td width="25"></td>
+                                        <td valign="middle" class="ddm_copyRight">&copy; 2023 LankaPay (Pvt) Ltd. All rights reserved. | Tel: 011 2334455 | Mail: helpdesk.ddm@lankapay.net</td>
+                                        <td align="right" valign="middle" class="ddm_copyRight">Developed By - Transnational Technology Solutions Lanka (Pvt) Ltd.</td>
+                                        <td width="25"></td>
+                                    </tr>
+                                </table></td>
+                        </tr>
+                    </table></td>
+            </tr>
+        </table>
+
+
+
+
+    </td>
+</tr>
+</table>
+
+</body>
 </html>
-<%
-        // }
+<%        // }
     }
 %>

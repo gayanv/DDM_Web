@@ -35,14 +35,15 @@ public class MerchantAccNoMapUtil
 
             mranm = new MerchantAccNoMap();
 
-            mranm.setBank(rs.getString("ACNOM_Bank"));
-            mranm.setBankName(rs.getString("ACNOM_BankName"));
-            mranm.setBankShortName(rs.getString("ACNOM_ShortName"));
-            mranm.setBranch(rs.getString("ACNOM_Branch"));
-            mranm.setBranchName(rs.getString("ACNOM_BranchName"));
-            mranm.setAcNo(rs.getString("ACNOM_AccountNo"));
-            mranm.setAcName(rs.getString("ACNOM_AccountName"));
-            mranm.setIsPrimary(rs.getString("ACNOM_IsPrimary"));
+            mranm.setMerchantID(rs.getString("merchantid"));
+            mranm.setBank(rs.getString("bankcode"));
+            mranm.setBankName(rs.getString("BankName"));
+            mranm.setBankShortName(rs.getString("BankShortName"));
+            mranm.setBranch(rs.getString("branchcode"));
+            mranm.setBranchName(rs.getString("BranchName"));
+            mranm.setAcNo(rs.getString("acno"));
+            mranm.setAcName(rs.getString("acname"));
+            mranm.setIsPrimary(rs.getString("isprimary"));
             mranm.setStatus(rs.getString("AccNoMapStatus"));
             mranm.setStatusModify(rs.getString("AccNoMapStatusModify"));
 
@@ -92,14 +93,15 @@ public class MerchantAccNoMapUtil
         {
             MerchantAccNoMap mranm = new MerchantAccNoMap();
 
-            mranm.setBank(rs.getString("ACNOM_Bank"));
-            mranm.setBankName(rs.getString("ACNOM_BankName"));
-            mranm.setBankShortName(rs.getString("ACNOM_ShortName"));
-            mranm.setBranch(rs.getString("ACNOM_Branch"));
-            mranm.setBranchName(rs.getString("ACNOM_BranchName"));
-            mranm.setAcNo(rs.getString("ACNOM_AccountNo"));
-            mranm.setAcName(rs.getString("ACNOM_AccountName"));
-            mranm.setIsPrimary(rs.getString("ACNOM_IsPrimary"));
+            mranm.setMerchantID(rs.getString("merchantid"));
+            mranm.setBank(rs.getString("bankcode"));
+            mranm.setBankName(rs.getString("BankName"));
+            mranm.setBankShortName(rs.getString("BankShortName"));
+            mranm.setBranch(rs.getString("branchcode"));
+            mranm.setBranchName(rs.getString("BranchName"));
+            mranm.setAcNo(rs.getString("acno"));
+            mranm.setAcName(rs.getString("acname"));
+            mranm.setIsPrimary(rs.getString("isprimary"));
             mranm.setStatus(rs.getString("AccNoMapStatus"));
             mranm.setStatusModify(rs.getString("AccNoMapStatusModify"));
 

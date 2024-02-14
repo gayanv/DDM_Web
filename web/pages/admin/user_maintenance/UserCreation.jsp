@@ -258,7 +258,8 @@
         usr.setUserId(newUserId.trim());
         usr.setUserLevelId(newUserLevel);
 
-        defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
+        //defaultPwd = DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_default_pwd);
+        defaultPwd = "";
         usr.setPassword(defaultPwd);
 
         usr.setBankCode(newUserBank);

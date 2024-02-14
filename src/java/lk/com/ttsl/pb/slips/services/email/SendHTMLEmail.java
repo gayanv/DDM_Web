@@ -78,7 +78,7 @@ public class SendHTMLEmail
                             {
                                 pwdExpireWarningDays = Integer.parseInt(strPwdExpireWarningDays);
                             }
-                            catch (Exception e)
+                            catch (NumberFormatException e)
                             {
                                 pwdExpireWarningDays = DDM_Constants.default_pwd_expire_warning_days;
                             }
@@ -341,7 +341,7 @@ public class SendHTMLEmail
 
             //transport.connect();
             System.out.println("sendEmailForApprovedNewUsers (" + toEmail + ") : Sending...");
-            Transport.send(message);
+            Transport.send(message);//20231010
             System.out.println("sendEmailForApprovedNewUsers (" + toEmail + ") : Done");
             //transport.close();
 
@@ -430,7 +430,7 @@ public class SendHTMLEmail
 
             //transport.connect();
             System.out.println("sendEmailForPasswordExpiry (" + toEmail + ") : Start Sending");
-            Transport.send(message);
+            Transport.send(message);//20231010
             System.out.println("sendEmailForPasswordExpiry (" + toEmail + ") : Done");
             //transport.close();
 
@@ -519,7 +519,7 @@ public class SendHTMLEmail
 
             //transport.connect();
             System.out.println("sendEmailForPasswordReset (" + toEmail + ") : Start Sending");
-            Transport.send(message);
+            Transport.send(message);//20231010
             System.out.println("sendEmailForPasswordReset (" + toEmail + ") : Done");
             //transport.close();
 
@@ -648,7 +648,7 @@ public class SendHTMLEmail
 
             //transport.connect();
             System.out.println("sendEmailForLoginOTP (" + toEmail + ") : Start Sending");
-            Transport.send(message);
+            Transport.send(message);//20231010
             System.out.println("sendEmailForLoginOTP (" + toEmail + ") : Done");
             //transport.close();
 

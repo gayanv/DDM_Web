@@ -37,4 +37,9 @@ public interface MerchantDAO
     public boolean doAuthorizedMerchant(Merchant cc);
     
     public boolean doAuthorizeModifiedMerchant(Merchant cc);
+    
+    
+    
+    
+    
 }

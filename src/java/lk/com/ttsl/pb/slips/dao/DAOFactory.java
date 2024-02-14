@@ -72,6 +72,8 @@ import lk.com.ttsl.pb.slips.dao.userLevel.UserLevelDAOImpl;
 import lk.com.ttsl.pb.slips.dao.userlevelfunctionmap.UserLevelFunctionMapDAO;
 import lk.com.ttsl.pb.slips.dao.userlevelfunctionmap.UserLevelFunctionMapDAOImpl;
 import lk.com.ttsl.pb.slips.dao.requeststatus.RequestStatusDAO;
+import lk.com.ttsl.pb.slips.dda.DDARequestDAO;
+import lk.com.ttsl.pb.slips.dda.DDARequestDAOImpl;
 
 /**
  *
@@ -252,6 +254,10 @@ public class DAOFactory
     public static UserLevelFunctionMapDAO getUserLevelFunctionMapDAO()
     {
         return new UserLevelFunctionMapDAOImpl();
+    }
+    
+    public static DDARequestDAO getDDARequestDAO() {
+        return new DDARequestDAOImpl();
     }
 
 }

@@ -80,7 +80,7 @@ public class CorporateCustomerAccNoMapDAOImpl implements CorporateCustomerAccNoM
                 sbQuery.append("AND ccanm.Status = ? ");
             }
 
-            sbQuery.append("ORDER BY AccNo ");
+            sbQuery.append("ORDER BY ccanm.AccNo ");
 
             System.out.println("sbQuery(getCorporateCustomerNotInStatus)----> " + sbQuery);
             
