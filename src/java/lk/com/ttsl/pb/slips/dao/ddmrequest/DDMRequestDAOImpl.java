@@ -606,7 +606,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             System.out.println("sbQuery(getDDARequestDetailsForIssuingBankApproval) ---> " + sbQuery.toString());
 
             pstm.setString(1, issuingBank);
-            pstm.setString(2, DDM_Constants.ddm_request_status_02);
+            pstm.setString(2, DDM_Constants.ddm_request_status_16);
 
             rs = pstm.executeQuery();
 
@@ -862,7 +862,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             System.out.println("sbQuery(getDDARequestDetailsForAquiringBankApproval) ---> " + sbQuery.toString());
 
             pstm.setString(1, acquiringBankCode);
-            pstm.setString(2, DDM_Constants.ddm_request_status_04);
+            pstm.setString(2, DDM_Constants.ddm_request_status_16);
 
             rs = pstm.executeQuery();
 
@@ -1006,7 +1006,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
 
             int i = 1;
 
-            pstm.setString(i, DDM_Constants.ddm_request_status_04);
+            pstm.setString(i, DDM_Constants.ddm_request_status_16);
             i++;
 
             for (int val_item : vt)
@@ -1362,6 +1362,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             int val_status_15 = 12;
             int val_bank = 13;
             int val_fromRequestDate = 14;
+            
             int val_toRequestDate = 15;
             int val_merchantID = 16;
 
@@ -2757,7 +2758,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("set ");
             sbQuery.append("Status = ?, ");
 
-            if (newStatus.equals(DDM_Constants.ddm_request_status_03) || newStatus.equals(DDM_Constants.ddm_request_status_11))
+            if (newStatus.equals(DDM_Constants.ddm_request_status_03) || newStatus.equals(DDM_Constants.ddm_request_status_06))
             {
                 if (remarks != null)
                 {
@@ -2768,7 +2769,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     sbQuery.append("IssuingBankAcceptedBy = ?,  IssuingBankAcceptedOn = now()");
                 }
             }
-            else if (newStatus.equals(DDM_Constants.ddm_request_status_05) || newStatus.equals(DDM_Constants.ddm_request_status_12))
+            else if (newStatus.equals(DDM_Constants.ddm_request_status_07) || newStatus.equals(DDM_Constants.ddm_request_status_08))
             {
                 if (remarks != null)
                 {
@@ -2798,9 +2799,9 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             pstm.setString(1, newStatus);
 
             if (newStatus.equals(DDM_Constants.ddm_request_status_03)
-                    || newStatus.equals(DDM_Constants.ddm_request_status_05)
-                    || newStatus.equals(DDM_Constants.ddm_request_status_11)
-                    || newStatus.equals(DDM_Constants.ddm_request_status_12))
+                    || newStatus.equals(DDM_Constants.ddm_request_status_06)
+                    || newStatus.equals(DDM_Constants.ddm_request_status_07)
+                    || newStatus.equals(DDM_Constants.ddm_request_status_08))
             {
                 if (remarks != null)
                 {

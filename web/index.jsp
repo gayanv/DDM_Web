@@ -64,7 +64,7 @@
 
     isAuhenticated = (String) session.getAttribute("session_isAuthenticated");
 
-    if (isAuhenticated == null || isAuhenticated.equals("null"))
+                                                                                                                                      if (isAuhenticated == null || isAuhenticated.equals("null"))
     {
         userName = (String) request.getParameter("txtUserName");
 

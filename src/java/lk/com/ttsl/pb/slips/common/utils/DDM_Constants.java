@@ -17,13 +17,13 @@ public class DDM_Constants
 
     //Property file paths
     //local 
-//     public static final String path_common_properties = "D:\\Projects\\DDA\\properties\\common.properties";
-//     public static final String path_dbProperty = "D:\\Projects\\DDA\\properties\\db_properties_ddm.properties";
-//     public static final String path_email_properties = "D:\\Projects\\DDA\\properties\\email.properties";
+     public static final String path_common_properties = "D:\\Projects\\DDA\\properties\\common.properties";
+     public static final String path_dbProperty = "D:\\Projects\\DDA\\properties\\db_properties_ddm.properties";
+     public static final String path_email_properties = "D:\\Projects\\DDA\\properties\\email.properties";
 //   // server
-    public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
-    public static final String path_common_properties = "/DDA/properties/common.properties";
-    public static final String path_email_properties = "/DDA/properties/email_properties.properties";
+//    public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
+//    public static final String path_common_properties = "/DDA/properties/common.properties";
+//    public static final String path_email_properties = "/DDA/properties/email_properties.properties";
     public static final String param_id_user_system = "System";
     public static final String param_id_businessdate = "BatchBusinessDate";
     public static final String param_id_batch_businessdate = "BatchBusinessDate";
@@ -469,7 +469,22 @@ public class DDM_Constants
     public static final String ddm_request_status_13 = "13";
     public static final String ddm_request_status_14 = "14";
     public static final String ddm_request_status_15 = "15";
+    public static final String ddm_request_status_16 = "16";
     public static final String ddm_request_status_19 = "19";
+    
+    public static final String ddm_request_status_21 = "21";
+    public static final String ddm_request_status_31 = "31";
+    public static final String ddm_request_status_32 = "32";
+    public static final String ddm_request_status_33 = "33";
+    public static final String ddm_request_status_34 = "34";
+    public static final String ddm_request_status_35 = "35";
+    
+    public static final String ddm_request_status_36 = "36";
+    public static final String ddm_request_status_37 = "37";
+    public static final String ddm_request_status_38 = "38";
+    public static final String ddm_request_status_40 = "40";
+    
+    
 
     public static final String ddm_request_frequency_daily = "D";
     public static final String ddm_request_frequency_weekly = "W";

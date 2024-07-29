@@ -180,9 +180,9 @@
         String newDDMR_Stat = null;
         String newDDMR_StatRejected = null;
 
-        curDDMR_Stat = DDM_Constants.ddm_request_status_04;
-        newDDMR_Stat = DDM_Constants.ddm_request_status_05;
-        newDDMR_StatRejected = DDM_Constants.ddm_request_status_12;
+        curDDMR_Stat = DDM_Constants.ddm_request_status_16;
+        newDDMR_Stat = DDM_Constants.ddm_request_status_07;
+        newDDMR_StatRejected = DDM_Constants.ddm_request_status_08;
 
         if (vtApprovedIds != null)
         {

@@ -705,6 +705,8 @@ public class UserDAOImpl implements UserDAO
 
             pstm.setString(1, usr.getUserId());
             pstm.setString(2, usr.getUserId() + usr.getPassword());
+            
+            System.out.println("sbQuery["+sbQuery+"]");
 
             if (!usr.getStatus().equals(DDM_Constants.status_all))
             {
@@ -1741,6 +1743,8 @@ public class UserDAOImpl implements UserDAO
             }
 
             pstm.setString(2, userId);
+            
+            System.out.println("sbQuery ["+sbQuery+"]");
 
             rs = pstm.executeQuery();
 

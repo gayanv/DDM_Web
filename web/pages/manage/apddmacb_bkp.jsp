@@ -609,7 +609,7 @@
 
 
                                                                                                                                     %>
-                                                                                                                                    <select name="cmbAcquiringBank" class="ddm_field_border" id="cmbAcquiringBank" onChange="isSearchRequest(false);doSubmit();" <%=!(session_userType.equals(DDM_Constants.user_type_ddm_manager) || session_userType.equals(DDM_Constants.user_type_ddm_supervisor)) ? "disabled" : ""%> >
+                                                                                                                                    
                                                                                                                                         <%                                                                                                                                if (acquiringBankCode == null || acquiringBankCode.equals(DDM_Constants.status_all))
                                                                                                                                             {
                                                                                                                                         %>
@@ -634,7 +634,7 @@
                                                                                                                                         <%
                                                                                                                                             }
                                                                                                                                         %>
-                                                                                                                                    </select>
+                                                                                                                                    
                                                                                                                                     <%                                                                                                                        }
                                                                                                                                     else
                                                                                                                                     {
@@ -650,6 +650,7 @@
 
 
                                                                                                                                     %></td>
+
                                                                                                                                 <td align="right" valign="middle" class="ddm_tbl_header_text">Acquiring  Branch :</td>
                                                                                                                                 <td align="left" valign="top" class="ddm_tbl_common_text"><%                                                                                                                        try
                                                                                                                                     {
@@ -862,7 +863,7 @@
                                                                                                                                         </tr>
                                                                                                                                     </table></td>
                                                                                                                             </tr>
-                                                                                                                  </table></td>
+                                                                                                                        </table></td>
                                                                                                                 </tr>
                                                                                                             </table>
 

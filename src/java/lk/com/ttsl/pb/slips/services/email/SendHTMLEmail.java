@@ -648,7 +648,7 @@ public class SendHTMLEmail
 
             //transport.connect();
             System.out.println("sendEmailForLoginOTP (" + toEmail + ") : Start Sending");
-            Transport.send(message);//20231010
+//            Transport.send(message);//20240701
             System.out.println("sendEmailForLoginOTP (" + toEmail + ") : Done");
             //transport.close();
 
