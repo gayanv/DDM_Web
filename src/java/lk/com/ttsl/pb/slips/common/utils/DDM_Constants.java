@@ -21,9 +21,10 @@ public class DDM_Constants
      public static final String path_dbProperty = "D:\\Projects\\DDA\\properties\\db_properties_ddm.properties";
      public static final String path_email_properties = "D:\\Projects\\DDA\\properties\\email.properties";
 //   // server
-//    public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
-//    public static final String path_common_properties = "/DDA/properties/common.properties";
-//    public static final String path_email_properties = "/DDA/properties/email_properties.properties";
+    //public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
+    //public static final String path_common_properties = "/DDA/properties/common.properties";
+    //public static final String path_email_properties = "/DDA/properties/email_properties.properties";
+    
     public static final String param_id_user_system = "System";
     public static final String param_id_businessdate = "BatchBusinessDate";
     public static final String param_id_batch_businessdate = "BatchBusinessDate";
@@ -184,9 +185,9 @@ public class DDM_Constants
 
     public static final String ddm_ibt_file_suffix = "_SLIPS.TXT";
 
-    public static final String ddm_file_process_status_initial = "0";
-    public static final String ddm_file_process_status_processing = "1";
-    public static final String ddm_file_process_status_completed = "2";
+    public static final String ddm_file_process_status_initial = "00";
+    public static final String ddm_file_process_status_processing = "01";
+    public static final String ddm_file_process_status_completed = "02";
     public static final String ddm_file_process_status_uploaded = "3";
     public static final String ddm_file_process_status_error = "5";
     public static final String ddm_file_process_status_rejected = "8";
@@ -455,15 +456,15 @@ public class DDM_Constants
     public static final String transaction_type_credit = "C";
     public static final String transaction_type_debit = "D";
 
-    public static final String ddm_request_status_01 = "1";
-    public static final String ddm_request_status_02 = "2";
-    public static final String ddm_request_status_03 = "3";
-    public static final String ddm_request_status_04 = "4";
-    public static final String ddm_request_status_05 = "5";
-    public static final String ddm_request_status_06 = "6";
-    public static final String ddm_request_status_07 = "7";
-    public static final String ddm_request_status_08 = "8";
-    public static final String ddm_request_status_09 = "9";
+    public static final String ddm_request_status_01 = "01";
+    public static final String ddm_request_status_02 = "02";
+    public static final String ddm_request_status_03 = "03";
+    public static final String ddm_request_status_04 = "04";
+    public static final String ddm_request_status_05 = "05";
+    public static final String ddm_request_status_06 = "06";
+    public static final String ddm_request_status_07 = "07";
+    public static final String ddm_request_status_08 = "08";
+    public static final String ddm_request_status_09 = "09";
     public static final String ddm_request_status_11 = "11";
     public static final String ddm_request_status_12 = "12";
     public static final String ddm_request_status_13 = "13";

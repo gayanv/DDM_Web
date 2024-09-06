@@ -646,9 +646,9 @@ public class SendHTMLEmail
             message.setContent(multipart);
             message.setSentDate(new Date());
 
-            //transport.connect();
+            //Transport.connect();
             System.out.println("sendEmailForLoginOTP (" + toEmail + ") : Start Sending");
-//            Transport.send(message);//20240701
+            Transport.send(message);//20240701
             System.out.println("sendEmailForLoginOTP (" + toEmail + ") : Done");
             //transport.close();
 
@@ -786,8 +786,8 @@ public class SendHTMLEmail
         return props;
     }
 
-//    public static void main(String[] args)
-//    {
-//        new SendHTMLEmail().sendOTP("System", "dineshnilu96@gmail.com", "Dinesh Hettiarachchi");
-//    }
+    //public static void main(String[] args)
+    //{
+    //    new SendHTMLEmail().sendOTP("System", "gayan@transnational-grp.com", "gayan@transnational-grp.com");
+    //}
 }

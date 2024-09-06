@@ -747,6 +747,7 @@ public class ParameterDAOImpl implements ParameterDAO
 
         try
         {
+            
             con = DBUtil.getInstance().getConnection();
             StringBuilder sbQuery = new StringBuilder();
 
@@ -756,7 +757,7 @@ public class ParameterDAOImpl implements ParameterDAO
             sbQuery.append("AND ModifiedBy != ? ");
             sbQuery.append("ORDER BY DisplayPriority");
 
-            //System.out.println("getAuthPendingModifiedParams(sbQuery)=========>" + sbQuery);
+            System.out.println("getAuthPendingModifiedParams(sbQuery)=========>" + sbQuery);
             String kk = DDM_Constants.aesk_s + DDM_Constants.aesk_l + DDM_Constants.aesk_i
                     + DDM_Constants.aesk_p + DDM_Constants.aesk_s + DDM_Constants.aesk_b
                     + DDM_Constants.aesk_c + DDM_Constants.aesk_m + DDM_Constants.aesk_2
@@ -767,8 +768,9 @@ public class ParameterDAOImpl implements ParameterDAO
             pstm.setString(1, kk);
             pstm.setString(2, kk);
             pstm.setString(3, modifiedBy);
-
+            
             rs = pstm.executeQuery();
+            
 
             col = ParameterUtil.makeParameterCollection(rs);
 
@@ -776,12 +778,14 @@ public class ParameterDAOImpl implements ParameterDAO
             {
                 msg = DDM_Constants.msg_no_records;
             }
+            
         }
         catch (SQLException | ClassNotFoundException e)
         {
             msg = DDM_Constants.msg_error_while_processing;
             System.out.println(e.getMessage());
         }
+        
         finally
         {
             DBUtil.getInstance().closeResultSet(rs);

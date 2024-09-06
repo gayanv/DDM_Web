@@ -465,6 +465,8 @@
                                 ddaRequest.setIsCSVFileRequest(DDM_Constants.status_yes);
                                 ddaRequest.setCSVFileName(newFileName);
                                 ddaRequest.setCSVFilePath(newFileFullPath);
+                                
+                                ddaRequest.setMerchantName(merchant.getMerchantName());
 
                                 // save into db
                                 if (DAOFactory.getDDMRequestDAO().addDDARequest(ddaRequest))

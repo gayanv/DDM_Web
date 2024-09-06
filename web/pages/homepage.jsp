@@ -637,6 +637,7 @@
                                                                                                     noOfPending_AuthNewMerchant = colMerchantNew.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_merchant)))
                                                                                             {
@@ -650,6 +651,7 @@
                                                                                                     noOfPending_AuthModifiedMerchant = colMerchantModified.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_params)))
                                                                                             {
@@ -663,6 +665,7 @@
                                                                                                     noOfPending_AuthModifiedParam = colParamModified.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_userlevel_functionmap)))
                                                                                             {
@@ -676,6 +679,7 @@
                                                                                                     noOfPending_AuthModifiedULFM = colULFM.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_new_user)))
                                                                                             {
@@ -689,6 +693,7 @@
                                                                                                     noOfPending_AuthNewUsers = colNewUser.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_user)))
                                                                                             {
@@ -703,6 +708,7 @@
                                                                                                 }
                                                                                             }
 
+
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_issuing_bank)))
                                                                                             {
                                                                                                 Collection<DDMRequest> colDDMReqIssuingBank = DAOFactory.getDDMRequestDAO().getDDARequestDetailsForIssuingBankApproval(session_bankCode);
@@ -715,6 +721,7 @@
                                                                                                     noOfPending_AuthPendingDDMReq_IssuingBank = colDDMReqIssuingBank.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_acquiring_bank)))
                                                                                             {
@@ -728,6 +735,7 @@
                                                                                                     noOfPending_AuthPendingDDMReq_AcquiringBank = colDDMReqAcquiringBank.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_terminated)))
                                                                                             {

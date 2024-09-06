@@ -606,7 +606,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             System.out.println("sbQuery(getDDARequestDetailsForIssuingBankApproval) ---> " + sbQuery.toString());
 
             pstm.setString(1, issuingBank);
-            pstm.setString(2, DDM_Constants.ddm_request_status_16);
+            pstm.setString(2, DDM_Constants.ddm_request_status_02);
 
             rs = pstm.executeQuery();
 
@@ -2657,11 +2657,12 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                     .append("IssuningBank, IssuningBranch, IssuningAcNo, IssuningAcName, ")
                     .append("StartDate, EndDate, MaxLimit, Frequency, Purpose, Ref, Status, ")
                     .append("AquiringBank, AquiringBranch, AquiringAcNo, AquiringAcName,IsCSVFileRequest , CSVFileName, CSVFilePath, ")
-                    .append("CreatedBy, CreatedDate ")
+                    .append("CreatedBy,merchantName, CreatedDate ")
                     .append(") ")
-                    .append("VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())");
+                    .append("VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())");
 
             System.out.println("addDDARequest(sqlQuery)=========>" + sqlQuery.toString());
+            System.out.println("Merchant "+ddmRequest.getMerchantName());
 
             psmt = con.prepareStatement(sqlQuery.toString());
 
@@ -2686,6 +2687,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             psmt.setString(19, ddmRequest.getCSVFileName().trim());
             psmt.setString(20, ddmRequest.getCSVFilePath().trim());
             psmt.setString(21, ddmRequest.getCreatedBy().trim());
+            psmt.setString(22, ddmRequest.getMerchantName().trim());
 
             count = psmt.executeUpdate();
 
