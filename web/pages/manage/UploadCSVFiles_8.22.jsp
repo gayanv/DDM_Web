@@ -33,8 +33,8 @@
     String session_bankName = null;
     String session_branchId = null;
     String session_branchName = null;
-    String session_merchantID = null;
-    String session_merchantName = null;
+    String session_cocuId = null;
+    String session_cocuName = null;
     String session_menuId = null;
     String session_menuName = null;
 
@@ -54,8 +54,8 @@
         session_bankName = (String) session.getAttribute("session_bankName");
         session_branchId = (String) session.getAttribute("session_branchId");
         session_branchName = (String) session.getAttribute("session_branchName");
-        session_merchantID = (String) session.getAttribute("session_merchantID");
-        session_merchantName = (String) session.getAttribute("session_merchantName");
+        session_cocuId = (String) session.getAttribute("session_cocuId");
+        session_cocuName = (String) session.getAttribute("session_cocuName");
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
 
@@ -63,13 +63,13 @@
 
         if (!isAccessOK)
         {
-            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - Upload CSV Files' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
+            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - New DDM Request(s) Acquiring Bank Approval' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
             {
                 response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp");
             }
             else
             {
-                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=Upload_CSV_Files");
+                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=New_DDM_Requests_Acquiring_Bank_Approval");
             }
         }
         else
@@ -94,7 +94,6 @@
     String merchantID = null;
     String orgAccountNo = null;
     String OrgAccountName = null;
-    String OrgAccountBank = null;
     String OrgAccountBranch = null;
 
     String csvFilePath = null;
@@ -105,11 +104,7 @@
 
     System.out.println("UploadSLIPSFiles : businessDate -----> " + businessDate);
 
-    if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
-    {
-        colMerchant = DAOFactory.getMerchantDAO().getMerchant(session_merchantID, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_active);
-    }
-    else if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
+    if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user))
     {
         colMerchant = DAOFactory.getMerchantDAO().getMerchant(DDM_Constants.status_all, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_active);
     }
@@ -117,6 +112,8 @@
     {
         colMerchant = DAOFactory.getMerchantDAO().getMerchant(DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_active);
     }
+    
+   
 
     System.out.println("UploadCSVFiles : colMerchant -----> " + colMerchant.size());
 
@@ -128,23 +125,16 @@
 
         if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
         {
-            merchantID = session_merchantID;
-
-            selectedMerchant = DAOFactory.getMerchantDAO().getMerchantDetails(merchantID);
-
-            orgAccountNo = selectedMerchant.getPrimaryAccountNo();
-            OrgAccountName = selectedMerchant.getPrimaryAccountName();
-            OrgAccountBank = selectedMerchant.getBankCode()+ " - " + selectedMerchant.getBankName();
-            OrgAccountBranch = selectedMerchant.getBranchCode() + " - " + selectedMerchant.getBranchName();
+            merchantID = session_cocuId;
         }
         else
         {
             merchantID = DDM_Constants.status_all;
-            orgAccountNo = DDM_Constants.status_all;
-            OrgAccountName = "";
-            OrgAccountBranch = "";
         }
 
+        orgAccountNo = DDM_Constants.status_all;
+        OrgAccountName = "";
+        OrgAccountBranch = "";
         csvFilePath = "";
 
         //System.out.println("UploadSLIPSFiles : orgAccountNo -----> " + orgAccountNo);
@@ -155,7 +145,7 @@
     {
         if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
         {
-            merchantID = session_merchantID;
+            merchantID = session_cocuId;
         }
         else
         {
@@ -182,9 +172,8 @@
             //orgAccountNo = DDM_Constants.status_all;
             orgAccountNo = "N/A";
             OrgAccountName = "N/A";
-            OrgAccountBank = "N/A";
             OrgAccountBranch = "N/A";
-
+            
         }
         else
         {
@@ -192,7 +181,6 @@
 
             orgAccountNo = selectedMerchant.getPrimaryAccountNo();
             OrgAccountName = selectedMerchant.getPrimaryAccountName();
-            OrgAccountBank = selectedMerchant.getBankCode() + " - " + selectedMerchant.getBankName();
             OrgAccountBranch = selectedMerchant.getBranchCode() + " - " + selectedMerchant.getBranchName();
         }
 
@@ -200,6 +188,8 @@
         {
             csvFilePath = "";
         }
+        
+        
 
 //        Collection<FileInfo> alreadyProcessingFileInfo = DAOFactory.getFileInfoDAO().getFileDetailsByCriteria(session_bankCode, DDM_Constants.status_all, merchantID, DDM_Constants.status_all, DDM_Constants.slip_file_status_processing, DDM_Constants.status_all, webBusinessDate, webBusinessDate);
 //
@@ -391,7 +381,7 @@
             if(answer)
             {
             document.getElementById('cmbMerchantID').disabled = false;
-
+           
             document.frmUploadSlipsFiles.action="UploadCSVFilesConfirmation.jsp";
             document.getElementById('btnUpload').disabled = true;
             document.frmUploadSlipsFiles.submit();
@@ -495,7 +485,7 @@
                                                                                                             <tr>
                                                                                                                 <td class="ddm_menubar_text">Welcome :</td>
                                                                                                                 <td width="5"></td>
-                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_merchantID : session_branchId%> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_merchantName : session_branchName%></td>
+                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuId : session_branchId%> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuName : session_branchName%></td>
                                                                                                                 <td width="15">&nbsp;</td>
                                                                                                                 <td valign="middle"><a href="<%=request.getContextPath()%>/pages/user/userProfile.jsp" title=" My Profile "><img src="<%=request.getContextPath()%>/images/user.png" width="18"
                                                                                                                                                                                                         height="22" border="0" align="middle" ></a></td>
@@ -636,16 +626,12 @@
                                                                                                                                     %>                                                                                                                                                                                                                                                                    </td>
                                                                                                                             </tr>
                                                                                                                             <tr>
-                                                                                                                                <td valign="middle" class="ddm_tbl_header_text">Merchant Account No. :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><%=orgAccountNo%> <input type="hidden" name="hdnOrgAccNo" id="hdnOrgAccNo" value="<%=orgAccountNo%>" /></td>
+                                                                                                                              <td valign="middle" class="ddm_tbl_header_text">Merchant Account No. :</td>
+                                                                                                                              <td valign="middle" class="ddm_tbl_common_text"><%=orgAccountNo%> <input type="hidden" name="hdnOrgAccNo" id="hdnOrgAccNo" value="<%=orgAccountNo%>" /></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">Merchant Account Name :</td>
                                                                                                                                 <td valign="middle" class="ddm_tbl_common_text"><%=OrgAccountName%> <input type="hidden" name="hdnOrgAccName" id="hdnOrgAccName" value="<%=OrgAccountName%>" /></td>
-                                                                                                                            </tr>
-                                                                                                                            <tr>
-                                                                                                                              <td valign="middle" class="ddm_tbl_header_text">Merchant Account Bank : </td>
-                                                                                                                              <td valign="middle" class="ddm_tbl_common_text"><%=OrgAccountBank %><input type="hidden" name="hdnOrgAccBank" id="hdnOrgAccBank" value="<%=OrgAccountBank%>" /></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">Merchant Account Branch : </td>
@@ -678,7 +664,7 @@
 
                                                                                             <form  method="post" name="frmUploadSlipsFilesSearch" id="frmUploadSlipsFilesSearch">		                                                                         						<input type="hidden" name="hdnReq" id="hdnReq" value="<%=isReq%>" />
                                                                                                 <input type="hidden" name="hdnMerchantId" id="hdnMerchantId" value="<%=merchantID%>" />
-                                                                                                <input type="hidden" name="hdnMerchantAccountNo" id="hdnMerchantAccountNo" value="<%=orgAccountNo%>" />
+                                                                                                <%--<input type="hidden" name="hdnMerchantAccountNo" id="hdnMerchantAccountNo" value="<%=orgAccountNo%>" />--%>
                                                                                                 <input type="hidden" name="hdnCSVFilePath" id="hdnCSVFilePath" value="<%=csvFilePath%>" /> 
 
                                                                                             </form>

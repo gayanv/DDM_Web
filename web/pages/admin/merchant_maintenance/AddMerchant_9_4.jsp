@@ -54,13 +54,13 @@
 
         if (!isAccessOK)
         {
-            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - Add Merchant' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
+            if (DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_user_access_denied, "| Unauthorized access to page - 'LankaPay Direct Debit Mandate Exchange System - Add Bank' | Accessed By - " + session_userName + " (" + session_userTypeDesc + ") |")))
             {
                 response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp");
             }
             else
             {
-                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=Add_Merchant");
+                response.sendRedirect(request.getContextPath() + "/pages/accessDenied.jsp?fp=Add_Bank");
             }
         }
         else
@@ -68,8 +68,7 @@
 
 %>
 
-<%   
-    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
+<%    String webBusinessDate = DateFormatter.doFormat(DateFormatter.getTime(DAOFactory.getParameterDAO().getParamValueById(DDM_Constants.param_id_businessdate), DDM_Constants.simple_date_format_yyyyMMdd), DDM_Constants.simple_date_format_yyyy_MM_dd);
     String currentDate = DAOFactory.getCustomDAO().getCurrentDate();
     long serverTime = DAOFactory.getCustomDAO().getServerTime();
     CustomDate customDate = DAOFactory.getCustomDAO().getServerTimeDetails();
@@ -107,13 +106,6 @@
     if (isReq == null)
     {
         isReq = "0";
-
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
-        {
-            merchantBank = session_bankCode;
-            colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(merchantBank, DDM_Constants.status_pending);
-        }
-
     }
     else if (isReq.equals("0"))
     {
@@ -129,11 +121,6 @@
         primaryAccountNo = request.getParameter("txtPrimaryAccNo");
         primaryAccountName = request.getParameter("txtPrimaryAccName");
         id = request.getParameter("txtID");
-        
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
-        {
-            merchantBank = session_bankCode;
-        }
 
         if (merchantBank != null && !merchantBank.equals(DDM_Constants.status_all))
         {
@@ -155,16 +142,6 @@
         primaryAccountNo = request.getParameter("txtPrimaryAccNo");
         primaryAccountName = request.getParameter("txtPrimaryAccName");
         id = request.getParameter("txtID");
-        
-        if (session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
-        {
-            merchantBank = session_bankCode;
-        }
-
-        if (merchantBank != null && !merchantBank.equals(DDM_Constants.status_all))
-        {
-            colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(merchantBank, DDM_Constants.status_pending);
-        }   
 
         MerchantDAO merchantDAO = DAOFactory.getMerchantDAO();
 
@@ -173,11 +150,11 @@
         if (!result)
         {
             msg = merchantDAO.getMsg();
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_merchant_maintenance_add_new_merchant, "| Merchant ID - " + merchantID + ", Name - " + merchantName + ", Email - " + merchantEmail + ", Primary Tel. No. - " + primaryTelNo + ", Secondary Tel. No. - " + (secondaryTelNo != null ? secondaryTelNo : "n/a") + ", Bank - " + merchantBank + ", Branch - " + merchantBranch + ", Primary Acc. No. - " + primaryAccountNo + ", Primary Acc. Name - " + primaryAccountName + ", ID - " + id + "], Status - Pending | Process Status - Unsuccess (" + msg + ") | Added By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_merchant_maintenance_add_new_merchant, "| Merchant ID - " + merchantID + ", Name - " + merchantName + ", Email - " + merchantEmail + ", Primary Tel. No. - " + primaryTelNo + ", Secondary Tel. No. - " + (secondaryTelNo!=null?secondaryTelNo:"n/a") + ", Bank - " + merchantBank + ", Branch - " + merchantBranch + ", Primary Acc. No. - " + primaryAccountNo + ", Primary Acc. Name - " + primaryAccountName + ", ID - " + id + "], Status - Pending | Process Status - Unsuccess (" + msg + ") | Added By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
         else
         {
-            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_merchant_maintenance_add_new_merchant, "| Merchant ID - " + merchantID + ", Name - " + merchantName + ", Email - " + merchantEmail + ", Primary Tel. No. - " + primaryTelNo + ", Secondary Tel. No. - " + (secondaryTelNo != null ? secondaryTelNo : "n/a") + ", Bank - " + merchantBank + ", Branch - " + merchantBranch + ", Primary Acc. No. - " + primaryAccountNo + ", Primary Acc. Name - " + primaryAccountName + ", ID - " + id + "], Status - Pending | Process Status - Success | Added By - " + session_userName + " (" + session_userTypeDesc + ") |"));
+            DAOFactory.getLogDAO().addLog(new Log(DDM_Constants.log_type_admin_merchant_maintenance_add_new_merchant, "| Merchant ID - " + merchantID + ", Name - " + merchantName + ", Email - " + merchantEmail + ", Primary Tel. No. - " + primaryTelNo + ", Secondary Tel. No. - " + (secondaryTelNo!=null?secondaryTelNo:"n/a") + ", Bank - " + merchantBank + ", Branch - " + merchantBranch + ", Primary Acc. No. - " + primaryAccountNo + ", Primary Acc. Name - " + primaryAccountName + ", ID - " + id + "], Status - Pending | Process Status - Success | Added By - " + session_userName + " (" + session_userTypeDesc + ") |"));
         }
     }
 %>
@@ -201,35 +178,35 @@
         <script language="javascript" type="text/JavaScript">
 
 
-            //            function clearRecords_onPageLoad()
-            //            {
-            //            document.getElementById('txtMerchantId').setAttribute("autocomplete","off");
-            //            document.getElementById('txtPrimaryAccNo').setAttribute("autocomplete","off");
-            //            document.getElementById('txtMerchantName').setAttribute("autocomplete","off");
-            //            document.getElementById('txtAddress').setAttribute("autocomplete","off");
-            //            document.getElementById('txtEmail').setAttribute("autocomplete","off");
-            //            document.getElementById('txtPrimaryTel').setAttribute("autocomplete","off");
-            //            document.getElementById('txtExt').setAttribute("autocomplete","off");
-            //            document.getElementById('txtFax').setAttribute("autocomplete","off");
-            //            showClock(3);
-            //            }
+//            function clearRecords_onPageLoad()
+//            {
+//            document.getElementById('txtMerchantId').setAttribute("autocomplete","off");
+//            document.getElementById('txtPrimaryAccNo').setAttribute("autocomplete","off");
+//            document.getElementById('txtMerchantName').setAttribute("autocomplete","off");
+//            document.getElementById('txtAddress').setAttribute("autocomplete","off");
+//            document.getElementById('txtEmail').setAttribute("autocomplete","off");
+//            document.getElementById('txtPrimaryTel').setAttribute("autocomplete","off");
+//            document.getElementById('txtExt').setAttribute("autocomplete","off");
+//            document.getElementById('txtFax').setAttribute("autocomplete","off");
+//            showClock(3);
+//            }
 
             function clearRecords()
             {
-            document.getElementById('txtMerchantId').value = "";
-            document.getElementById('txtMerchantName').value = "";
-            document.getElementById('txtEmail').value = "";
-            document.getElementById('txtPrimaryTel').value = "";
-            document.getElementById('txtSecondaryTel').value = "";
-            document.getElementById('txtPassword').value = "";
-            document.getElementById('txtReTypePassword').value = "";
-
-            document.getElementById('cmbBank').selectedIndex = "0";
-            document.getElementById('cmbBranch').selectedIndex = "0";
-
-            document.getElementById('txtPrimaryAccNo').value = "";
-            document.getElementById('txtPrimaryAccName').value = "";
-            document.getElementById('txtID').value = "";
+                document.getElementById('txtMerchantId').value = "";
+                document.getElementById('txtMerchantName').value = "";
+                document.getElementById('txtEmail').value = "";
+                document.getElementById('txtPrimaryTel').value = "";
+                document.getElementById('txtSecondaryTel').value = "";
+                document.getElementById('txtPassword').value = "";
+                document.getElementById('txtReTypePassword').value = "";
+                
+                document.getElementById('cmbBank').selectedIndex = "0";
+                document.getElementById('cmbBranch').selectedIndex = "0";
+                
+                document.getElementById('txtPrimaryAccNo').value = "";
+                document.getElementById('txtPrimaryAccName').value = "";
+                document.getElementById('txtID').value = "";
 
             }
 
@@ -259,266 +236,271 @@
 
             function isVldAccountNo()
             {                
-            hideMessage_onFocus();
+                hideMessage_onFocus();
 
-            var numbers = /^[0-9]*$/;
+                var numbers = /^[0-9]*$/;
 
-            var accountNo = document.getElementById('txtPrimaryAccNo').value;
+                var accountNo = document.getElementById('txtPrimaryAccNo').value;
 
-            if (!numbers.test(accountNo))
-            {
-            document.getElementById('txtPrimaryAccNo').value = "";
-            alert("Invalid Primary Acc. No.!");
-            }
+                if (!numbers.test(accountNo))
+                {
+                    document.getElementById('txtPrimaryAccNo').value = "";
+                    alert("Invalid Primary Acc. No.!");
+                }
             }
 
             function fieldValidation()
             {
+                
+                var merchantid = document.getElementById('txtMerchantId').value;
+                var merchantname = document.getElementById('txtMerchantName').value;
+                var merchantemail = document.getElementById('txtEmail').value;
+                var merchantPT = document.getElementById('txtPrimaryTel').value;
+                var merchantST = document.getElementById('txtSecondaryTel').value;
+                
+                var password = document.getElementById('txtPassword').value;
+                var reType_password = document.getElementById('txtReTypePassword').value;
+                
+                var merchantBank = document.getElementById('cmbBank').value;
+                var merchantBranch = document.getElementById('cmbBranch').value;
+                
+                var prAccNo = document.getElementById('txtPrimaryAccNo').value; 
+                var prAccName = document.getElementById('txtPrimaryAccName').value;
+                var objID = document.getElementById('txtID').value;
 
-            var merchantid = document.getElementById('txtMerchantId').value;
-            var merchantname = document.getElementById('txtMerchantName').value;
-            var merchantemail = document.getElementById('txtEmail').value;
-            var merchantPT = document.getElementById('txtPrimaryTel').value;
-            var merchantST = document.getElementById('txtSecondaryTel').value;
+                
 
-            var password = document.getElementById('txtPassword').value;
-            var reType_password = document.getElementById('txtReTypePassword').value;
+                var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";            
+                var iTelNumbers = "0123456789,- ";
+                var numbers = /^[0-9]*$/;
 
-            var merchantBank = document.getElementById('cmbBank').value;
-            var merchantBranch = document.getElementById('cmbBranch').value;
+                if(isempty(merchantid))
+                {
+                alert("'Merchant ID' can not be empty!");
+                document.getElementById('txtMerchantId').focus();
+                return false;
+                }
+                else if(merchantid.length!=4)
+                {
+                alert("'Merchant ID' must contain only 4 characters!");
+                document.getElementById('txtMerchantId').focus();
+                return false;
+                }                
 
-            var prAccNo = document.getElementById('txtPrimaryAccNo').value; 
-            var prAccName = document.getElementById('txtPrimaryAccName').value;
-            var objID = document.getElementById('txtID').value;
+                if(isempty(merchantname))
+                {
+                alert("'Merchant Name' can not be empty!");
+                document.getElementById('txtMerchantName').focus();
+                return false;
+                }
 
+                if(isempty(merchantemail))
+                {
+                alert("'Email' can not be empty!");
+                document.getElementById('txtEmail').focus();
+                return false;
+                }
+                else if(merchantemail.indexOf("@") < 1)
+                {               
+                alert("Invalid 'Email'! Please check and enter valid email address to proceed.");
+                document.getElementById('txtEmail').focus();
+                return false;
+                }
+                else if(merchantemail.indexOf("@") != merchantemail.lastIndexOf("@"))
+                {
+                alert("Invalid 'Email'! Please check and enter valid email address to proceed.");
+                document.getElementById('txtEmail').focus();
+                return false;                
+                }
+                else if(merchantemail.lastIndexOf(".") < 3)
+                {               
+                alert("Invalid 'Email'! Please check and enter valid email address to proceed.");
+                document.getElementById('txtEmail').focus();
+                return false;
+                }
 
-
-            var iChars = "!@#$%^&*()+=-[]\\\';,./{}|\":<>?";            
-            var iTelNumbers = "0123456789,- ";
-            var numbers = /^[0-9]*$/;
-
-            if(isempty(merchantid))
-            {
-            alert("'Merchant ID' can not be empty!");
-            document.getElementById('txtMerchantId').focus();
-            return false;
-            }
-            else if(merchantid.length!=4)
-            {
-            alert("'Merchant ID' must contain only 4 characters!");
-            document.getElementById('txtMerchantId').focus();
-            return false;
-            }                
-
-            if(isempty(merchantname))
-            {
-            alert("'Merchant Name' can not be empty!");
-            document.getElementById('txtMerchantName').focus();
-            return false;
-            }
-
-            if(isempty(merchantemail))
-            {
-            alert("'Email' can not be empty!");
-            document.getElementById('txtEmail').focus();
-            return false;
-            }
-            else if(merchantemail.indexOf("@") < 1)
-            {               
-            alert("Invalid 'Email'! Please check and enter valid email address to proceed.");
-            document.getElementById('txtEmail').focus();
-            return false;
-            }
-            else if(merchantemail.indexOf("@") != merchantemail.lastIndexOf("@"))
-            {
-            alert("Invalid 'Email'! Please check and enter valid email address to proceed.");
-            document.getElementById('txtEmail').focus();
-            return false;                
-            }
-            else if(merchantemail.lastIndexOf(".") < 3)
-            {               
-            alert("Invalid 'Email'! Please check and enter valid email address to proceed.");
-            document.getElementById('txtEmail').focus();
-            return false;
-            }
-
-            if(isempty(merchantPT))
-            {
-            alert("'Primary Telephone No.' can not be empty!");
-            document.getElementById('txtPrimaryTel').focus();
-            return false;
-            }
-            else if(merchantPT.length < 10)
-            {
-            alert ("Invalid 'Primary Telephone No.'!");
-            document.getElementById('txtPrimaryTel').focus();
-            return false;
-            }
-            else
-            {                
-            for (var i = 0; i < merchantPT.length; i++) 
-            {
-            if (iTelNumbers.indexOf(merchantPT.charAt(i)) == -1) 
-            {
-            alert ("Invalid 'Primary Telephone No.'!");
-            document.getElementById('txtPrimaryTel').focus();
-            return false;
-            }
-            }                
-            }
-
-            if(!isempty(merchantST))
-            {
-            if(merchantST.length < 10)
-            {
-            alert ("Invalid 'Secondary Telephone No.'!");
-            document.getElementById('txtSecondaryTel').focus();
-            return false;
-            }
-            else
-            {                
-            for (var i = 0; i < merchantST.length; i++) 
-            {
-            if (iTelNumbers.indexOf(merchantST.charAt(i)) == -1) 
-            {
-            alert ("Invalid 'Secondary Telephone No.'!");
-            document.getElementById('txtSecondaryTel').focus();
-            return false;
-            }
-            }                
-            }
-            }
-
-            if(isempty(password))
-            {
-            alert("Password Can't be Empty!");
-            document.getElementById('txtPassword').focus();
-            return false;
-            }				
-
-            if(isempty(reType_password))
-            {
-            alert("Confirm Password Can't be Empty!");
-            document.getElementById('txtReTypePassword').focus();
-            return false;
-            }
-
-            if(!password_Validation())
-            {                    
-            document.getElementById('txtPassword').value="";
-            document.getElementById('txtReTypePassword').value="";                    
-            document.getElementById('txtPassword').focus();
-            return false;
-            }
-
-            if(merchantBank == null || merchantBank == "<%=DDM_Constants.status_all%>")
-            {
-            alert("Select 'Primary Account Bank' to proceed.");
-            document.getElementById('cmbBank').focus();
-            return false;
-            }
-
-            if(merchantBranch == null || merchantBranch == "<%=DDM_Constants.status_all%>")
-            {
-            alert("Select 'Primary Account Branch' to proceed.");
-            document.getElementById('cmbBranch').focus();
-            return false;
-            }
-
-
-            if(isempty(prAccNo))
-            {
-            alert("'Primary Account No.' can not be empty!");
-            document.getElementById('txtPrimaryAccNo').focus();
-            return false;
-            }            
-            else if (!numbers.test(prAccNo)) 
-            {
-            alert("'Primary Account No.' must contain numbers only!");
-            document.getElementById('txtPrimaryAccNo').focus();
-            return false;
-            }
-
-            if(isempty(prAccName))
-            {
-            alert("'Primary Account Name' can not be empty!");
-            document.getElementById('txtPrimaryAccName').focus();
-            return false;
-            }
-
-
-            if(isempty(objID))
-            {
-            alert("'ID' can not be empty!");
-            document.getElementById('txtID').focus();
-            return false;
-            }
+                if(isempty(merchantPT))
+                {
+                alert("'Primary Telephone No.' can not be empty!");
+                document.getElementById('txtPrimaryTel').focus();
+                return false;
+                }
+                else if(merchantPT.length < 10)
+                {
+                    alert ("Invalid 'Primary Telephone No.'!");
+                    document.getElementById('txtPrimaryTel').focus();
+                    return false;
+                }
+                else
+                {                
+                    for (var i = 0; i < merchantPT.length; i++) 
+                    {
+                        if (iTelNumbers.indexOf(merchantPT.charAt(i)) == -1) 
+                        {
+                        alert ("Invalid 'Primary Telephone No.'!");
+                        document.getElementById('txtPrimaryTel').focus();
+                        return false;
+                        }
+                    }                
+                }
             
+                if(!isempty(merchantST))
+                {
+                    if(merchantST.length < 10)
+                    {
+                        alert ("Invalid 'Secondary Telephone No.'!");
+                        document.getElementById('txtSecondaryTel').focus();
+                        return false;
+                    }
+                    else
+                    {                
+                        for (var i = 0; i < merchantST.length; i++) 
+                        {
+                            if (iTelNumbers.indexOf(merchantST.charAt(i)) == -1) 
+                            {
+                            alert ("Invalid 'Secondary Telephone No.'!");
+                            document.getElementById('txtSecondaryTel').focus();
+                            return false;
+                            }
+                        }                
+                    }
+                }
+                
+                if(isempty(password))
+                {
+                    alert("Password Can't be Empty!");
+                    document.getElementById('txtPassword').focus();
+                    return false;
+                }				
 
-            document.frmAddMerchant.action = "AddMerchant.jsp";
-            document.frmAddMerchant.submit();
+                if(isempty(reType_password))
+                {
+                    alert("Confirm Password Can't be Empty!");
+                    document.getElementById('txtReTypePassword').focus();
+                    return false;
+                }
+
+                if(!password_Validation())
+                {                    
+                    document.getElementById('txtPassword').value="";
+                    document.getElementById('txtReTypePassword').value="";                    
+                    document.getElementById('txtPassword').focus();
+                    return false;
+                }
+                
+                if(merchantBank == null || merchantBank == "<%=DDM_Constants.status_all%>")
+                {
+                    alert("Select 'Primary Account Bank' to proceed.");
+                    document.getElementById('cmbBank').focus();
+                    return false;
+                }
+                
+                if(merchantBranch == null || merchantBranch == "<%=DDM_Constants.status_all%>")
+                {
+                    alert("Select 'Primary Account Branch' to proceed.");
+                    document.getElementById('cmbBranch').focus();
+                    return false;
+                }
+                
+            
+                if(isempty(prAccNo))
+                {
+                    alert("'Primary Account No.' can not be empty!");
+                    document.getElementById('txtPrimaryAccNo').focus();
+                    return false;
+                }            
+                else if (!numbers.test(prAccNo)) 
+                {
+                    alert("'Primary Account No.' must contain numbers only!");
+                    document.getElementById('txtPrimaryAccNo').focus();
+                    return false;
+                }
+                
+                if(isempty(prAccName))
+                {
+                    alert("'Primary Account Name' can not be empty!");
+                    document.getElementById('txtPrimaryAccName').focus();
+                    return false;
+                }
+                
+                
+                if(isempty(objID))
+                {
+                    alert("'ID' can not be empty!");
+                    document.getElementById('txtID').focus();
+                    return false;
+                }
+                else if(!numbers.test(objID)) 
+                {
+                    alert("'ID' must contain numbers only!");
+                    document.getElementById('txtID').focus();
+                    return false;
+                }
+
+                document.frmAddMerchant.action = "AddMerchant.jsp";
+                document.frmAddMerchant.submit();
             }
 
             function isRequest(status)
             {
-            if(status)
-            {
-            document.getElementById('hdnReq').value = "1";
-            }
-            else
-            {
-            document.getElementById('hdnReq').value = "0";                    
-            }
+                if(status)
+                {
+                    document.getElementById('hdnReq').value = "1";
+                }
+                else
+                {
+                    document.getElementById('hdnReq').value = "0";                    
+                }
             }		
 
 
             function hideMessage_onFocus()
             {
-            if(document.getElementById('displayMsg_error')!= null)
-            {
-            document.getElementById('displayMsg_error').style.display='none';
+                if(document.getElementById('displayMsg_error')!= null)
+                {
+                    document.getElementById('displayMsg_error').style.display='none';
 
-            if(document.getElementById('hdnCheckPOSForClearREcords')!=null && document.getElementById('hdnCheckPOSForClearREcords').value == '1')
-            {
-            clearRecords();
-            document.getElementById('hdnCheckPOSForClearREcords').value = '0';
-            }
-            }
+                    if(document.getElementById('hdnCheckPOSForClearREcords')!=null && document.getElementById('hdnCheckPOSForClearREcords').value == '1')
+                    {
+                        clearRecords();
+                        document.getElementById('hdnCheckPOSForClearREcords').value = '0';
+                    }
+                }
 
-            if(document.getElementById('displayMsg_success')!=null)
-            {
-            document.getElementById('displayMsg_success').style.display = 'none';
+                if(document.getElementById('displayMsg_success')!=null)
+                {
+                    document.getElementById('displayMsg_success').style.display = 'none';
 
-            if(document.getElementById('hdnCheckPOSForClearREcords')!=null && document.getElementById('hdnCheckPOSForClearREcords').value == '1')
-            {
-            clearRecords();
-            document.getElementById('hdnCheckPOSForClearREcords').value = '0';
-            }
-            }                
+                    if(document.getElementById('hdnCheckPOSForClearREcords')!=null && document.getElementById('hdnCheckPOSForClearREcords').value == '1')
+                    {
+                        clearRecords();
+                        document.getElementById('hdnCheckPOSForClearREcords').value = '0';
+                    }
+                }                
             }
 
             function password_Validation()
             {                
-            var password = document.getElementById('txtPassword').value;
-            var reType_password = document.getElementById('txtReTypePassword').value;
+                var password = document.getElementById('txtPassword').value;
+                var reType_password = document.getElementById('txtReTypePassword').value;
 
-            var numbers = /^[0-9]*$/;
+                var numbers = /^[0-9]*$/;
+			
+                if(findSpaces(password))
+                {
+                    alert("Spaces not allowed for the password!")
+                    return false;
+                }
 
-            if(findSpaces(password))
-            {
-            alert("Spaces not allowed for the password!")
-            return false;
-            }
-
-            if(password != reType_password)
-            {
-            alert("Password does not match with the Re-type Password!");
-            return false;
-            }
-            else
-            {
-            return true;
-            }            
+                if(password != reType_password)
+                {
+                    alert("Password does not match with the Re-type Password!");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }            
             }
 
             function doSubmit()
@@ -584,7 +566,7 @@
         <div class="bg bg2"></div>
         <div class="bg bg3"></div>
 
-
+        
         <table width="100%" style="min-width:900;min-height:600" height="100%" align="center" border="0" cellpadding="0" cellspacing="0" >
             <tr>
                 <td align="center" valign="top" class="ddm_bgRepeat_center">
@@ -603,16 +585,16 @@
                                                                             <td><table height="100%" width="100%" border="0" cellpadding="0" cellspacing="0">
                                                                                     <tr>
                                                                                         <td height="75"><table width="900" border="0" cellspacing="0" cellpadding="0">
-                                                                                                <tr>
-                                                                                                    <td>&nbsp;</td>
-                                                                                                </tr>
-                                                                                            </table></td>
-                                                                                    </tr>
+                                                                                          <tr>
+                                                                                            <td>&nbsp;</td>
+                                                                                          </tr>
+                                                                                        </table></td>
+                                                                              </tr>
                                                                                     <tr>
                                                                                         <td height="22"><table width="100%" height="22" border="0" cellspacing="0" cellpadding="0">
                                                                                                 <tr>
                                                                                                     <td width="15">&nbsp;</td>
-                                                                                                    <td>
+<td>
 
                                                                                                         <div style="padding:1;height:100%;width:100%;">
                                                                                                             <div id="layer" style="position:absolute;visibility:hidden;">**** LankaPay DDM ****</div>
@@ -642,7 +624,7 @@
                                                                                     <tr>
                                                                                         <td height="5">                                        </td>
                                                                                     </tr>
-                                                                                </table></td>
+                                                                          </table></td>
                                                                         </tr>
                                                                     </table>
                                                                 </td>
@@ -734,7 +716,7 @@
                                                                                                                 <tr>
                                                                                                                     <td><table border="0" cellspacing="1" cellpadding="5"  bgcolor="#FFFFFF">
 
-                                                                                                                            <tr>
+                                                                                                              <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">
                                                                                                                                     Merchant ID<span class="ddm_required_field"> *</span> :        </td>
 
@@ -775,7 +757,7 @@
                                                                                                                                     try
                                                                                                                                     {
                                                                                                                                     %>
-                                                                                                                                    <select name="cmbBank" id="cmbBank" class="ddm_field_border" onChange="isRequest(false);frmAddMerchant.submit()" <%=(session_userType.equals(DDM_Constants.user_type_bank_manager) || session_userType.equals(DDM_Constants.user_type_bank_user) || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? "disabled" : ""%>>
+                                                                                                                                    <select name="cmbBank" id="cmbBank" class="ddm_field_border" onChange="isRequest(false);frmAddMerchant.submit()" <%=(session_userType.equals(DDM_Constants.user_type_bank_manager)  || session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? "disabled" : ""%>>
                                                                                                                                         <%
                                                                                                                                             if (merchantBank == null || (merchantBank != null && merchantBank.equals(DDM_Constants.status_all)))
                                                                                                                                             {
@@ -799,7 +781,7 @@
                                                                                                                                             }
                                                                                                                                         %>
                                                                                                                                     </select>
-                                                                                                                                    <%
+                                                                                                                                  <%
                                                                                                                                     }
                                                                                                                                     else
                                                                                                                                     {
@@ -843,7 +825,7 @@
                                                                                                                                             }
                                                                                                                                         %>
                                                                                                                                     </select>
-                                                                                                                                    <%
+                                                                                                                                  <%
                                                                                                                                     }
                                                                                                                                     else
                                                                                                                                     {
@@ -859,10 +841,8 @@
                                                                                                                             </tr>
                                                                                                                             <tr>
                                                                                                                                 <td valign="middle" class="ddm_tbl_header_text">Primary Account No. <span  class="ddm_required_field"> *</span> :</td>
-                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><input type="text" name="txtPrimaryAccNo" id="txtPrimaryAccNo" maxlength="15" size="18" class="ddm_field_border" onChange="isVldAccountNo()" onFocus="isVldAccountNo()" onBlur="isVldAccountNo()" onKeyUp="isVldAccountNo()" onMouseUp="isVldAccountNo()" value="<%=primaryAccountNo != null ? primaryAccountNo : ""%>" <%=isOkToDisable_txtPrimaryAccNo ? "disabled" : ""%>> 
-
-
-                                                                                                                                    <input type="hidden" name="hdnChangeCount" id="hdnChangeCount" value="0" />
+                                                                                                                                <td valign="middle" class="ddm_tbl_common_text"><input type="text" name="txtPrimaryAccNo" id="txtPrimaryAccNo" maxlength="15" size="18" class="ddm_field_border" onChange="isVldAccountNo()" onFocus="isVldAccountNo()" onBlur="isVldAccountNo()" onKeyUp="isVldAccountNo()" onMouseUp="isVldAccountNo()" value="<%=primaryAccountNo != null ? primaryAccountNo : ""%>" <%=isOkToDisable_txtPrimaryAccNo ? "disabled" : ""%>>
+                                                                                                                              <input type="hidden" name="hdnChangeCount" id="hdnChangeCount" value="0" />
                                                                                                                                     <input type="hidden" name="hdnPrevAccountNo" id="hdnPrevAccountNo" value="0" /></td>
                                                                                                                             </tr>
                                                                                                                             <tr>
@@ -884,7 +864,7 @@
                                                                                                                                                 <input name="btnClear" id="btnClear" value="&nbsp;&nbsp; <%=((isReq != null && isReq.equals("1")) && result) ? "Done" : "Cancel"%> &nbsp;&nbsp;" type="button" onClick="cancel()" class="ddm_custom_button" />                                                                                            </td></tr>
                                                                                                                                     </table></td>
                                                                                                                             </tr>
-                                                                                                                        </table></td>
+                                                                                                                  </table></td>
                                                                                                                 </tr>
                                                                                                             </table></td>
                                                                                                     </tr>

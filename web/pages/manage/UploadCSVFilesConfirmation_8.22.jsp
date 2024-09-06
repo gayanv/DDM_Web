@@ -1,7 +1,12 @@
-
+<%@page import="lk.com.ttsl.pb.slips.dao.ddmrequest.DDMRequestUtil"%>
+<%@page import="lk.com.ttsl.pb.slips.dda.DDARequest"%>
+<%@page import="lk.com.ttsl.pb.slips.dao.merchant.Merchant"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.*,java.sql.*" errorPage="../../error.jsp" %>
 <%@page import="java.sql.*,java.util.*,java.io.*,java.text.DecimalFormat" errorPage="../../error.jsp"%>
+<%@page import="org.apache.commons.fileupload.servlet.ServletFileUpload" errorPage="../../error.jsp" %>
+<%@page import="org.apache.commons.fileupload.disk.DiskFileItemFactory" errorPage="../../error.jsp" %>
+<%@page import="org.apache.commons.fileupload.*" errorPage="../../error.jsp" %>
 
 <%@page import="lk.com.ttsl.pb.slips.services.utils.*" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.DAOFactory" errorPage="../../error.jsp"%>
@@ -11,9 +16,6 @@
 <%@page import="lk.com.ttsl.pb.slips.dao.branch.Branch" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.branch.BranchDAO" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.corporatecustomer.CorporateCustomer" errorPage="../../error.jsp"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.ddmrequest.DDMRequestUtil"%>
-<%@page import="lk.com.ttsl.pb.slips.dda.DDARequest"%>
-<%@page import="lk.com.ttsl.pb.slips.dao.merchant.Merchant"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.ddmrequest.DDMRequest" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DDM_Constants" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.custom.CustomDate" errorPage="../../error.jsp"%>
@@ -24,10 +26,6 @@
 <%@page import="lk.com.ttsl.pb.slips.common.utils.DateFormatter" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.Log" errorPage="../../error.jsp"%>
 <%@page import="lk.com.ttsl.pb.slips.dao.log.LogDAO" errorPage="../../error.jsp"%>
-
-<%@page import="org.apache.commons.fileupload.servlet.ServletFileUpload" errorPage="../../error.jsp" %>
-<%@page import="org.apache.commons.fileupload.disk.DiskFileItemFactory" errorPage="../../error.jsp" %>
-<%@page import="org.apache.commons.fileupload.*" errorPage="../../error.jsp" %>
 
 <%
     response.setHeader("Cache-Control", "no-cache"); //HTTP 1.1
@@ -45,8 +43,8 @@
     String session_sbType = null;
     String session_branchId = null;
     String session_branchName = null;
-    String session_merchantID = null;
-    String session_merchantName = null;
+    String session_cocuId = null;
+    String session_cocuName = null;
     String session_menuId = null;
     String session_menuName = null;
     String session_OTP = null;
@@ -69,8 +67,8 @@
         session_sbType = (String) session.getAttribute("session_sbType");
         session_branchId = (String) session.getAttribute("session_branchId");
         session_branchName = (String) session.getAttribute("session_branchName");
-        session_merchantID = (String) session.getAttribute("session_merchantID");
-        session_merchantName = (String) session.getAttribute("session_merchantName");
+        session_cocuId = (String) session.getAttribute("session_cocuId");
+        session_cocuName = (String) session.getAttribute("session_cocuName");
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
         session_OTP = (String) session.getAttribute("session_OTP");
@@ -134,8 +132,11 @@
                 {
                     fileUploadConfirmStatus = true;
                 }
+
             }
+
         }
+
     }
     else
     {
@@ -267,7 +268,6 @@
             System.out.println("fileUploadStatus ------> " + fileUploadStatus);
             System.out.println("merchantAccNo ------> " + merchantAccNo);
             System.out.println("merchantAccName 2 ------> " + merchantAccName);
-            System.out.println("merchantAccBank ------> " + merchantAccBank);
             System.out.println("merchantAccBranch ------> " + merchantAccBranch);
 
             System.out.println("Start CSV File read and Processing ------> ");
@@ -552,7 +552,7 @@
 %>
 
 <html>
-    <head><title>LankaPay Direct Debit Mandate Exchange System - DDM CSV File Uploading Summary</title>
+    <head><title>LankaPay Direct Debit Mandate Exchange System - SLIPS Data File Upload Summary</title>
         <link href="<%=request.getContextPath()%>/css/ddm.css" rel="stylesheet" type="text/css" />
         <link href="../../css/ddm.css" rel="stylesheet" type="text/css" />
         <script language="JavaScript" type="text/javascript" src="<%=request.getContextPath()%>/js/fade.js"></script>
@@ -723,7 +723,7 @@
                                                                                                             <tr>
                                                                                                                 <td class="ddm_menubar_text">Welcome :</td>
                                                                                                                 <td width="5"></td>
-                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_merchantID : session_branchId%> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_merchantName : session_branchName%></td>
+                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuId : session_branchId%> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuName : session_branchName%></td>
                                                                                                                 <td width="15">&nbsp;</td>
                                                                                                                 <td valign="middle"><a href="<%=request.getContextPath()%>/pages/user/userProfile.jsp" title=" My Profile "><img src="<%=request.getContextPath()%>/images/user.png" width="18"
                                                                                                                                                                                                         height="22" border="0" align="middle" ></a></td>
@@ -833,20 +833,8 @@
                                                                                                                             <td valign="middle" class="ddm_tbl_common_text"><%=merchantID != null ? merchantID : ""%><input name="hdnCoCuID" id="hdnCoCuID" type="hidden" value="<%=merchantID%>"  ></td>
                                                                                                                         </tr>
                                                                                                                         <tr>
-                                                                                                                          <td valign="middle" class="ddm_tbl_header_text">Merchant Account Name :</td>
-                                                                                                                          <td valign="middle" class="ddm_tbl_common_text"><%=merchantAccName != null ? merchantAccName : ""%><input name="hdnOrgAccName" id="hdnOrgAccName" type="hidden" value="<%=merchantAccName%>"  ></td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                            <td valign="middle" class="ddm_tbl_header_text">Merchant Account No  :</td>
+                                                                                                                            <td valign="middle" class="ddm_tbl_header_text">Merchant Acc. No  :</td>
                                                                                                                             <td valign="middle" class="ddm_tbl_common_text"><%=merchantAccNo != null ? merchantAccNo : ""%><input name="hdnOrgAccNo" id="hdnOrgAccNo" type="hidden" value="<%=merchantAccNo%>"  ></td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                          <td valign="middle" class="ddm_tbl_header_text">Merchant Account Bank :</td>
-                                                                                                                          <td valign="middle" class="ddm_tbl_common_text"><%=merchantAccBank != null ? merchantAccBank : ""%><input name="hdnOrgAccBank" id="hdnOrgAccBank" type="hidden" value="<%=merchantAccBank%>"  ></td>
-                                                                                                                        </tr>
-                                                                                                                        <tr>
-                                                                                                                          <td valign="middle" class="ddm_tbl_header_text">Merchant Account Branch :</td>
-                                                                                                                          <td valign="middle" class="ddm_tbl_common_text"><%=merchantAccBranch != null ? merchantAccBranch : ""%><input name="hdnOrgAccBranch" id="hdnOrgAccBranch" type="hidden" value="<%=merchantAccBranch%>"  ></td>
                                                                                                                         </tr>
                                                                                                                         <tr>
                                                                                                                             <td valign="middle" class="ddm_tbl_header_text">
@@ -870,7 +858,7 @@
                                                                                                                                     </tr>
                                                                                                                                 </table>                                                                                                                                </td>
                                                                                                                         </tr>
-                                                                                                              </table></td>
+                                                                                                                    </table></td>
                                                                                                             </tr>
                                                                                                         </table>
 

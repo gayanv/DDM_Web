@@ -18,8 +18,8 @@
     String password = null;
     String branchId = null;
     String branchName = null;
-    String merchantID = null;
-    String merchantName = null;
+    String cocuId = null;
+    String cocuName = null;
     String userType = null;
     String userTypeDesc = null;
     String menuId = null;
@@ -143,8 +143,8 @@
 
                             branchId = user.getBranchCode();
                             branchName = user.getBranchName();
-                            merchantID = user.getCoCuId();
-                            merchantName = user.getCoCuName();
+                            cocuId = user.getCoCuId();
+                            cocuName = user.getCoCuName();
                             userType = user.getUserLevelId();
                             userTypeDesc = user.getUserLevelDesc();
                             bankName = user.getBankFullName();
@@ -206,13 +206,8 @@
                             session.setAttribute("session_isAuthenticated", DDM_Constants.is_authorized_yes);
                             session.setAttribute("session_branchId", branchId);
                             session.setAttribute("session_branchName", branchName);
-                            
-                            session.setAttribute("session_merchantID", merchantID);
-                            session.setAttribute("session_merchantName", merchantName);
-                            
-                            session.setAttribute("session_cocuId", merchantID);
-                            session.setAttribute("session_cocuName", merchantName);
-                            
+                            session.setAttribute("session_cocuId", cocuId);
+                            session.setAttribute("session_cocuName", cocuName);
                             session.setAttribute("session_menuId", menuId);
                             session.setAttribute("session_menuName", menuName);
                             session.setAttribute("session_bankName", bankName);
@@ -348,8 +343,8 @@
 
                             branchId = user.getBranchCode();
                             branchName = user.getBranchName();
-                            merchantID = user.getCoCuId();
-                            merchantName = user.getCoCuName();
+                            cocuId = user.getCoCuId();
+                            cocuName = user.getCoCuName();
                             userType = user.getUserLevelId();
                             userTypeDesc = user.getUserLevelDesc();
                             bankName = user.getBankFullName();
@@ -407,13 +402,8 @@
                             session.setAttribute("session_isAuthenticated", DDM_Constants.is_authorized_yes);
                             session.setAttribute("session_branchId", branchId);
                             session.setAttribute("session_branchName", branchName);
-                            
-                            session.setAttribute("session_merchantID", merchantID);
-                            session.setAttribute("session_merchantName", merchantName);
-                            
-                            session.setAttribute("session_cocuId", merchantID);
-                            session.setAttribute("session_cocuName", merchantName);
-                            
+                            session.setAttribute("session_cocuId", cocuId);
+                            session.setAttribute("session_cocuName", cocuName);
                             session.setAttribute("session_menuId", menuId);
                             session.setAttribute("session_menuName", menuName);
                             session.setAttribute("session_bankName", bankName);

@@ -17,13 +17,14 @@ public class DDM_Constants
 
     //Property file paths
     //local 
-     public static final String path_common_properties = "D:\\Projects\\DDA\\properties\\common.properties";
-     public static final String path_dbProperty = "D:\\Projects\\DDA\\properties\\db_properties_ddm.properties";
-     public static final String path_email_properties = "D:\\Projects\\DDA\\properties\\email.properties";
+    //public static final String path_common_properties = "D:\\Projects\\DDA\\properties\\common.properties";
+    //public static final String path_dbProperty = "D:\\Projects\\DDA\\properties\\db_properties_ddm.properties";
+    //public static final String path_email_properties = "D:\\Projects\\DDA\\properties\\email.properties";
 //   // server
-    //public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
-    //public static final String path_common_properties = "/DDA/properties/common.properties";
-    //public static final String path_email_properties = "/DDA/properties/email_properties.properties";
+    
+    public static final String path_dbProperty = "/DDA/properties/db_properties.properties";
+    public static final String path_common_properties = "/DDA/properties/common.properties";
+    public static final String path_email_properties = "/DDA/properties/email_properties.properties";
     
     public static final String param_id_user_system = "System";
     public static final String param_id_businessdate = "BatchBusinessDate";

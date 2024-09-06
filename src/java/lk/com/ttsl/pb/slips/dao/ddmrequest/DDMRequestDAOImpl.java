@@ -73,7 +73,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
             sbQuery.append("AND ddmr.DDAID = ? ");
@@ -199,7 +199,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
 
@@ -420,7 +420,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
 
@@ -595,7 +595,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
             sbQuery.append("AND ddmr.IssuningBank = ? ");
@@ -709,7 +709,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
             sbQuery.append("AND ddmr.Status = ? ");
@@ -851,7 +851,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
             sbQuery.append("AND ddmr.AquiringBank = ? ");
@@ -965,7 +965,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
 
@@ -1101,7 +1101,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
             sbQuery.append("AND ddmr.StatusModify = ? ");
@@ -1213,7 +1213,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
 
@@ -1893,7 +1893,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
 
@@ -2410,7 +2410,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             sbQuery.append("and ddmr.IssuningBranch = ibr.BranchCode ");
             sbQuery.append("and ddmr.AquiringBank = abk.BankCode ");
             sbQuery.append("and ddmr.AquiringBank = abr.BankCode ");
-            sbQuery.append("and ddmr.IssuningBranch = abr.BranchCode ");
+            sbQuery.append("and ddmr.AquiringBranch = abr.BranchCode ");
             sbQuery.append("and ddmr.Status = ddmrs.id ");
             sbQuery.append("and ddmr.MerchantID = mr.MerchantID ");
 
@@ -2556,6 +2556,11 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             System.out.println("WARNING : Null getMerchantID parameter.");
             return false;
         }
+        if (ddmRequest.getMerchantName()== null)
+        {
+            System.out.println("WARNING : Null getMerchantName parameter.");
+            return false;
+        }
 
         if (ddmRequest.getIssuningBankCode() == null)
         {
@@ -2663,7 +2668,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
 
             System.out.println("addDDARequest(sqlQuery)=========>" + sqlQuery.toString());
             System.out.println("Merchant "+ddmRequest.getMerchantName());
-
+            System.out.println("1");
             psmt = con.prepareStatement(sqlQuery.toString());
 
             psmt.setString(1, ddmRequest.getDDA_ID().trim());
@@ -2676,6 +2681,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             psmt.setString(8, ddmRequest.getEndDate().trim());
             psmt.setString(9, ddmRequest.getMaxLimit().trim());
             psmt.setString(10, ddmRequest.getFrequency().trim());
+             System.out.println("2");
             psmt.setString(11, ddmRequest.getPurpose().trim());
             psmt.setString(12, ddmRequest.getReference().trim());
             psmt.setString(13, ddmRequest.getStatus().trim());
@@ -2685,12 +2691,13 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
             psmt.setString(17, ddmRequest.getAcquiringAccountName().trim());
             psmt.setString(18, ddmRequest.getIsCSVFileRequest().trim());
             psmt.setString(19, ddmRequest.getCSVFileName().trim());
+             System.out.println("3");
             psmt.setString(20, ddmRequest.getCSVFilePath().trim());
             psmt.setString(21, ddmRequest.getCreatedBy().trim());
             psmt.setString(22, ddmRequest.getMerchantName().trim());
-
+            System.out.println("4");
             count = psmt.executeUpdate();
-
+            System.out.println("5");
             if (count > 0)
             {
                 System.out.println("### addDDARequest was Success ####");
@@ -2702,7 +2709,7 @@ public class DDMRequestDAOImpl implements DDMRequestDAO
                 status = false;
                 msg = DDM_Constants.msg_duplicate_records;
             }
-        } catch (SQLException | ClassNotFoundException e)
+        } catch (SQLException | ClassNotFoundException e )
         {
             msg = e.getMessage();
             System.out.println(e.toString());

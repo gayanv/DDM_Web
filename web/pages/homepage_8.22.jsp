@@ -30,8 +30,8 @@
     String session_bankName = null;
     String session_branchId = null;
     String session_branchName = null;
-    String session_merchantID = null;
-    String session_merchantName = null;
+    String session_cocuId = null;
+    String session_cocuName = null;
     String session_menuId = null;
     String session_menuName = null;
 
@@ -53,8 +53,8 @@
         session_bankName = (String) session.getAttribute("session_bankName");
         session_branchId = (String) session.getAttribute("session_branchId");
         session_branchName = (String) session.getAttribute("session_branchName");
-        session_merchantID = (String) session.getAttribute("session_merchantID");
-        session_merchantName = (String) session.getAttribute("session_merchantName");
+        session_cocuId = (String) session.getAttribute("session_cocuId");
+        session_cocuName = (String) session.getAttribute("session_cocuName");
         session_menuId = (String) session.getAttribute("session_menuId");
         session_menuName = (String) session.getAttribute("session_menuName");
 
@@ -214,7 +214,7 @@
                                                                                                             <tr>
                                                                                                                 <td class="ddm_menubar_text">Welcome :</td>
                                                                                                                 <td width="5"></td>
-                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_merchantID : session_bankCode %> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_merchantName : session_bankName %></td>
+                                                                                                                <td class="ddm_menubar_text"><b><%=session_userName%></b> - <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuId : session_bankCode %> <%=(session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op)) ? session_cocuName : session_bankName %></td>
                                                                                                                 <td width="15">&nbsp;</td>
                                                                                                                 <td valign="middle"><a href="<%=request.getContextPath()%>/pages/user/userProfile.jsp" title=" My Profile "><img src="<%=request.getContextPath()%>/images/user.png" width="18"
                                                                                                                                                                                                         height="22" border="0" align="middle" ></a></td>
@@ -308,7 +308,7 @@
                                                                                                                         }
                                                                                                                         else
                                                                                                                         {
-                                                                                                                            colDDMReqSummary = DAOFactory.getDDMRequestDAO().getDDAReqSummaryByMerchant(session_merchantID, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_all);
+                                                                                                                            colDDMReqSummary = DAOFactory.getDDMRequestDAO().getDDAReqSummaryByMerchant(session_cocuId, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_all);
                                                                                                                         }
 
                                                                                                                         if (colDDMReqSummary != null && colDDMReqSummary.size() > 0)
@@ -404,7 +404,7 @@
                                                                                                                         }
                                                                                                                         else if (session_userType.equals(DDM_Constants.user_type_merchant_su) || session_userType.equals(DDM_Constants.user_type_merchant_op))
                                                                                                                         {
-                                                                                                                            colSLABreachIsuBK = DAOFactory.getDDMRequestDAO().getSLABreachByIssuingBankDDAReqSummary(session_merchantID, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all);
+                                                                                                                            colSLABreachIsuBK = DAOFactory.getDDMRequestDAO().getSLABreachByIssuingBankDDAReqSummary(session_cocuId, DDM_Constants.status_all, DDM_Constants.status_all, DDM_Constants.status_all);
                                                                                                                         }
 
                                                                                                                         if (colSLABreachIsuBK != null && colSLABreachIsuBK.size() > 0)
@@ -478,7 +478,7 @@
                                                                                                                         }
                                                                                                                         else
                                                                                                                         {
-                                                                                                                            colSLABreachAcqBK = DAOFactory.getDDMRequestDAO().getSLABreachByAcquiringBankDDAReqSummary(session_merchantID, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_all);
+                                                                                                                            colSLABreachAcqBK = DAOFactory.getDDMRequestDAO().getSLABreachByAcquiringBankDDAReqSummary(session_cocuId, session_bankCode, DDM_Constants.status_all, DDM_Constants.status_all);
                                                                                                                         }
 
                                                                                                                         if (colSLABreachAcqBK != null && colSLABreachAcqBK.size() > 0)
@@ -637,6 +637,7 @@
                                                                                                     noOfPending_AuthNewMerchant = colMerchantNew.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_merchant)))
                                                                                             {
@@ -650,6 +651,7 @@
                                                                                                     noOfPending_AuthModifiedMerchant = colMerchantModified.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_params)))
                                                                                             {
@@ -663,6 +665,7 @@
                                                                                                     noOfPending_AuthModifiedParam = colParamModified.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_userlevel_functionmap)))
                                                                                             {
@@ -676,6 +679,7 @@
                                                                                                     noOfPending_AuthModifiedULFM = colULFM.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_new_user)))
                                                                                             {
@@ -689,6 +693,7 @@
                                                                                                     noOfPending_AuthNewUsers = colNewUser.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_modified_user)))
                                                                                             {
@@ -703,6 +708,7 @@
                                                                                                 }
                                                                                             }
 
+
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_issuing_bank)))
                                                                                             {
                                                                                                 Collection<DDMRequest> colDDMReqIssuingBank = DAOFactory.getDDMRequestDAO().getDDARequestDetailsForIssuingBankApproval(session_bankCode);
@@ -715,6 +721,7 @@
                                                                                                     noOfPending_AuthPendingDDMReq_IssuingBank = colDDMReqIssuingBank.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_acquiring_bank)))
                                                                                             {
@@ -728,6 +735,7 @@
                                                                                                     noOfPending_AuthPendingDDMReq_AcquiringBank = colDDMReqAcquiringBank.size();
                                                                                                 }
                                                                                             }
+                                                                                            
 
                                                                                             if (DAOFactory.getUserLevelFunctionMapDAO().isAccessOK(session_userType, (DDM_Constants.directory_previous + DDM_Constants.ddm_main_finction_path_auth_ddm_req_terminated)))
                                                                                             {

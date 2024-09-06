@@ -148,20 +148,9 @@
             }
             else if (newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_op))
             {
-                if (newUserMerchant != null)
-                {
-                    Merchant objMerchant = DAOFactory.getMerchantDAO().getMerchantDetails(newUserMerchant);
-                    
-                    newUserBank = objMerchant.getBankCode();
-                    newUserBranch = objMerchant.getBranchCode();
-                    colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(newUserBank, DDM_Constants.status_pending);                    
-                }
-                else
-                {
-                    newUserBank = DDM_Constants.default_bank_code;
-                    newUserBranch = DDM_Constants.default_branch_code;
-                    colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(newUserBank, DDM_Constants.status_pending);
-                }
+                newUserBank = DDM_Constants.default_bank_code;
+                newUserBranch = DDM_Constants.default_branch_code;
+                colBranch = DAOFactory.getBranchDAO().getBranchNotInStatus(newUserBank, DDM_Constants.status_pending);
             }
             else
             {
@@ -738,7 +727,7 @@
                                                                                                             %>
                                                                                                             <div id="displayMsg_success" class="ddm_Display_Success_msg" >
 
-                                                                                                                User Created Successfully and pending for Authorization <span class="ddm_error">(Manager Level Authorization Is Mandatory)</span>  !
+                                                                                                                User Created Sucessfully and pending for authorization <span class="ddm_error">(Manager Level Authorization Is Mandatory)</span>  !
 
 
                                                                                                             </div>
@@ -793,38 +782,6 @@
                                                                                                                                         </tr>
 
 
-                                                                                                                                        <!-- Start table row for Merchant    -->
-                                                                                                                                        <%
-                                                                                                                                            if (newUserLevel != null && (newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_op)))
-                                                                                                                                            {
-                                                                                                                                        %>
-                                                                                                                                        <tr>
-                                                                                                                                            <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Merchant <span class="ddm_required_field">*</span> :</td>
-                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text">
-                                                                                                                                                <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="isSearchRequest(false);frmCreateUser.submit()" >
-                                                                                                                                                    <option value="<%=DDM_Constants.default_web_combo_select%>" <%=(newUserMerchant != null && newUserMerchant.equals(DDM_Constants.default_web_combo_select)) ? "selected" : ""%>>-- Select Merchant --</option>
-                                                                                                                                                    <%
-                                                                                                                                                        if (colMerchant != null && colMerchant.size() > 0)
-                                                                                                                                                        {
-                                                                                                                                                            for (Merchant merchant : colMerchant)
-                                                                                                                                                            {
-
-                                                                                                                                                    %>
-                                                                                                                                                    <option value="<%=merchant.getMerchantID()%>" <%=(newUserMerchant != null && merchant.getMerchantID().equals(newUserMerchant)) ? "selected" : ""%> ><%=merchant.getMerchantID()%> - <%=merchant.getMerchantName()%></option>
-                                                                                                                                                    <%
-                                                                                                                                                            }
-                                                                                                                                                        }
-                                                                                                                                                    %>
-                                                                                                                                                </select>
-                                                                                                                                            </td>
-                                                                                                                                        </tr>
-
-                                                                                                                                        <%
-                                                                                                                                            }
-                                                                                                                                        %>
-
-                                                                                                                                        <!-- End table row for Merchant    -->
-
 
                                                                                                                                         <tr>
                                                                                                                                             <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Bank <span class="ddm_required_field">*</span> :</td>
@@ -866,7 +823,37 @@
                                                                                                                                                 </table>                                                                                                                                                </td>
                                                                                                                                         </tr>
 
+                                                                                                                                        <!-- Start table row for Merchant    -->
+                                                                                                                                        <%
+                                                                                                                                            if (newUserLevel != null && (newUserLevel.equals(DDM_Constants.user_type_merchant_su) || newUserLevel.equals(DDM_Constants.user_type_merchant_op)))
+                                                                                                                                            {
+                                                                                                                                        %>
+                                                                                                                                        <tr>
+                                                                                                                                            <td align="left" valign="middle" bgcolor="#A4B7CA" class="ddm_tbl_header_text">Merchant <span class="ddm_required_field">*</span> :</td>
+                                                                                                                                            <td bgcolor="#E1E3EC" valign="middle" class="ddm_tbl_common_text">
+                                                                                                                                                <select name="cmbMerchant" id="cmbMerchant" class="ddm_field_border"  onChange="clearResultData()" >
+                                                                                                                                                    <option value="<%=DDM_Constants.default_web_combo_select%>" <%=(newUserMerchant != null && newUserMerchant.equals(DDM_Constants.default_web_combo_select)) ? "selected" : ""%>>-- Select Merchant --</option>
+                                                                                                                                                    <%
+                                                                                                                                                        if (colMerchant != null && colMerchant.size() > 0)
+                                                                                                                                                        {
+                                                                                                                                                            for (Merchant merchant : colMerchant)
+                                                                                                                                                            {
 
+                                                                                                                                                    %>
+                                                                                                                                                    <option value="<%=merchant.getMerchantID()%>" <%=(newUserMerchant != null && merchant.getMerchantID().equals(newUserMerchant)) ? "selected" : ""%> ><%=merchant.getMerchantID()%> - <%=merchant.getMerchantName()%></option>
+                                                                                                                                                    <%
+                                                                                                                                                            }
+                                                                                                                                                        }
+                                                                                                                                                    %>
+                                                                                                                                                </select>
+                                                                                                                                            </td>
+                                                                                                                                        </tr>
+
+                                                                                                                                        <%
+                                                                                                                                            }
+                                                                                                                                        %>
+
+                                                                                                                                        <!-- End table row for Merchant    -->
 
 
                                                                                                                                         <tr>
